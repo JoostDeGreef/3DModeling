@@ -1,14 +1,14 @@
 #ifndef GEOMETRY_CUBE_H
 #define GEOMETRY_CUBE_H 1
 
+#include "Shape.h"
+
 namespace Geometry
 {
-    class Cube 
+    class Cube : public Shape
     {
-        Cube() = delete;
     public:
-
-        static ShapePtr::Shared Construct();
+        Cube();
 
     };
 };

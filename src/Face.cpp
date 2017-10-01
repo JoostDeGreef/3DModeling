@@ -1,4 +1,6 @@
 #include <cassert>
+#include <iostream>
+#include <string>
 #include <vector>
 using namespace std;
 
@@ -84,7 +86,7 @@ private:
     std::pair<FacePtr, FacePtr> SplitCore(bool AddVertices = true)
     {
         // check the input face is valid
-        assert(m_face->GetEdgeCount() >= (AddVertices?3:4));
+        assert(m_face->GetEdgeCount() >= (size_t)(AddVertices?3:4));
         // parent objects
         Patch& patch = m_face->GetPatch();
         // find the two extreme vertices
@@ -107,9 +109,9 @@ private:
             split0 = split0->GetNext();
         }
         EdgePtr split1 = extremes.second.first;
-        for (int i = 0; i < extremes.second.second / 2; ++i)
+        for (int i = 1; i < extremes.second.second / 2; ++i)
         {
-            split1 = split1->GetPrev();
+            split1 = split1->GetNext();
         }
         // create new face and connecting edges
         FacePtr newFace0 = make_shared<Face>(patch);
@@ -117,23 +119,24 @@ private:
         patch.AddFace(newFace0);
         patch.AddFace(newFace1);
 
-        EdgePtr edge0 = make_shared<Edge>(newFace0,split0->GetEndVertex());
-        EdgePtr edge1 = make_shared<Edge>(newFace1,split1->GetEndVertex());
-        newFace0->AddEdge(edge0);
-        newFace1->AddEdge(edge1);
+        EdgePtr edge0 = Face::ConstructAndAddEdge(newFace0,split0->GetEndVertex());
+        EdgePtr edge1 = Face::ConstructAndAddEdge(newFace1,split1->GetEndVertex());
+
+        edge0->SetStartNormal(split0->GetEndNormal());
+        edge1->SetStartNormal(split1->GetEndNormal());
+
         edge0->SetTwin(edge1);
         edge1->SetTwin(edge0);
         edge0->SetPrev(split0);
         edge0->SetNext(split1->GetNext());
         edge1->SetPrev(split1);
         edge1->SetNext(split0->GetNext());
+
         split0->GetNext()->SetPrev(edge1);
         split0->SetNext(edge0);
         split1->GetNext()->SetPrev(edge0);
         split1->SetNext(edge1);
-        edge0->SetStartNormal(split0->GetEndNormal());
-        edge1->SetStartNormal(split1->GetEndNormal());
-
+        
         // move all the edges to their new face
         auto MoveEdges = [&](const EdgePtr& edge, const FacePtr& newFace)
         {
@@ -147,6 +150,7 @@ private:
         };
         MoveEdges(edge0, newFace0);
         MoveEdges(edge1, newFace1);
+
         // face color
         newFace0->SetColor(m_face->GetColor());
         newFace1->SetColor(m_face->GetColor());

@@ -3,6 +3,7 @@
 using namespace testing;
 
 #include "Shape.h"
+#include "Cube.h"
 #include "Dodecahedron.h"
 using namespace Geometry;
 
@@ -20,20 +21,26 @@ protected:
 
 TEST_F(ShapeTest, Copy) 
 {
-    std::set<VertexPtr> vertices;
-    std::set<EdgePtr> edges;
-    ShapePtr d = std::make_shared<Dodecahedron>();
-    d->ForEachVertex([&vertices](const VertexPtr& vertex) { vertices.emplace(vertex); });
-    d->ForEachEdge([&edges](const EdgePtr& edge) { edges.emplace(edge); });
-    size_t vc0 = vertices.size();
-    size_t ec0 = edges.size();
-    ShapePtr s0 = std::make_shared<Shape>(*d);
-    s0->ForEachVertex([&vertices](const VertexPtr& vertex) { vertices.emplace(vertex); });
-    s0->ForEachEdge([&edges](const EdgePtr& edge) { edges.emplace(edge); });
-    size_t vc1 = vertices.size();
-    size_t ec1 = edges.size();
-    ASSERT_EQ(vc0 * 2, vc1);
-    ASSERT_EQ(ec0 * 2, ec1);
+    auto CopyShape = [](ShapePtr d)
+    {
+        std::set<VertexPtr> vertices;
+        std::set<EdgePtr> edges;
+        d->ForEachVertex([&vertices](const VertexPtr& vertex) { vertices.emplace(vertex); });
+        d->ForEachEdge([&edges](const EdgePtr& edge) { edges.emplace(edge); });
+        size_t vc0 = vertices.size();
+        size_t ec0 = edges.size();
+        ShapePtr s0 = std::make_shared<Shape>(*d);
+        s0->ForEachVertex([&vertices](const VertexPtr& vertex) { vertices.emplace(vertex); });
+        s0->ForEachEdge([&edges](const EdgePtr& edge) { edges.emplace(edge); });
+        size_t vc1 = vertices.size();
+        size_t ec1 = edges.size();
+        ASSERT_EQ(vc0 * 2, vc1);
+        ASSERT_EQ(ec0 * 2, ec1);
+    };
+
+    CopyShape(std::make_shared<Cube>());
+    CopyShape(std::make_shared<Dodecahedron>());
+
 }
 
 TEST_F(ShapeTest, SerializeBlob)

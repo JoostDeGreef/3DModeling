@@ -190,6 +190,14 @@ void Hull::SplitTrianglesIn4()
 
 void Hull::Triangulate()
 {
-    ForEachFace([](const FacePtr& face) {face->CheckPointering(); });
-    ForEachFace([](const FacePtr& face) {face->Triangulate(); });
+    std::vector<FacePtr> faces;
+    ForEachFace([&faces](const FacePtr& face) 
+    {
+        faces.emplace_back(face);
+        face->CheckPointering();
+    });
+    for (FacePtr& face : faces)
+    {
+        face->Triangulate();
+    }
 }

@@ -1,26 +1,21 @@
 #include <vector>
 using namespace std;
 
-#include "Common.h"
-using namespace Common;
-
-#include "Geometry.h"
+#include "Cube.h"
 using namespace Geometry;
 
-ShapePtr::Shared Cube::Construct()
+Cube::Cube()
 {
-    ShapePtr::Shared shape = Shape::Construct();
-
     // calculate all vertices
-    VertexPtr::Shared A = GeoFactory::Construct<Vertex>(-1,-1, 1);
-    VertexPtr::Shared B = GeoFactory::Construct<Vertex>( 1,-1, 1);
-    VertexPtr::Shared C = GeoFactory::Construct<Vertex>( 1, 1, 1);
-    VertexPtr::Shared D = GeoFactory::Construct<Vertex>(-1, 1, 1);
-    VertexPtr::Shared E = GeoFactory::Construct<Vertex>(-1,-1,-1);
-    VertexPtr::Shared F = GeoFactory::Construct<Vertex>(-1, 1,-1);
-    VertexPtr::Shared G = GeoFactory::Construct<Vertex>( 1, 1,-1);
-    VertexPtr::Shared H = GeoFactory::Construct<Vertex>( 1,-1,-1);
-    vector<VertexPtr::Shared> vertices({ A,B,C,D,E,F,G,H });
+    VertexPtr A = std::make_shared<Vertex>(-1,-1, 1);
+    VertexPtr B = std::make_shared<Vertex>( 1,-1, 1);
+    VertexPtr C = std::make_shared<Vertex>( 1, 1, 1);
+    VertexPtr D = std::make_shared<Vertex>(-1, 1, 1);
+    VertexPtr E = std::make_shared<Vertex>(-1,-1,-1);
+    VertexPtr F = std::make_shared<Vertex>(-1, 1,-1);
+    VertexPtr G = std::make_shared<Vertex>( 1, 1,-1);
+    VertexPtr H = std::make_shared<Vertex>( 1,-1,-1);
+    vector<VertexPtr> vertices({ A,B,C,D,E,F,G,H });
 
     // normalize all vertices, just to be sure
     for (auto v : vertices)
@@ -29,16 +24,16 @@ ShapePtr::Shared Cube::Construct()
     }
 
     // create the hull
-    HullPtr::Raw hull = shape->ConstructAndAddHull();
+    HullPtr hull = ConstructAndAddHull();
 
-    auto CreateFace = [&](VertexPtr::Shared& a, VertexPtr::Shared& b, VertexPtr::Shared& c, VertexPtr::Shared& d,
-        EdgePtr::Raw& ab, EdgePtr::Raw& bc, EdgePtr::Raw& cd, EdgePtr::Raw& da)
+    auto CreateFace = [&](VertexPtr& a, VertexPtr& b, VertexPtr& c, VertexPtr& d,
+                          EdgePtr& ab, EdgePtr& bc, EdgePtr& cd, EdgePtr& da)
     {
-        FacePtr::Raw face = hull->ConstructAndAddPatch()->ConstructAndAddFace();
-        ab = face->ConstructAndAddEdge(a);
-        bc = face->ConstructAndAddEdge(b);
-        cd = face->ConstructAndAddEdge(c);
-        da = face->ConstructAndAddEdge(d);
+        FacePtr face = hull->ConstructAndAddPatch()->ConstructAndAddFace();
+        ab = Face::ConstructAndAddEdge(face,a);
+        bc = Face::ConstructAndAddEdge(face,b);
+        cd = Face::ConstructAndAddEdge(face,c);
+        da = Face::ConstructAndAddEdge(face,d);
         ab->SetNext(bc);  ab->SetPrev(da);
         bc->SetNext(cd);  bc->SetPrev(ab);
         cd->SetNext(da);  cd->SetPrev(bc);
@@ -46,18 +41,18 @@ ShapePtr::Shared Cube::Construct()
         return face;
     };
 
-    EdgePtr::Raw AB, BC, CD, DA, AE, EH, HB, BA, BH, HG, GC, CB;
-    EdgePtr::Raw CG, GF, FD, DC, AD, DF, FE, EA, EF, FG, GH, HE;
+    EdgePtr AB, BC, CD, DA, AE, EH, HB, BA, BH, HG, GC, CB;
+    EdgePtr CG, GF, FD, DC, AD, DF, FE, EA, EF, FG, GH, HE;
 
     // create all the faces and extract their edge pointers
-    FacePtr::Raw face1 = CreateFace(A, B, C, D, AB, BC, CD, DA);
-    FacePtr::Raw face2 = CreateFace(A, E, H, B, AE, EH, HB, BA);
-    FacePtr::Raw face3 = CreateFace(B, H, G, C, BH, HG, GC, CB);
-    FacePtr::Raw face4 = CreateFace(C, G, F, D, CG, GF, FD, DC);
-    FacePtr::Raw face5 = CreateFace(A, D, F, E, AD, DF, FE, EA);
-    FacePtr::Raw face6 = CreateFace(E, F, G, H, EF, FG, GH, HE);
+    FacePtr face1 = CreateFace(A, B, C, D, AB, BC, CD, DA);
+    FacePtr face2 = CreateFace(A, E, H, B, AE, EH, HB, BA);
+    FacePtr face3 = CreateFace(B, H, G, C, BH, HG, GC, CB);
+    FacePtr face4 = CreateFace(C, G, F, D, CG, GF, FD, DC);
+    FacePtr face5 = CreateFace(A, D, F, E, AD, DF, FE, EA);
+    FacePtr face6 = CreateFace(E, F, G, H, EF, FG, GH, HE);
 
-    auto Join = [](const EdgePtr::Raw& a, const EdgePtr::Raw& b)
+    auto Join = [](const EdgePtr& a, const EdgePtr& b)
     {
         a->SetTwin(b);
         b->SetTwin(a);
@@ -80,8 +75,6 @@ ShapePtr::Shared Cube::Construct()
     Join(EF, FE);
     
     // check geometric integrity
-    shape->ForEachFace([](const FacePtr::Raw& face) {face->CheckPointering(); });
-
-    return shape;
+    ForEachFace([](const FacePtr& face) {face->CheckPointering(); });
 }
 

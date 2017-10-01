@@ -17,6 +17,16 @@ protected:
     virtual void TearDown() 
     {
     }
+
+    int FaceCount(ShapePtr shape)
+    {
+        int count = 0;
+        shape->ForEachFace([&count](const FacePtr& face)
+        {
+            count++;
+        });
+        return count;
+    };
 };
 
 TEST_F(ShapeTest, Copy) 
@@ -41,6 +51,15 @@ TEST_F(ShapeTest, Copy)
     CopyShape(std::make_shared<Cube>());
     CopyShape(std::make_shared<Dodecahedron>());
 
+}
+
+TEST_F(ShapeTest, SplitTrianglesIn4)
+{
+    ShapePtr shape = std::make_shared<Cube>();
+    shape->Triangulate();
+    EXPECT_EQ(12, FaceCount(shape));
+    shape->SplitTrianglesIn4();
+    EXPECT_EQ(48, FaceCount(shape));
 }
 
 TEST_F(ShapeTest, SerializeBlob)

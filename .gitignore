@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+/tmp/Debug.x64.3DModelingTest/*.pdb
+/tmp/Debug.x64.3DModeling/3DModeling.tlog/*.tlog
+*.suo
+*.ipch
+*.tlog
+*.idb
+*.log
+*.pdb
+*.ilk

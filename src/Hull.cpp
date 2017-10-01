@@ -112,80 +112,99 @@ HullPtr Hull::Copy(Shape& newShape) const
 
 void Hull::SplitTrianglesIn4()
 {
-    //std::unordered_set<EdgePtr> edges;
-    //ForEachFace([](const FacePtr& face) {face->CheckPointering(); });
-    //ForEachFace([&edges](const FacePtr& face)
-    //{
-    //    face->ForEachEdge([&](const EdgePtr& edge)
-    //    {
-    //        if (edge < edge->GetTwin())
-    //        {
-    //            edges.insert(edge);
-    //        }
-    //    });
-    //});
-    //for (const EdgePtr& edge : edges)
-    //{
-    //    edge->Split();
-    //}
-    //ForEachPatch([&](const PatchPtr patch)
-    //{ 
-    //    auto faces = patch->GetFaces();
-    //    for (const FacePtr& face : faces)
-    //    {
-    //        // new faces
-    //        FacePtr f0 = patch->ConstructAndAddFace();
-    //        FacePtr f1 = patch->ConstructAndAddFace();
-    //        FacePtr f2 = patch->ConstructAndAddFace();
-    //        FacePtr f3 = face;
-    //        // existing edges
-    //        EdgePtr e01 = face->GetStartEdge();
-    //        EdgePtr e12 = e01->GetNext();
-    //        EdgePtr e23 = e12->GetNext();
-    //        EdgePtr e34 = e23->GetNext();
-    //        EdgePtr e45 = e34->GetNext();
-    //        EdgePtr e50 = e45->GetNext();
-    //        // existing vertices
-    //        VertexPtr v1 = e12->GetStartVertex();
-    //        VertexPtr v3 = e34->GetStartVertex();
-    //        VertexPtr v5 = e50->GetStartVertex();
-    //        // existing normals
-    //        NormalPtr n1 = e12->GetStartNormal();
-    //        NormalPtr n3 = e34->GetStartNormal();
-    //        NormalPtr n5 = e50->GetStartNormal();
-    //        // new edges
-    //        EdgePtr e13 = m_shape->ConstructEdge(v1, f3, n1);
-    //        EdgePtr e31 = m_shape->ConstructEdge(v3, f1, n3);
-    //        EdgePtr e35 = m_shape->ConstructEdge(v3, f3, n3);
-    //        EdgePtr e53 = m_shape->ConstructEdge(v5, f2, n5);
-    //        EdgePtr e15 = m_shape->ConstructEdge(v1, f0, n1);
-    //        EdgePtr e51 = m_shape->ConstructEdge(v5, f3, n5);
-    //        // set new edge twins
-    //        e13->SetTwin(e31); e31->SetTwin(e13);
-    //        e35->SetTwin(e53); e53->SetTwin(e35);
-    //        e15->SetTwin(e51); e51->SetTwin(e15);
-    //        // set next/prev
-    //        auto Link = [](EdgePtr& e0, EdgePtr& e1) {e0->SetNext(e1); e1->SetPrev(e0); };
-    //        Link(e01, e15); Link(e15, e50);
-    //        Link(e23, e31); Link(e31, e12);
-    //        Link(e45, e53); Link(e53, e34);
-    //        Link(e13, e35); Link(e35, e51); Link(e51, e13);
-    //        // connect existing edges to new face
-    //        e01->SetFace(f0); e50->SetFace(f0);
-    //        e12->SetFace(f1); e23->SetFace(f1);
-    //        e34->SetFace(f2); e45->SetFace(f2);
-    //        // face start edge / internal state
-    //        f0->SetStartEdge(e01); f0->CalcNormal();
-    //        f1->SetStartEdge(e12); f1->CalcNormal();
-    //        f2->SetStartEdge(e34); f2->CalcNormal();
-    //        f3->SetStartEdge(e13); f3->CalcNormal();
-    //        // check all faces
-    //        f0->CheckPointering();
-    //        f1->CheckPointering();
-    //        f2->CheckPointering();
-    //        f3->CheckPointering();
-    //    }
-    //});
+    size_t count = 0;
+    std::vector<FacePtr> faces;
+    std::unordered_set<EdgePtr> edges;
+    ForEachFace([&count](const FacePtr& face) 
+    {
+        ++count;
+        face->CheckPointering(); 
+    });
+    faces.reserve(count);
+    ForEachFace([&edges,&faces](const FacePtr& face)
+    {
+        assert(3==face->GetEdgeCount());
+        faces.emplace_back(face);
+        face->ForEachEdge([&](const EdgePtr& edge)
+        {
+            if (edge < edge->GetTwin())
+            {
+                edges.insert(edge);
+            }
+        });
+    });
+    for (const EdgePtr& edge : edges)
+    {
+        edge->Split();
+    }
+    for (FacePtr& face : faces)
+    {
+        Patch& patch = face->GetPatch();
+        // new faces
+        FacePtr f0 = patch.ConstructAndAddFace();
+        FacePtr f1 = patch.ConstructAndAddFace();
+        FacePtr f2 = patch.ConstructAndAddFace();
+        FacePtr f3 = patch.ConstructAndAddFace();
+        // edges, with e01 pre-existing
+        EdgePtr e01 = face->GetStartEdge();
+        if (edges.find(e01) == edges.end())
+        {
+            e01 = e01->GetNext();
+        }
+        EdgePtr e12 = e01->GetNext();
+        EdgePtr e23 = e12->GetNext();
+        EdgePtr e34 = e23->GetNext();
+        EdgePtr e45 = e34->GetNext();
+        EdgePtr e50 = e45->GetNext();
+        // newly created vertices
+        VertexPtr v1 = e12->GetStartVertex();
+        VertexPtr v3 = e34->GetStartVertex();
+        VertexPtr v5 = e50->GetStartVertex();
+        // normals at new vertices
+        NormalPtr n1 = e12->GetStartNormal();
+        NormalPtr n3 = e34->GetStartNormal();
+        NormalPtr n5 = e50->GetStartNormal();
+        // create new edges
+        EdgePtr e13 = Face::ConstructAndAddEdge(f3, v1, n1);
+        EdgePtr e31 = Face::ConstructAndAddEdge(f1, v3, n3);
+        EdgePtr e35 = Face::ConstructAndAddEdge(f3, v3, n3);
+        EdgePtr e53 = Face::ConstructAndAddEdge(f2, v5, n5);
+        EdgePtr e15 = Face::ConstructAndAddEdge(f0, v1, n1);
+        EdgePtr e51 = Face::ConstructAndAddEdge(f3, v5, n5);
+        // set new edge twins
+        e13->SetTwin(e31); e31->SetTwin(e13);
+        e35->SetTwin(e53); e53->SetTwin(e35);
+        e15->SetTwin(e51); e51->SetTwin(e15);
+        // set next/prev
+        auto Link = [](EdgePtr& e0, EdgePtr& e1) {e0->SetNext(e1); e1->SetPrev(e0); };
+        Link(e01, e15); Link(e15, e50);
+        Link(e23, e31); Link(e31, e12);
+        Link(e45, e53); Link(e53, e34);
+        Link(e13, e35); Link(e35, e51); Link(e51, e13);
+        // connect existing edges to new face
+        e01->SetFace(f0); e50->SetFace(f0);
+        e12->SetFace(f1); e23->SetFace(f1);
+        e34->SetFace(f2); e45->SetFace(f2);
+        // add existing edges to faces
+        f0->AddEdge(e01);
+        f0->AddEdge(e50);
+        f1->AddEdge(e12);
+        f1->AddEdge(e23);
+        f2->AddEdge(e34);
+        f2->AddEdge(e45);
+        // calculate face normals
+        f0->CalcNormal();
+        f1->CalcNormal();
+        f2->CalcNormal();
+        f3->CalcNormal();
+        // check all faces
+        f0->CheckPointering();
+        f1->CheckPointering();
+        f2->CheckPointering();
+        f3->CheckPointering();
+        // remove old face
+        patch.RemoveFace(face);
+    }
 }
 
 void Hull::Triangulate()

@@ -51,6 +51,16 @@ namespace Geometry
             , m_startColor()
             , m_startTextureCoord()
         {}
+        Edge(const FacePtr& face, const VertexPtr& vertex, const NormalPtr& normal)
+            : m_startVertex(std::move(vertex))
+            , m_startNormal(std::move(normal))
+            , m_face(std::move(face))
+            , m_twin()
+            , m_next()
+            , m_prev()
+            , m_startColor()
+            , m_startTextureCoord()
+        {}
 
         ~Edge()
         {}

@@ -208,7 +208,7 @@ void Face::CheckPointering() const
     assert(count > 2);
     // all edges should be linked
     assert(m_edges.size() == count);
-    // FindSharedEdge should work for all linked edges
+    // all linked edges should be 'owned' by this face
     ForEachEdge([&](const EdgePtr& edge)
     {
         assert(m_edges.find(edge) != m_edges.end());

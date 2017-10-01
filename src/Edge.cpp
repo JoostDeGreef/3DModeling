@@ -28,12 +28,10 @@ void Edge::Split()
     twinFace->CheckPointering();
 
     EdgePtr twin0 = GetTwin();
-    EdgePtr twin1 = make_shared<Edge>(twinFace,vertex1);
-    twinFace->AddEdge(twin1);
+    EdgePtr twin1 = Face::ConstructAndAddEdge(twinFace,vertex1);
 
     EdgePtr this0 = twin0->GetTwin();
-    EdgePtr this1 = make_shared<Edge>(thisFace,vertex1);
-    thisFace->AddEdge(this1);
+    EdgePtr this1 = Face::ConstructAndAddEdge(thisFace,vertex1);
 
     this0->SetTwin(twin1); 
     this1->SetTwin(twin0);

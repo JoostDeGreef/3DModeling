@@ -4,6 +4,8 @@
 #include <array>
 #include <memory>
 
+#include "Numerics.h"
+
 namespace Geometry
 {
 	template<typename VALUE_TYPE, unsigned int DIMENSION>

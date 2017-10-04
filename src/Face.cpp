@@ -224,14 +224,6 @@ void Face::CheckPointering() const
     {
         assert(edge->GetFace() != nullptr);
     });
-    // check that edges are connected via vertices
-    VertexPtr p0 = (*m_edges.begin())->GetPrev()->GetEndVertex();
-    ForEachEdge([&p0](const EdgePtr& edge)
-    {
-        const VertexPtr& p1 = edge->GetStartVertex();
-        assert(p0 == p1);
-        p0 = edge->GetEndVertex();
-    });
     // check that all edge normals are set or none
     int normalCount = 0;
     ForEachEdge([&normalCount](const EdgePtr& edge)

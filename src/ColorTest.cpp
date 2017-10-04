@@ -1,9 +1,4 @@
-#include "gtest/gtest.h"
-using namespace testing;
-
-#include "Aliases.h"
-#include "RGBAColor.h"
-using namespace Geometry;
+#include "CommonTestFunctionality.h"
 
 class ColorTest : public Test 
 {

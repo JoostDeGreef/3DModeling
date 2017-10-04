@@ -72,6 +72,9 @@
     <ClInclude Include="..\include\Cube.h">
       <Filter>Header Files\Shapes</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\Contour.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Edge.cpp">
@@ -94,6 +97,9 @@
     </ClCompile>
     <ClCompile Include="..\src\Cube.cpp">
       <Filter>Source Files\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Contour.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

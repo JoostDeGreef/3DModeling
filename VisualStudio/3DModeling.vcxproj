@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\Aliases.h" />
     <ClInclude Include="..\include\BoundingShape.h" />
+    <ClInclude Include="..\include\Contour.h" />
     <ClInclude Include="..\include\Cube.h" />
     <ClInclude Include="..\include\Dodecahedron.h" />
     <ClInclude Include="..\include\Numerics.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="..\include\Vector.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\Contour.cpp" />
     <ClCompile Include="..\src\Cube.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>

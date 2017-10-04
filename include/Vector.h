@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "Numerics.h"
+#include "SmallObjectAllocator.h"
 
 namespace Geometry
 {
@@ -37,6 +38,14 @@ namespace Geometry
         {
             Set(data);
         }
+
+        template<typename... Args>
+        static std::shared_ptr<this_type> Construct(const Args&... args)
+        {
+            SmallObjectAllocator<this_type> allocator;
+            return std::allocate_shared<this_type>(allocator, args...);
+        }
+
 
         this_type &operator = (const this_type &other)
         {

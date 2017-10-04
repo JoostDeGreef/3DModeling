@@ -5,6 +5,7 @@
 
 #include "Aliases.h"
 #include "Operations.h"
+#include "SmallObjectAllocator.h"
 
 namespace Geometry
 {
@@ -61,6 +62,13 @@ namespace Geometry
             , m_startColor()
             , m_startTextureCoord()
         {}
+
+        template<typename... Args>
+        static EdgePtr Construct(const Args&... args)
+        {
+            SmallObjectAllocator<Edge> allocator;
+            return std::allocate_shared<Edge>(allocator,args...);
+        }
 
         ~Edge()
         {}

@@ -7,14 +7,14 @@ using namespace Geometry;
 Cube::Cube()
 {
     // calculate all vertices
-    VertexPtr A = std::make_shared<Vertex>(-1,-1, 1);
-    VertexPtr B = std::make_shared<Vertex>( 1,-1, 1);
-    VertexPtr C = std::make_shared<Vertex>( 1, 1, 1);
-    VertexPtr D = std::make_shared<Vertex>(-1, 1, 1);
-    VertexPtr E = std::make_shared<Vertex>(-1,-1,-1);
-    VertexPtr F = std::make_shared<Vertex>(-1, 1,-1);
-    VertexPtr G = std::make_shared<Vertex>( 1, 1,-1);
-    VertexPtr H = std::make_shared<Vertex>( 1,-1,-1);
+    VertexPtr A = Vertex::Construct(-1,-1, 1);
+    VertexPtr B = Vertex::Construct( 1,-1, 1);
+    VertexPtr C = Vertex::Construct( 1, 1, 1);
+    VertexPtr D = Vertex::Construct(-1, 1, 1);
+    VertexPtr E = Vertex::Construct(-1,-1,-1);
+    VertexPtr F = Vertex::Construct(-1, 1,-1);
+    VertexPtr G = Vertex::Construct( 1, 1,-1);
+    VertexPtr H = Vertex::Construct( 1,-1,-1);
     vector<VertexPtr> vertices({ A,B,C,D,E,F,G,H });
 
     // normalize all vertices, just to be sure

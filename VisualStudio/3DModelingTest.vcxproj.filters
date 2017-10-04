@@ -9,40 +9,36 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\BoundingShapeTest.cpp">
+    <ClCompile Include="..\src\UnitTest\BoundingShapeTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ColorTest.cpp">
+    <ClCompile Include="..\src\UnitTest\ColorTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\EdgeTest.cpp">
+    <ClCompile Include="..\src\UnitTest\ContourTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\EntityTest.cpp">
+    <ClCompile Include="..\src\UnitTest\EdgeTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\QuaternionTest.cpp">
+    <ClCompile Include="..\src\UnitTest\EntityTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ShapeTest.cpp">
+    <ClCompile Include="..\src\UnitTest\FaceTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\FaceTest.cpp">
+    <ClCompile Include="..\src\UnitTest\QuaternionTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ContourTest.cpp">
+    <ClCompile Include="..\src\UnitTest\ShapeTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\CommonTestFunctionality.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="..\src\UnitTest\CommonTestFunctionality.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

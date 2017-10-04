@@ -48,7 +48,7 @@ namespace Geometry
         template<typename... Args>
         static EdgePtr ConstructAndAddEdge(FacePtr& newFace, const Args& ... args)
         {
-            EdgePtr edge = std::make_shared<Edge>(newFace, args...);
+            EdgePtr edge = Edge::Construct(newFace, args...);
             newFace->AddEdge(edge);
             return edge;
         }

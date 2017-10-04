@@ -151,6 +151,7 @@
     <ClInclude Include="..\include\RGBColor.h" />
     <ClInclude Include="..\include\RotationMatrix.h" />
     <ClInclude Include="..\include\Shape.h" />
+    <ClInclude Include="..\include\SmallObjectAllocator.h" />
     <ClInclude Include="..\include\Vector.h" />
   </ItemGroup>
   <ItemGroup>

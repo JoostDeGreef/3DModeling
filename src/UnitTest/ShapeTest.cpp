@@ -1,11 +1,8 @@
-
-#include "gtest/gtest.h"
-using namespace testing;
+#include "CommonTestFunctionality.h"
 
 #include "Shape.h"
 #include "Cube.h"
 #include "Dodecahedron.h"
-using namespace Geometry;
 
 class ShapeTest : public Test 
 {
@@ -39,7 +36,7 @@ TEST_F(ShapeTest, Copy)
         d->ForEachEdge([&edges](const EdgePtr& edge) { edges.emplace(edge); });
         size_t vc0 = vertices.size();
         size_t ec0 = edges.size();
-        ShapePtr s0 = std::make_shared<Shape>(*d);
+        ShapePtr s0 = Shape::Construct(*d);
         s0->ForEachVertex([&vertices](const VertexPtr& vertex) { vertices.emplace(vertex); });
         s0->ForEachEdge([&edges](const EdgePtr& edge) { edges.emplace(edge); });
         size_t vc1 = vertices.size();
@@ -48,14 +45,14 @@ TEST_F(ShapeTest, Copy)
         ASSERT_EQ(ec0 * 2, ec1);
     };
 
-    CopyShape(std::make_shared<Cube>());
-    CopyShape(std::make_shared<Dodecahedron>());
+    CopyShape(Cube::Construct());
+    CopyShape(Dodecahedron::Construct());
 
 }
 
 TEST_F(ShapeTest, SplitTrianglesIn4)
 {
-    ShapePtr shape = std::make_shared<Cube>();
+    ShapePtr shape = Cube::Construct();
     shape->Triangulate();
     EXPECT_EQ(12, FaceCount(shape));
     shape->SplitTrianglesIn4();

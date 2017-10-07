@@ -2,12 +2,7 @@
 using namespace testing;
 
 #include "Aliases.h"
-#include "Contour.h"
-#include "Numerics.h"
 #include "Vector.h"
-#include "Quaternion.h"
-#include "RGBAColor.h"
-#include "BoundingShape.h"
 using namespace Geometry;
 using namespace Geometry::Numerics;
 

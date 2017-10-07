@@ -29,10 +29,6 @@ namespace Geometry
         BoundingShape3d m_boundingShape;
     public:
 
-        //Hull()
-        //    : m_shape()
-        //    , m_orientation(Orientation::Outward)
-        //{}
         Hull(Shape& shape)
             : m_shape(shape)
             , m_orientation(Orientation::Outward)
@@ -43,6 +39,13 @@ namespace Geometry
         Hull(this_type &&other) = default;
         Hull& operator = (const this_type &other) = default;
         Hull& operator = (this_type &&other) = default;
+
+        template<typename... Args>
+        static HullPtr Construct(Args&... args)
+        {
+            SmallObjectAllocator<Hull> allocator;
+            return std::allocate_shared<Hull>(allocator, args...);
+        }
 
         ~Hull()
         {}
@@ -59,9 +62,9 @@ namespace Geometry
             m_patches.erase(patch);
         }
         template<typename... Args>
-        PatchPtr ConstructAndAddPatch(const Args&... args)
+        PatchPtr ConstructAndAddPatch(Args&... args)
         {
-            PatchPtr patch = std::make_shared<Patch>(*this, args...);
+            PatchPtr patch = Patch::Construct(*this, args...);
             AddPatch(patch);
             return patch;
         }

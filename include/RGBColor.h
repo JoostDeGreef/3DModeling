@@ -28,6 +28,12 @@ namespace Geometry
         {
             SetInt(color);
         }
+        template<typename... Args>
+        static std::shared_ptr<this_type> Construct(Args&... args)
+        {
+            SmallObjectAllocator<this_type> allocator;
+            return std::allocate_shared<this_type>(allocator, args...);
+        }
 
         void SetR(const value_type &r) { m_data[0] = r; }
         void SetG(const value_type &g) { m_data[1] = g; }

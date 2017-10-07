@@ -29,7 +29,7 @@ namespace Geometry
     public:
 
         Patch(Hull& hull)
-            : Patch(hull, std::make_shared<Color>(Color::White()))
+            : Patch(hull, Color::Construct(Color::White()))
         {}
         Patch(Hull& hull, const ColorPtr& color)
             : m_hull(hull)
@@ -38,6 +38,12 @@ namespace Geometry
             , m_textureId(0)
             , m_boundingShape()
         {}
+        template<typename... Args>
+        static std::shared_ptr<this_type> Construct(Args&... args)
+        {
+            SmallObjectAllocator<this_type> allocator;
+            return std::allocate_shared<this_type>(allocator, args...);
+        }
 
         Patch(const this_type &other) = default;
         Patch(this_type &&other) = default;
@@ -53,9 +59,9 @@ namespace Geometry
             m_faces.erase(face);
         }
         template<typename... Args>
-        FacePtr ConstructAndAddFace(const Args& ... args)
+        FacePtr ConstructAndAddFace(Args& ... args)
         {
-            FacePtr face = std::make_shared<Face>(*this, args...);
+            FacePtr face = Face::Construct(*this, args...);
             AddFace(face);
             return face;
         }

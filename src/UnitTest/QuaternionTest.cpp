@@ -1,12 +1,7 @@
-#include "gtest/gtest.h"
-using namespace testing;
+#include "CommonTestFunctionality.h"
 
-#include "Aliases.h"
 #include "Numerics.h"
-#include "Vector.h"
 #include "Quaternion.h"
-using namespace Geometry;
-using namespace Geometry::Numerics;
 
 class QuaternionTest : public Test
 {

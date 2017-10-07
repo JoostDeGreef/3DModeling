@@ -139,6 +139,7 @@
     <ClInclude Include="..\include\Contour.h" />
     <ClInclude Include="..\include\Cube.h" />
     <ClInclude Include="..\include\Dodecahedron.h" />
+    <ClInclude Include="..\include\Line.h" />
     <ClInclude Include="..\include\Numerics.h" />
     <ClInclude Include="..\include\Edge.h" />
     <ClInclude Include="..\include\Face.h" />

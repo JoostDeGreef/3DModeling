@@ -1,9 +1,7 @@
-#include "gtest/gtest.h"
-using namespace testing;
+#include "CommonTestFunctionality.h"
 
 #include "Edge.h"
 #include "Shape.h"
-using namespace Geometry;
 
 class EdgeTest : public Test 
 {
@@ -20,15 +18,15 @@ protected:
 TEST_F(EdgeTest, Split) 
 {
     Shape shape;
-    HullPtr hull = std::make_shared<Hull>(shape);
+    HullPtr hull = Hull::Construct(shape);
     shape.AddHull(hull);
-    PatchPtr patch = std::make_shared<Patch>(*hull);
+    PatchPtr patch = Patch::Construct(*hull);
     hull->AddPatch(patch);
     FacePtr f_top = patch->ConstructAndAddFace();
     FacePtr f_bottom = patch->ConstructAndAddFace();
-    VertexPtr v0 = std::make_shared<Vertex>(0, 0, 0);
-    VertexPtr v1 = std::make_shared<Vertex>(1, 0, 0);
-    VertexPtr v2 = std::make_shared<Vertex>(0, 1, 0);
+    VertexPtr v0 = Vertex::Construct(0, 0, 0);
+    VertexPtr v1 = Vertex::Construct(1, 0, 0);
+    VertexPtr v2 = Vertex::Construct(0, 1, 0);
     EdgePtr e0t = Face::ConstructAndAddEdge(f_top,v0);
     EdgePtr e1t = Face::ConstructAndAddEdge(f_top,v1);
     EdgePtr e2t = Face::ConstructAndAddEdge(f_top,v2);

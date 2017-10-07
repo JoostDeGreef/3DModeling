@@ -16,26 +16,26 @@ Dodecahedron::Dodecahedron(int initialFaceCount)
     const double s = 1 / sqrt(3.0);
 
     // calculate all vertices
-    VertexPtr A = make_shared<Vertex>(s * t, s * 0, s * ti);
-    VertexPtr B = make_shared<Vertex>(s *-t, s * 0, s * ti);
-    VertexPtr C = make_shared<Vertex>(s *-t, s * 0, s *-ti);
-    VertexPtr D = make_shared<Vertex>(s * t, s * 0, s *-ti);
-    VertexPtr E = make_shared<Vertex>(s * ti, s * t, s * 0);
-    VertexPtr F = make_shared<Vertex>(s * ti, s *-t, s * 0);
-    VertexPtr G = make_shared<Vertex>(s *-ti, s *-t, s * 0);
-    VertexPtr H = make_shared<Vertex>(s *-ti, s * t, s * 0);
-    VertexPtr I = make_shared<Vertex>(s * 0, s * ti, s * t);
-    VertexPtr J = make_shared<Vertex>(s * 0, s * ti, s *-t);
-    VertexPtr K = make_shared<Vertex>(s * 0, s *-ti, s *-t);
-    VertexPtr L = make_shared<Vertex>(s * 0, s *-ti, s * t);
-    VertexPtr M = make_shared<Vertex>(s * 1, s * 1, s * 1);
-    VertexPtr N = make_shared<Vertex>(s * 1, s *-1, s * 1);
-    VertexPtr O = make_shared<Vertex>(s *-1, s *-1, s * 1);
-    VertexPtr P = make_shared<Vertex>(s *-1, s * 1, s * 1);
-    VertexPtr Q = make_shared<Vertex>(s *-1, s * 1, s *-1);
-    VertexPtr R = make_shared<Vertex>(s * 1, s * 1, s *-1);
-    VertexPtr S = make_shared<Vertex>(s * 1, s *-1, s *-1);
-    VertexPtr T = make_shared<Vertex>(s *-1, s *-1, s *-1);
+    VertexPtr A = Vertex::Construct(s * t, s * 0, s * ti);
+    VertexPtr B = Vertex::Construct(s *-t, s * 0, s * ti);
+    VertexPtr C = Vertex::Construct(s *-t, s * 0, s *-ti);
+    VertexPtr D = Vertex::Construct(s * t, s * 0, s *-ti);
+    VertexPtr E = Vertex::Construct(s * ti, s * t, s * 0);
+    VertexPtr F = Vertex::Construct(s * ti, s *-t, s * 0);
+    VertexPtr G = Vertex::Construct(s *-ti, s *-t, s * 0);
+    VertexPtr H = Vertex::Construct(s *-ti, s * t, s * 0);
+    VertexPtr I = Vertex::Construct(s * 0, s * ti, s * t);
+    VertexPtr J = Vertex::Construct(s * 0, s * ti, s *-t);
+    VertexPtr K = Vertex::Construct(s * 0, s *-ti, s *-t);
+    VertexPtr L = Vertex::Construct(s * 0, s *-ti, s * t);
+    VertexPtr M = Vertex::Construct(s * 1, s * 1, s * 1);
+    VertexPtr N = Vertex::Construct(s * 1, s *-1, s * 1);
+    VertexPtr O = Vertex::Construct(s *-1, s *-1, s * 1);
+    VertexPtr P = Vertex::Construct(s *-1, s * 1, s * 1);
+    VertexPtr Q = Vertex::Construct(s *-1, s * 1, s *-1);
+    VertexPtr R = Vertex::Construct(s * 1, s * 1, s *-1);
+    VertexPtr S = Vertex::Construct(s * 1, s *-1, s *-1);
+    VertexPtr T = Vertex::Construct(s *-1, s *-1, s *-1);
     vector<VertexPtr> vertices({ A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T });
 
     // normalize all vertices, just to be sure
@@ -161,7 +161,7 @@ void Dodecahedron::InitialRefinement()
         vertices.push_back(vertices.front());
         edges.push_back(edges.front());
 
-        VertexPtr centerPtr = std::make_shared<Vertex>(center);
+        VertexPtr centerPtr = Vertex::Construct(center);
         std::vector<FacePtr> newFaces({ patch.ConstructAndAddFace(), patch.ConstructAndAddFace(), patch.ConstructAndAddFace(), patch.ConstructAndAddFace(), patch.ConstructAndAddFace() });
         for (size_t i = 0; i < 5; ++i)
         {
@@ -243,7 +243,7 @@ void Dodecahedron::Refine(int initialFaceCount)
         // give all edges at this vertex the same normal
         if (!edge->GetStartNormal())
         {
-            NormalPtr normal = std::make_shared<Normal>(*edge->GetStartVertex());
+            NormalPtr normal = Normal::Construct(*edge->GetStartVertex());
             edge->ForEachEdgeAtStartVertex([normal](const EdgePtr& edge) {edge->SetStartNormal(normal); });
         }
     });

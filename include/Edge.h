@@ -64,7 +64,7 @@ namespace Geometry
         {}
 
         template<typename... Args>
-        static EdgePtr Construct(const Args&... args)
+        static EdgePtr Construct(Args&... args)
         {
             SmallObjectAllocator<Edge> allocator;
             return std::allocate_shared<Edge>(allocator,args...);

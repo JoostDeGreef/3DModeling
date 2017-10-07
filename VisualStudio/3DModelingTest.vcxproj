@@ -152,7 +152,12 @@
   <ItemGroup>
     <ClCompile Include="..\src\UnitTest\BoundingShapeTest.cpp" />
     <ClCompile Include="..\src\UnitTest\ColorTest.cpp" />
-    <ClCompile Include="..\src\UnitTest\ContourTest.cpp" />
+    <ClCompile Include="..\src\UnitTest\ContourTest.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\src\UnitTest\EdgeTest.cpp" />
     <ClCompile Include="..\src\UnitTest\EntityTest.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -161,6 +166,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\src\UnitTest\FaceTest.cpp" />
+    <ClCompile Include="..\src\UnitTest\LineTest.cpp" />
     <ClCompile Include="..\src\UnitTest\QuaternionTest.cpp" />
     <ClCompile Include="..\src\UnitTest\ShapeTest.cpp" />
   </ItemGroup>

@@ -10,6 +10,13 @@ namespace Geometry
     public:
         Dodecahedron(int initialFaceCount = 60);
 
+        template<typename... Args>
+        static std::shared_ptr<Shape> Construct(Args&... args)
+        {
+            SmallObjectAllocator<Dodecahedron> allocator;
+            return std::allocate_shared<Dodecahedron>(allocator, args...);
+        }
+
     private:
         void InitialRefinement();
         void Refine(int initialFaceCount);

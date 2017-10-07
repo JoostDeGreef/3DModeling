@@ -1,5 +1,7 @@
 #include "CommonTestFunctionality.h"
 
+#include "RGBAColor.h"
+
 class ColorTest : public Test 
 {
 protected:

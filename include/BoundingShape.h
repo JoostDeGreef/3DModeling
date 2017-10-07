@@ -44,6 +44,12 @@ namespace Geometry
         {
             Set(center, radius);
         }
+        template<typename... Args>
+        static std::shared_ptr<this_type> Construct(Args&... args)
+        {
+            SmallObjectAllocator<this_type> allocator;
+            return std::allocate_shared<this_type>(allocator, args...);
+        }
 
         void Set(const vector_type &min_point, const vector_type &max_point, const bool optimal = true)
         {

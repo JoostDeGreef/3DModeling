@@ -17,12 +17,6 @@ Cube::Cube()
     VertexPtr H = Vertex::Construct( 1,-1,-1);
     vector<VertexPtr> vertices({ A,B,C,D,E,F,G,H });
 
-    // normalize all vertices, just to be sure
-    for (auto v : vertices)
-    {
-        v->Normalize();
-    }
-
     // create the hull
     HullPtr hull = ConstructAndAddHull();
 

@@ -52,24 +52,24 @@ HullPtr Hull::Copy(Shape& newShape) const
     // duplicate shallow structures
     for (auto& vertexMap : vertices)
     {
-        vertexMap.second = vertexMap.first == nullptr ? nullptr : make_shared<Vertex>(*vertexMap.first);
+        vertexMap.second = vertexMap.first == nullptr ? nullptr : Vertex::Construct(*vertexMap.first);
     }
     for (auto& normalMap : normals)
     {
-        normalMap.second = normalMap.first == nullptr ? nullptr : make_shared<Normal>(*normalMap.first);
+        normalMap.second = normalMap.first == nullptr ? nullptr : Normal::Construct(*normalMap.first);
     }
     for (auto& colorMap : colors)
     {
-        colorMap.second = colorMap.first == nullptr ? nullptr : make_shared<Color>(*colorMap.first);
+        colorMap.second = colorMap.first == nullptr ? nullptr : Color::Construct(*colorMap.first);
     }
     for (auto& textureCoordinateMap : textureCoordinates)
     {
-        textureCoordinateMap.second = textureCoordinateMap.first == nullptr ? nullptr : make_shared<TextureCoord>(*textureCoordinateMap.first);
+        textureCoordinateMap.second = textureCoordinateMap.first == nullptr ? nullptr : TextureCoord::Construct(*textureCoordinateMap.first);
     }
     // recreate complex structures
     for (auto& patchMap : patches)
     {
-        patchMap.second = make_shared<Patch>(*newHull);
+        patchMap.second = newHull->ConstructAndAddPatch();
         newHull->AddPatch(patchMap.second);
         patchMap.second->SetBoundingShape(patchMap.first->GetBoundingShape());
         patchMap.second->SetColor(colors[patchMap.first->GetColor()]);
@@ -78,7 +78,7 @@ HullPtr Hull::Copy(Shape& newShape) const
     {
         PatchPtr patch = patches[&faceMap.first->GetPatch()];
         assert(patch != nullptr);
-        faceMap.second = make_shared<Face>(*patch);
+        faceMap.second = patch->ConstructAndAddFace();
         patch->AddFace(faceMap.second);
     }
     for (auto& edgeMap : edges)
@@ -87,7 +87,7 @@ HullPtr Hull::Copy(Shape& newShape) const
         assert(v != nullptr);
         FacePtr& f = faces[edgeMap.first->GetFace()];
         assert(f != nullptr);
-        edgeMap.second = make_shared<Edge>(f,v);
+        edgeMap.second = Edge::Construct(f,v);
         f->AddEdge(edgeMap.second);
     }
     for (auto& edgeMap : edges)

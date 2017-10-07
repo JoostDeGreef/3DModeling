@@ -25,7 +25,7 @@ void Face::CalcNormal()
         p0 = p1;
     });
     double surface = normal.Length();
-    m_normal = make_shared<Normal>(normal / surface);
+    m_normal = Normal::Construct(normal / surface);
 }
 
 const std::vector<EdgePtr> Face::GetEdgesOrdered() const
@@ -114,8 +114,8 @@ private:
             split1 = split1->GetNext();
         }
         // create new face and connecting edges
-        FacePtr newFace0 = make_shared<Face>(patch);
-        FacePtr newFace1 = make_shared<Face>(patch);
+        FacePtr newFace0 = Face::Construct(patch);
+        FacePtr newFace1 = Face::Construct(patch);
         patch.AddFace(newFace0);
         patch.AddFace(newFace1);
 

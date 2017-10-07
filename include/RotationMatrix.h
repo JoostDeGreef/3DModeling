@@ -32,6 +32,12 @@ namespace Geometry
         {
             quad.GetRotationMatrix3rows(m_data[0].GetData(),m_data[1].GetData(),m_data[2].GetData());
         }
+        template<typename... Args>
+        static std::shared_ptr<this_type> Construct(Args&... args)
+        {
+            SmallObjectAllocator<this_type> allocator;
+            return std::allocate_shared<this_type>(allocator, args...);
+        }
 
         this_type &operator = (const this_type &other)
         {

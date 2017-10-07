@@ -21,6 +21,10 @@ namespace Geometry
     using Vertex = Vector3d;
     using VertexPtr = std::shared_ptr<Vertex>;
 
+    template<typename POINT_TYPE> class TLine;
+    using Line2d = TLine<Vector2d>;
+    using Line3d = TLine<Vector3d>;
+
     using Normal = Vector3d;
     using NormalPtr = std::shared_ptr<Normal>;
 

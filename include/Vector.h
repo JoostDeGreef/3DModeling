@@ -40,7 +40,7 @@ namespace Geometry
         }
 
         template<typename... Args>
-        static std::shared_ptr<this_type> Construct(const Args&... args)
+        static std::shared_ptr<this_type> Construct(Args... args)
         {
             SmallObjectAllocator<this_type> allocator;
             return std::allocate_shared<this_type>(allocator, args...);

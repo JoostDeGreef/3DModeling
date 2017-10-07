@@ -23,6 +23,13 @@ namespace Geometry
         Contour(const Contour& other);
         Contour(const std::vector<Vector2d>& points);
 
+        template<typename... Args>
+        static std::shared_ptr<Contour> Construct(Args&... args)
+        {
+            SmallObjectAllocator<Contour> allocator;
+            return std::allocate_shared<Contour>(allocator, args...);
+        }
+
         void Add(const Vector2d& point);
         void Add(const std::vector<Vector2d>& points);
 

@@ -1,5 +1,7 @@
 #include "CommonTestFunctionality.h"
 
+#include "BoundingShape.h"
+
 class BoundingShapeTest : public Test 
 {
 protected:

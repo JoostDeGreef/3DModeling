@@ -46,7 +46,13 @@ namespace Geometry
             m_edges.erase(edge);
         }
         template<typename... Args>
-        static EdgePtr ConstructAndAddEdge(FacePtr& newFace, const Args& ... args)
+        static FacePtr Construct(Args&... args)
+        {
+            SmallObjectAllocator<Face> allocator;
+            return std::allocate_shared<Face>(allocator, args...);
+        }
+        template<typename... Args>
+        static EdgePtr ConstructAndAddEdge(FacePtr& newFace, Args& ... args)
         {
             EdgePtr edge = Edge::Construct(newFace, args...);
             newFace->AddEdge(edge);

@@ -1,17 +1,34 @@
+#include <cassert>
 #include <algorithm>
 
 using namespace std;
 
 #include "Contour.h"
+#include "Line.h"
 
 using namespace Geometry;
 
 namespace
 {
-    std::vector<std::vector<Vector2d>> SplitAtSelfintersactions(const std::vector<Vector2d>& points)
+    // this should probably be replaced by a sweepline algorithm, 
+    // but for contours with small linecount, it's Okay...
+    std::vector<std::vector<Vector2d>> SplitAtSelfintersections(const std::vector<Vector2d>& points)
     {
+        //assert(points.size() >= 3);
         std::vector<std::vector<Vector2d>> res;
-        // todo
+        //std::vector<Line2d> lines;
+        //auto cur = points.cbegin();
+        //lines.emplace_back(points.back(), *cur);
+        //auto prev = cur++;
+        //for (; cur != points.cend(); ++cur, ++prev)
+        //{
+        //    lines.emplace_back(*prev, *cur);
+        //    for (size_t li = 0; li + 2 < lines.size(); ++li)
+        //    {
+
+        //    }
+        //}
+
         if (!points.empty())
         {
             res.push_back(points);
@@ -59,7 +76,7 @@ void Contour::Add(const std::vector<Vector2d>& points)
 
 std::vector<std::vector<Vector2d>> Contour::GetClockwiseLoops()
 {
-    std::vector<std::vector<Vector2d>> res = SplitAtSelfintersactions(m_points);
+    std::vector<std::vector<Vector2d>> res = SplitAtSelfintersections(m_points);
     for (auto& loop : res)
     {
         TurnClockwise(loop);

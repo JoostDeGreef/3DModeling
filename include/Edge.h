@@ -18,7 +18,7 @@ namespace Geometry
      *     start
      * 
      */
-    class Edge 
+    class Edge : public SmallObjectAllocator<Edge>::Object
     {
     private:
         VertexPtr m_startVertex;
@@ -62,13 +62,6 @@ namespace Geometry
             , m_startColor()
             , m_startTextureCoord()
         {}
-
-        template<typename... Args>
-        static EdgePtr Construct(Args&... args)
-        {
-            SmallObjectAllocator<Edge> allocator;
-            return std::allocate_shared<Edge>(allocator,args...);
-        }
 
         ~Edge()
         {}

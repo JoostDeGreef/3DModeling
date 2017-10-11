@@ -12,7 +12,7 @@ namespace Geometry
 {
     /* Face : full edge indexed winged face
      */
-    class Face 
+    class Face : public SmallObjectAllocator<Face>::Object
     {
     public:
         typedef Face this_type;
@@ -44,12 +44,6 @@ namespace Geometry
         void RemoveEdge(EdgePtr& edge)
         {
             m_edges.erase(edge);
-        }
-        template<typename... Args>
-        static FacePtr Construct(Args&... args)
-        {
-            SmallObjectAllocator<Face> allocator;
-            return std::allocate_shared<Face>(allocator, args...);
         }
         template<typename... Args>
         static EdgePtr ConstructAndAddEdge(FacePtr& newFace, Args& ... args)

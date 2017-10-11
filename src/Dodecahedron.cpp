@@ -8,7 +8,7 @@ using namespace std;
 #include "RotationMatrix.h"
 using namespace Geometry;
 
-Dodecahedron::Dodecahedron(int initialFaceCount)
+Dodecahedron::Dodecahedron(const int initialFaceCount)
     : Shape()
 {
     const double t = (1 + sqrt(5.0))*0.5;

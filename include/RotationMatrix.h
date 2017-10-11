@@ -4,7 +4,7 @@
 namespace Geometry
 {
     template<typename VALUE_TYPE>
-    class TRotationMatrix3
+    class TRotationMatrix3 : public SmallObjectAllocator<TRotationMatrix3<VALUE_TYPE>>::Object
     {
     public:
         typedef VALUE_TYPE value_type;
@@ -31,12 +31,6 @@ namespace Geometry
         TRotationMatrix3(const quad_type &quad)
         {
             quad.GetRotationMatrix3rows(m_data[0].GetData(),m_data[1].GetData(),m_data[2].GetData());
-        }
-        template<typename... Args>
-        static std::shared_ptr<this_type> Construct(Args&... args)
-        {
-            SmallObjectAllocator<this_type> allocator;
-            return std::allocate_shared<this_type>(allocator, args...);
         }
 
         this_type &operator = (const this_type &other)

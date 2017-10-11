@@ -2,6 +2,7 @@
 #define SMALL_OBJECT_POOL_ALLOCATOR_H 1
 
 #include <deque>
+#include <vector>
 #include <mutex>
 
 namespace Geometry
@@ -43,6 +44,17 @@ namespace Geometry
                 delete[] reinterpret_cast<char*>(p);
             }
         }
+
+        class Object
+        {
+        public:
+            template<typename... Args>
+            static std::shared_ptr<T> Construct(Args&&... args)
+            {
+                SmallObjectAllocator<T> allocator;
+                return std::allocate_shared<T>(allocator, std::forward<Args>(args)...);
+            }
+        };
 
     private:
         class GlobalPool
@@ -143,7 +155,9 @@ namespace Geometry
             thread_local static ThreadLocalPool pool;
             return pool;
         }
+
     };
+
 
     template <class T, class U>
     bool operator==(const SmallObjectAllocator<T>&, const SmallObjectAllocator<U>&) { return true; }

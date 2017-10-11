@@ -7,7 +7,7 @@
 namespace Geometry
 {
     template<typename VALUE_TYPE>
-    class TQuaternion 
+    class TQuaternion : public SmallObjectAllocator<TQuaternion<VALUE_TYPE>>::Object
     {
     public:
         typedef TQuaternion<VALUE_TYPE> this_type;
@@ -115,7 +115,7 @@ namespace Geometry
 
         value_type MagnitudeSqr() const
         {
-            return Common::Sqr(m_data[0]) + Common::Sqr(m_data[1]) + Common::Sqr(m_data[2]) + Common::Sqr(m_data[3]);
+            return Numerics::Sqr(m_data[0]) + Numerics::Sqr(m_data[1]) + Numerics::Sqr(m_data[2]) + Numerics::Sqr(m_data[3]);
         }
 
         value_type Magnitude() const

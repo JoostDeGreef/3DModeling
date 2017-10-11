@@ -11,7 +11,7 @@
 namespace Geometry
 {
     template<typename VECTOR_TYPE>
-    class TBoundingShape 
+    class TBoundingShape : public SmallObjectAllocator<TBoundingShape<VECTOR_TYPE>>::Object
     {
     public:
         typedef TBoundingShape<VECTOR_TYPE> this_type;
@@ -43,12 +43,6 @@ namespace Geometry
         TBoundingShape(const vector_type &center, const value_type &radius)
         {
             Set(center, radius);
-        }
-        template<typename... Args>
-        static std::shared_ptr<this_type> Construct(Args&... args)
-        {
-            SmallObjectAllocator<this_type> allocator;
-            return std::allocate_shared<this_type>(allocator, args...);
         }
 
         void Set(const vector_type &min_point, const vector_type &max_point, const bool optimal = true)

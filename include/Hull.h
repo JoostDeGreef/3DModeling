@@ -10,7 +10,7 @@ namespace Geometry
 {
     class Shape;
 
-    class Hull 
+    class Hull : public SmallObjectAllocator<Hull>::Object
     {
     public:
         typedef std::unordered_set<PatchPtr> container_type;
@@ -39,13 +39,6 @@ namespace Geometry
         Hull(this_type &&other) = default;
         Hull& operator = (const this_type &other) = default;
         Hull& operator = (this_type &&other) = default;
-
-        template<typename... Args>
-        static HullPtr Construct(Args&... args)
-        {
-            SmallObjectAllocator<Hull> allocator;
-            return std::allocate_shared<Hull>(allocator, args...);
-        }
 
         ~Hull()
         {}

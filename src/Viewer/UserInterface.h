@@ -1,8 +1,16 @@
 #ifndef USERINTERFACE_H
 #define USERINTERFACE_H 1
 
+#include "Shape.h"
+#include "Aliases.h"
+
 namespace Viewer
 {
+    namespace Internal
+    {
+        class State;
+    };
+
     class UserInterface
     {
     public:
@@ -13,7 +21,10 @@ namespace Viewer
         void Run();
         bool Cleanup();
         void Draw();
+        void AddShape(Geometry::ShapePtr& shape);
 
+    private:
+        std::shared_ptr<Internal::State> m_state;
     };
 }
 

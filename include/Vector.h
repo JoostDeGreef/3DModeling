@@ -10,7 +10,7 @@
 namespace Geometry
 {
 	template<typename VALUE_TYPE, unsigned int DIMENSION>
-    class TVector
+    class TVector : public SmallObjectAllocator<TVector<VALUE_TYPE,DIMENSION>>::Object
     {
     public:
         typedef TVector<VALUE_TYPE, DIMENSION> this_type;
@@ -30,22 +30,14 @@ namespace Geometry
             Copy(other);
         }
         template<typename ...Args>
-        TVector(const value_type &value,Args ...values)
+        TVector(const value_type &value,Args&& ...values)
         {
-            Set(value, values...);
+            Set(value, std::forward<Args>(values)...);
         }
         explicit TVector(const value_type *data)
         {
             Set(data);
         }
-
-        template<typename... Args>
-        static std::shared_ptr<this_type> Construct(Args... args)
-        {
-            SmallObjectAllocator<this_type> allocator;
-            return std::allocate_shared<this_type>(allocator, args...);
-        }
-
 
         this_type &operator = (const this_type &other)
         {
@@ -65,14 +57,14 @@ namespace Geometry
             m_data[index] = value;
         }
         template<index_type index, typename ...Args>
-        void SetIndex(const value_type &value, Args ...values)
+        void SetIndex(const value_type &value, const Args&... values)
         {
             m_data[index] = value;
             SetIndex<index + 1>(values...);
         }
     public:
         template<typename ...Args>
-        void Set(const value_type &value, Args ...values)
+        void Set(const value_type &value, const Args&... values)
         {
             static_assert(sizeof...(values)+1 == dimension, "Incorrect number of values");
             SetIndex<0>(value, values...);

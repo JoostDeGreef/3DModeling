@@ -13,7 +13,7 @@
 
 namespace Geometry
 {
-    class Patch
+    class Patch : public SmallObjectAllocator<Patch>::Object
     {
     public:
         typedef std::unordered_set<FacePtr> container_type;
@@ -38,12 +38,6 @@ namespace Geometry
             , m_textureId(0)
             , m_boundingShape()
         {}
-        template<typename... Args>
-        static std::shared_ptr<this_type> Construct(Args&... args)
-        {
-            SmallObjectAllocator<this_type> allocator;
-            return std::allocate_shared<this_type>(allocator, args...);
-        }
 
         Patch(const this_type &other) = default;
         Patch(this_type &&other) = default;

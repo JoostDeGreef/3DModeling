@@ -4,7 +4,7 @@
 namespace Geometry
 {
     template<typename VALUE_TYPE>
-    class TRGBColor
+    class TRGBColor : public SmallObjectAllocator<TRGBColor<VALUE_TYPE>>::Object
     {
     public:
         typedef TRGBColor<VALUE_TYPE> this_type;
@@ -27,12 +27,6 @@ namespace Geometry
         TRGBColor(const unsigned int color)
         {
             SetInt(color);
-        }
-        template<typename... Args>
-        static std::shared_ptr<this_type> Construct(Args&... args)
-        {
-            SmallObjectAllocator<this_type> allocator;
-            return std::allocate_shared<this_type>(allocator, args...);
         }
 
         void SetR(const value_type &r) { m_data[0] = r; }

@@ -6,7 +6,7 @@
 namespace Geometry
 {
 	template<typename POINT>
-	class TLine
+	class TLine : public SmallObjectAllocator<TLine<POINT>>::Object
 	{
 	public:
 		typedef TLine<POINT> this_type;
@@ -21,12 +21,6 @@ namespace Geometry
 			: m_p1(other.m_p1)
 			, m_p2(other.m_p2)
 		{}
-        template<typename... Args>
-        static std::shared_ptr<this_type> Construct(Args&... args)
-        {
-            SmallObjectAllocator<this_type> allocator;
-            return std::allocate_shared<this_type>(allocator, args...);
-        }
 
 		const point_type &GetPoint1() const { return m_p1; }
 		const point_type &GetPoint2() const { return m_p2; }

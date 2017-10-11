@@ -12,7 +12,7 @@
 
 namespace Geometry
 {
-    class Shape 
+    class Shape : public SmallObjectAllocator<Shape>::Object
     {
     public:
         typedef std::unordered_set<HullPtr> container_type;
@@ -28,13 +28,6 @@ namespace Geometry
         Shape();
         Shape(const this_type &other);
         Shape(this_type &&other);
-
-        template<typename... Args>
-        static std::shared_ptr<this_type> Construct(Args&... args)
-        {
-            SmallObjectAllocator<this_type> allocator;
-            return std::allocate_shared<this_type>(allocator, args...);
-        }
 
         Shape& operator = (const this_type &other) = default;
         Shape& operator = (this_type &&other) = default;

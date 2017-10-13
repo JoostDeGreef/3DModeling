@@ -1,12 +1,6 @@
 #ifndef VIEWER_GLWRAPPERS_H
 #define VIEWER_GLWRAPPERS_H 1
 
-#include "RGBAColor.h"
-#include "RGBColor.h"
-#include "Vector.h"
-#include "Quaternion.h"
-#include "Aliases.h"
-
 namespace Viewer
 {
     void glColor(const Geometry::RGBAColorf& color);

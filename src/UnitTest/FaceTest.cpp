@@ -1,7 +1,5 @@
 #include "CommonTestFunctionality.h"
 
-#include "Cube.h"
-
 class FaceTest : public Test 
 {
 protected:
@@ -30,9 +28,9 @@ TEST_F(FaceTest, CalcNormal)
     HullPtr hull = shape.ConstructAndAddHull();
     PatchPtr patch = hull->ConstructAndAddPatch();
     FacePtr face = patch->ConstructAndAddFace();
-    auto e0 = Face::ConstructAndAddEdge(face, Vector3d::Construct(0, 0, 0));
-    auto e1 = Face::ConstructAndAddEdge(face, Vector3d::Construct(1, 0, 0));
-    auto e2 = Face::ConstructAndAddEdge(face, Vector3d::Construct(0, 1, 0));
+    auto e0 = Face::ConstructAndAddEdge(face, Construct<Vertex>(0, 0, 0));
+    auto e1 = Face::ConstructAndAddEdge(face, Construct<Vertex>(1, 0, 0));
+    auto e2 = Face::ConstructAndAddEdge(face, Construct<Vertex>(0, 1, 0));
     e0->SetNext(e1);
     e1->SetNext(e2);
     e2->SetNext(e0);
@@ -48,7 +46,7 @@ TEST_F(FaceTest, CalcNormal)
 
 TEST_F(FaceTest, SplitSquare) 
 {
-    ShapePtr shape = Cube::Construct();
+    ShapePtr shape = Construct<Cube>();
     FacePtr face = *(*(*shape->GetHulls().begin())->GetPatches().begin())->GetFaces().begin();
     face->CheckPointering();
     EXPECT_EQ(6, FaceCount(shape));
@@ -58,7 +56,7 @@ TEST_F(FaceTest, SplitSquare)
 
 TEST_F(FaceTest, SplitTriangle)
 {
-    ShapePtr shape = Cube::Construct();
+    ShapePtr shape = Construct<Cube>();
     shape->Triangulate();
     FacePtr face = *(*(*shape->GetHulls().begin())->GetPatches().begin())->GetFaces().begin();
     face->CheckPointering();

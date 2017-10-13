@@ -1,3 +1,4 @@
+#include "Geometry.h"
 #include "GLWrappers.h"
 using namespace Geometry;
 

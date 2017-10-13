@@ -1,17 +1,10 @@
 #ifndef BOUNDINGSHAPE_H
 #define BOUNDINGSHAPE_H 1
 
-#include <limits>
-
-#include "MiniBall.h"
-#include "Numerics.h"
-#include "Operations.h"
-#include "Vector.h"
-
 namespace Geometry
 {
     template<typename VECTOR_TYPE>
-    class TBoundingShape : public SmallObjectAllocator<TBoundingShape<VECTOR_TYPE>>::Object
+    class TBoundingShape 
     {
     public:
         typedef TBoundingShape<VECTOR_TYPE> this_type;

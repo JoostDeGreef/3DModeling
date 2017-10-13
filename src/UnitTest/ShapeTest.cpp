@@ -1,9 +1,5 @@
 #include "CommonTestFunctionality.h"
 
-#include "Shape.h"
-#include "Cube.h"
-#include "Dodecahedron.h"
-
 class ShapeTest : public Test 
 {
 protected:
@@ -36,7 +32,7 @@ TEST_F(ShapeTest, Copy)
         d->ForEachEdge([&edges](const EdgePtr& edge) { edges.emplace(edge); });
         size_t vc0 = vertices.size();
         size_t ec0 = edges.size();
-        ShapePtr s0 = Shape::Construct(*d);
+        ShapePtr s0 = Construct<Shape>(*d);
         s0->ForEachVertex([&vertices](const VertexPtr& vertex) { vertices.emplace(vertex); });
         s0->ForEachEdge([&edges](const EdgePtr& edge) { edges.emplace(edge); });
         size_t vc1 = vertices.size();
@@ -45,14 +41,14 @@ TEST_F(ShapeTest, Copy)
         ASSERT_EQ(ec0 * 2, ec1);
     };
 
-    CopyShape(Cube::Construct());
-    CopyShape(Dodecahedron::Construct());
+    CopyShape(Construct<Cube>());
+    CopyShape(Construct<Dodecahedron>());
 
 }
 
 TEST_F(ShapeTest, SplitTrianglesIn4)
 {
-    ShapePtr shape = Cube::Construct();
+    ShapePtr shape = Construct<Cube>();
     shape->Triangulate();
     EXPECT_EQ(12, FaceCount(shape));
     shape->SplitTrianglesIn4();

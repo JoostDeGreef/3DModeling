@@ -1,8 +1,5 @@
 #include "CommonTestFunctionality.h"
 
-#include "Numerics.h"
-#include "Quaternion.h"
-
 class QuaternionTest : public Test
 {
 protected:

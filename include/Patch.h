@@ -1,19 +1,9 @@
 #ifndef GEOMETRY_PATCH_H
 #define GEOMETRY_PATCH_H 1
 
-#include <functional>
-#include <memory>
-#include <unordered_set>
-
-#include "Aliases.h"
-#include "BoundingShape.h"
-#include "RGBAColor.h"
-#include "Face.h"
-
-
 namespace Geometry
 {
-    class Patch : public SmallObjectAllocator<Patch>::Object
+    class Patch 
     {
     public:
         typedef std::unordered_set<FacePtr> container_type;
@@ -26,10 +16,10 @@ namespace Geometry
         unsigned int m_displayList;
         unsigned int m_textureId;
         BoundingShape3d m_boundingShape;
-    public:
 
+    protected:
         Patch(Hull& hull)
-            : Patch(hull, Color::Construct(Color::White()))
+            : Patch(hull, Construct<Color>(Color::White()))
         {}
         Patch(Hull& hull, const ColorPtr& color)
             : m_hull(hull)
@@ -41,8 +31,9 @@ namespace Geometry
 
         Patch(const this_type &other) = default;
         Patch(this_type &&other) = default;
-        Patch& operator = (const this_type &other) = default;
-        Patch& operator = (this_type &&other) = default;
+    public:
+        Patch& operator = (const this_type &other) = delete;
+        Patch& operator = (this_type &&other) = delete;
 
         void AddFace(FacePtr& face)
         {
@@ -53,9 +44,9 @@ namespace Geometry
             m_faces.erase(face);
         }
         template<typename... Args>
-        FacePtr ConstructAndAddFace(Args& ... args)
+        FacePtr ConstructAndAddFace(Args&& ... args)
         {
-            FacePtr face = Face::Construct(*this, args...);
+            FacePtr face = Construct<Face>(*this, std::forward<Args>(args)...);
             AddFace(face);
             return face;
         }
@@ -74,42 +65,11 @@ namespace Geometry
         void SetDisplayList(const unsigned int displayList) { m_displayList = displayList; }
 
         const container_type& GetFaces() const { return m_faces; }
+        std::unordered_set<VertexPtr> GetVertices() const;
 
-        void ForEachFace(std::function<void(const FacePtr& facePtr)> func) const
-        {
-            for (const FacePtr& face:m_faces)
-            {
-                func(face);
-            }
-        }
-
-        void ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const
-        {
-            ForEachFace([func](const FacePtr & facePtr)
-            {
-                facePtr->ForEachEdge(func);
-            });
-        }
-
-        std::unordered_set<VertexPtr> GetVertices() const
-        {
-            std::unordered_set<VertexPtr> vertices;
-            ForEachFace([&vertices](const FacePtr& face) 
-            {
-                face->ForEachVertex([&vertices](const VertexPtr& vertex) 
-                {
-                    vertices.insert(vertex); 
-                }); 
-            });
-            return vertices;
-        }
-        void ForEachVertex(std::function<void(const VertexPtr& vertexPtr)> func) const
-        {
-            for (const VertexPtr& vertex : GetVertices())
-            {
-                func(vertex);
-            }
-        }
+        void ForEachFace(std::function<void(const FacePtr& facePtr)> func) const;
+        void ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const;
+        void ForEachVertex(std::function<void(const VertexPtr& vertexPtr)> func) const;
 
         const Hull& GetHull() const { return m_hull; }
         const Shape& GetShape() const;

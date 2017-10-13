@@ -1,14 +1,5 @@
-#include <cassert>
-#include <iostream>
-#include <string>
-#include <vector>
+#include "Geometry.h"
 using namespace std;
-
-#include "Aliases.h"
-#include "Face.h"
-#include "Patch.h"
-#include "Shape.h"
-#include "Vector.h"
 using namespace Geometry;
 
 Face::~Face()
@@ -25,7 +16,7 @@ void Face::CalcNormal()
         p0 = p1;
     });
     double surface = normal.Length();
-    m_normal = Normal::Construct(normal / surface);
+    m_normal = Construct<Normal>(normal / surface);
 }
 
 const std::vector<EdgePtr> Face::GetEdgesOrdered() const
@@ -114,8 +105,8 @@ private:
             split1 = split1->GetNext();
         }
         // create new face and connecting edges
-        FacePtr newFace0 = Face::Construct(patch);
-        FacePtr newFace1 = Face::Construct(patch);
+        FacePtr newFace0 = Construct<Face>(patch);
+        FacePtr newFace1 = Construct<Face>(patch);
         patch.AddFace(newFace0);
         patch.AddFace(newFace1);
 
@@ -184,6 +175,25 @@ public:
     }
 
 };
+
+void Face::ForEachEdge(std::function<void(const EdgePtr&edge)> func) const
+{
+    const EdgePtr startEdge = GetStartEdge();
+    EdgePtr edge = startEdge;
+    do
+    {
+        func(edge);
+        edge = edge->GetNext();
+    } while (edge != startEdge);
+}
+
+void Face::ForEachVertex(std::function<void(const VertexPtr&vertex)> func) const
+{
+    ForEachEdge([func](const EdgePtr& edge)
+    {
+        func(edge->GetStartVertex());
+    });
+}
 
 std::pair<FacePtr, FacePtr> Face::Split()
 {

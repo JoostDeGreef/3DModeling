@@ -1,7 +1,5 @@
 #include "CommonTestFunctionality.h"
 
-#include "Line.h"
-
 class LineTest : public Test
 {
 protected:

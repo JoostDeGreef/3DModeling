@@ -1,16 +1,10 @@
 #ifndef GEOMETRY_VECTOR_H
 #define GEOMETRY_VECTOR_H 1
 
-#include <array>
-#include <memory>
-
-#include "Numerics.h"
-#include "SmallObjectAllocator.h"
-
 namespace Geometry
 {
 	template<typename VALUE_TYPE, unsigned int DIMENSION>
-    class TVector : public SmallObjectAllocator<TVector<VALUE_TYPE,DIMENSION>>::Object
+    class TVector 
     {
     public:
         typedef TVector<VALUE_TYPE, DIMENSION> this_type;
@@ -258,6 +252,7 @@ namespace Geometry
     {
         return CrossProduct(a,CrossProduct(b,c));
     }
+
 };
 
 #endif // GEOMETRY_VECTOR_H

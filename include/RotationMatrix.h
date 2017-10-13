@@ -4,7 +4,7 @@
 namespace Geometry
 {
     template<typename VALUE_TYPE>
-    class TRotationMatrix3 : public SmallObjectAllocator<TRotationMatrix3<VALUE_TYPE>>::Object
+    class TRotationMatrix3 
     {
     public:
         typedef VALUE_TYPE value_type;

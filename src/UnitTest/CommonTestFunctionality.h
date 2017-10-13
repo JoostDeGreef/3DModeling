@@ -1,8 +1,7 @@
 #include "gtest/gtest.h"
 using namespace testing;
 
-#include "Aliases.h"
-#include "Vector.h"
+#include "Geometry.h"
 using namespace Geometry;
 using namespace Geometry::Numerics;
 

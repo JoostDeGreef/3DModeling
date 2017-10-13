@@ -135,6 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Aliases.h" />
+    <ClInclude Include="..\include\Geometry.h" />
     <ClInclude Include="..\include\BoundingShape.h" />
     <ClInclude Include="..\include\Contour.h" />
     <ClInclude Include="..\include\Cube.h" />

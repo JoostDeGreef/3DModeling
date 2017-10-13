@@ -6,7 +6,7 @@
 namespace Geometry
 {
 	template<typename POINT>
-	class TLine : public SmallObjectAllocator<TLine<POINT>>::Object
+	class TLine 
 	{
 	public:
 		typedef TLine<POINT> this_type;
@@ -113,6 +113,7 @@ namespace Geometry
             return Intersection(Intersection::Parallel,point_type());
         }
     }
+
 };
 
 

@@ -1,7 +1,5 @@
 #include "CommonTestFunctionality.h"
 
-#include "Contour.h"
-
 class ContourTest : public Test 
 {
 protected:

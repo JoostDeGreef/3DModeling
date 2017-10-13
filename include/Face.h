@@ -1,18 +1,11 @@
 #ifndef GEOMETRY_FACE_H
 #define GEOMETRY_FACE_H 1
 
-#include <functional>
-#include <memory>
-#include <unordered_set>
-
-#include "Aliases.h"
-#include "Edge.h"
-
 namespace Geometry
 {
     /* Face : full edge indexed winged face
      */
-    class Face : public SmallObjectAllocator<Face>::Object
+    class Face
     {
     public:
         typedef Face this_type;
@@ -22,18 +15,19 @@ namespace Geometry
         container_type m_edges;
         NormalPtr m_normal;
         ColorPtr m_color;
-    public:
 
+    protected:
         Face(Patch& patch)
             : m_edges()
             , m_normal()
             , m_patch(patch)
         {}
-
         Face(const this_type &other) = default;
         Face(this_type &&other) = default;
-        Face& operator = (const this_type &other) = default;
-        Face& operator = (this_type &&other) = default;
+
+    public:
+        Face& operator = (const this_type &other) = delete;
+        Face& operator = (this_type &&other) = delete;
 
         ~Face();
 
@@ -46,9 +40,9 @@ namespace Geometry
             m_edges.erase(edge);
         }
         template<typename... Args>
-        static EdgePtr ConstructAndAddEdge(FacePtr& newFace, Args& ... args)
+        static EdgePtr ConstructAndAddEdge(FacePtr& newFace, Args&&... args)
         {
-            EdgePtr edge = Edge::Construct(newFace, args...);
+            EdgePtr edge = Construct<Edge>(newFace, std::forward<Args>(args)...);
             newFace->AddEdge(edge);
             return edge;
         }
@@ -70,23 +64,8 @@ namespace Geometry
 
         size_t GetEdgeCount() const { return m_edges.size(); }
 
-        void ForEachEdge(std::function<void(const EdgePtr& edge)> func) const
-        {
-            const EdgePtr startEdge = GetStartEdge();
-            EdgePtr edge = startEdge;
-            do
-            {
-                func(edge);
-                edge = edge->GetNext();
-            } while (edge != startEdge);
-        }
-        void ForEachVertex(std::function<void(const VertexPtr& vertex)> func) const
-        {
-            ForEachEdge([func](const EdgePtr& edge)
-            {
-                func(edge->GetStartVertex());
-            });
-        }
+        void ForEachEdge(std::function<void(const EdgePtr& edge)> func) const;
+        void ForEachVertex(std::function<void(const VertexPtr& vertex)> func) const;
 
         // Split the face in 2; may add vertices
         std::pair<FacePtr, FacePtr> Split();

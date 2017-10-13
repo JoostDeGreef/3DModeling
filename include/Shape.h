@@ -1,18 +1,9 @@
 #ifndef GEOMETRY_SHAPE_H
 #define GEOMETRY_SHAPE_H 1
 
-#include <functional>
-#include <memory>
-#include <unordered_set>
-
-#include "Aliases.h"
-#include "BoundingShape.h"
-#include "Face.h"
-#include "Hull.h"
-
 namespace Geometry
 {
-    class Shape : public SmallObjectAllocator<Shape>::Object
+    class Shape 
     {
     public:
         typedef std::unordered_set<HullPtr> container_type;
@@ -43,58 +34,26 @@ namespace Geometry
             m_hulls.erase(hull);
         }
         template<typename... Args>
-        HullPtr ConstructAndAddHull(Args&... args)
+        HullPtr ConstructAndAddHull(Args&&... args)
         {
-            HullPtr hull = Hull::Construct(*this,args...);
+            HullPtr hull = Construct<Hull>(*this,std::forward<Args>(args)...);
             AddHull(hull);
             return hull;
         }
 
         const container_type& GetHulls() const { return m_hulls; }
 
-        void ForEachHull(std::function<void(const HullPtr& hull)> func) const
-        {
-            for (const HullPtr& hull : GetHulls()) { func(hull); }
-        }
-        void ForEachPatch(std::function<void(const PatchPtr& patch)> func) const
-        {
-            ForEachHull([func](const HullPtr& hull) { hull->ForEachPatch(func); });
-        }
-        void ForEachFace(std::function<void(const FacePtr& facePtr)> func) const
-        {
-            ForEachHull([func](const HullPtr& hull) { hull->ForEachFace(func); });
-        }
-        void ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const
-        {
-            ForEachHull([func](const HullPtr& hull) { hull->ForEachEdge(func); });
-        }
-        void ForEachVertex(std::function<void(const VertexPtr& vertexPtr)> func) const
-        {
-            std::unordered_set<VertexPtr> vertices;
-            ForEachFace([&vertices](const FacePtr& face) 
-            {
-                face->ForEachVertex([&vertices](const VertexPtr& vertex) 
-                {
-                    vertices.insert(vertex); 
-                }); 
-            });
-            for (const VertexPtr& vertex : vertices)
-            {
-                func(vertex);
-            }
-        }
+        void ForEachHull(std::function<void(const HullPtr& hull)> func) const;
+        void ForEachPatch(std::function<void(const PatchPtr& patch)> func) const;
+        void ForEachFace(std::function<void(const FacePtr& facePtr)> func) const;
+        void ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const;
+        void ForEachVertex(std::function<void(const VertexPtr& vertexPtr)> func) const;
 
         // Split all edges in the shape and connect them; divide all triangles into 4 triangles.
-        void SplitTrianglesIn4()
-        {
-            ForEachHull([](const HullPtr& hull) {hull->SplitTrianglesIn4(); });
-        }
+        void SplitTrianglesIn4();
 
         // Make sure the shape exists solely out of triangles
-        void Triangulate()
-        {
-            ForEachHull([](const HullPtr& hull) {hull->Triangulate(); });
-        }
+        void Triangulate();
 
         const BoundingShape3d& GetBoundingShape() const { return m_boundingShape; }
         void SetBoundingShape(const BoundingShape3d& boundingShape) { m_boundingShape = boundingShape; }

@@ -1,19 +1,12 @@
-#include <vector>
+#include "Geometry.h"
 using namespace std;
-
-#include "Aliases.h"
-#include "Edge.h"
-#include "Face.h"
-#include "Patch.h"
-#include "Shape.h"
-#include "RGBAColor.h"
 using namespace Geometry;
 
 void Edge::Split()
 {
     VertexPtr vertex0 = GetStartVertex();
     VertexPtr vertex2 = GetEndVertex();
-    VertexPtr vertex1 = Vertex::Construct(Middle(*vertex0, *vertex2));
+    VertexPtr vertex1 = Construct<Vertex>(Middle(*vertex0, *vertex2));
     NormalPtr normal0 = GetStartNormal();
     NormalPtr normal2 = GetEndNormal();
     NormalPtr normal1;
@@ -50,7 +43,7 @@ void Edge::Split()
 
     if (normal0 && normal2)
     {
-        normal1 = Normal::Construct(*normal0 + *normal2);
+        normal1 = Construct<Normal>(*normal0 + *normal2);
         normal1->Normalize();
         this1->SetStartNormal(normal1);
         twin1->SetStartNormal(normal1);
@@ -58,12 +51,23 @@ void Edge::Split()
 
     if (color0 && color2)
     {
-        color1 = Color::Construct(color0->Mix(*color2));
+        color1 = Construct<Color>(color0->Mix(*color2));
         this1->SetStartColor(color1);
         twin1->SetStartColor(color1);
     }
 
     thisFace->CheckPointering();
     twinFace->CheckPointering();
+}
+
+void Edge::ForEachEdgeAtStartVertex(std::function<void(EdgePtr&edge)> func) const
+{
+    EdgePtr me = GetTwin()->GetTwin();
+    EdgePtr next = me;
+    do
+    {
+        func(next);
+        next = next->GetTwin()->GetNext();
+    } while (next != me);
 }
 

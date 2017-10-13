@@ -1,9 +1,6 @@
 #ifndef USERINTERFACE_H
 #define USERINTERFACE_H 1
 
-#include "Shape.h"
-#include "Aliases.h"
-
 namespace Viewer
 {
     namespace Internal

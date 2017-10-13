@@ -9,14 +9,6 @@ namespace Geometry
     {
     public:
         Cube();
-
-        template<typename... Args>
-        static std::shared_ptr<Shape> Construct(Args&... args)
-        {
-            SmallObjectAllocator<Cube> allocator;
-            return std::allocate_shared<Cube>(allocator, args...);
-        }
-
     };
 };
 

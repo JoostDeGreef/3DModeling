@@ -1,16 +1,5 @@
-#include <algorithm>
-#include <cassert>
-#include <map>
-#include <stack>
-#include <unordered_map>
+#include "Geometry.h"
 using namespace std;
-
-#include "Aliases.h"
-#include "RGBAColor.h"
-#include "Face.h"
-#include "Patch.h"
-#include "Hull.h"
-#include "Shape.h"
 using namespace Geometry;
 
 HullPtr Hull::Copy(Shape& newShape) const
@@ -52,19 +41,19 @@ HullPtr Hull::Copy(Shape& newShape) const
     // duplicate shallow structures
     for (auto& vertexMap : vertices)
     {
-        vertexMap.second = vertexMap.first == nullptr ? nullptr : Vertex::Construct(*vertexMap.first);
+        vertexMap.second = vertexMap.first == nullptr ? nullptr : Construct<Vertex>(*vertexMap.first);
     }
     for (auto& normalMap : normals)
     {
-        normalMap.second = normalMap.first == nullptr ? nullptr : Normal::Construct(*normalMap.first);
+        normalMap.second = normalMap.first == nullptr ? nullptr : Construct<Normal>(*normalMap.first);
     }
     for (auto& colorMap : colors)
     {
-        colorMap.second = colorMap.first == nullptr ? nullptr : Color::Construct(*colorMap.first);
+        colorMap.second = colorMap.first == nullptr ? nullptr : Construct<Color>(*colorMap.first);
     }
     for (auto& textureCoordinateMap : textureCoordinates)
     {
-        textureCoordinateMap.second = textureCoordinateMap.first == nullptr ? nullptr : TextureCoord::Construct(*textureCoordinateMap.first);
+        textureCoordinateMap.second = textureCoordinateMap.first == nullptr ? nullptr : Construct<TextureCoord>(*textureCoordinateMap.first);
     }
     // recreate complex structures
     for (auto& patchMap : patches)
@@ -87,7 +76,7 @@ HullPtr Hull::Copy(Shape& newShape) const
         assert(v != nullptr);
         FacePtr& f = faces[edgeMap.first->GetFace()];
         assert(f != nullptr);
-        edgeMap.second = Edge::Construct(f,v);
+        edgeMap.second = Construct<Edge>(f,v);
         f->AddEdge(edgeMap.second);
     }
     for (auto& edgeMap : edges)
@@ -219,4 +208,26 @@ void Hull::Triangulate()
     {
         face->Triangulate();
     }
+}
+
+void Hull::ForEachPatch(std::function<void(const PatchPtr& patch)> func) const
+{
+    for (const PatchPtr& patch : m_patches) 
+    { 
+        func(patch); 
+    }
+}
+void Hull::ForEachFace(std::function<void(const FacePtr& facePtr)> func) const
+{
+    ForEachPatch([func](const PatchPtr& patch) 
+    { 
+        patch->ForEachFace(func); 
+    });
+}
+void Hull::ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const
+{
+    ForEachFace([func](const FacePtr& face) 
+    { 
+        face->ForEachEdge(func); 
+    });
 }

@@ -1,13 +1,11 @@
 #ifndef GEOMETRY_ALIASES_H
 #define GEOMETRY_ALIASES_H 1
 
-#include <memory>
-
 namespace Geometry
 {
     template<typename VALUE_TYPE, unsigned int DIMENSION> class TVector;
 
-    template<typename VALUE_TYPE> 
+    template<typename VALUE_TYPE>
     using TVector3 = TVector<VALUE_TYPE, 3>;
     using Vector3d = TVector3<double>;
     using Vector3f = TVector3<float>;
@@ -21,12 +19,15 @@ namespace Geometry
     using Vertex = Vector3d;
     using VertexPtr = std::shared_ptr<Vertex>;
 
-    template<typename POINT_TYPE> class TLine;
+    using Normal = Vector3d;
+    using NormalPtr = std::shared_ptr<Normal>;
+
+    template<typename POINT> class TLine;
     using Line2d = TLine<Vector2d>;
     using Line3d = TLine<Vector3d>;
 
-    using Normal = Vector3d;
-    using NormalPtr = std::shared_ptr<Normal>;
+    template<typename VALUE_TYPE> class TQuaternion;
+    using Quat = TQuaternion<double>;
 
     class Edge;
     using EdgePtr = std::shared_ptr<Edge>;
@@ -48,18 +49,15 @@ namespace Geometry
 
     using MousePos = Vector2i;
 
-    template<typename VALUE_TYPE> class TQuaternion;
-    using Quat = TQuaternion<double>;
+    template<typename VALUE_TYPE> class TRGBAColor;
+    using RGBAColord = TRGBAColor<double>;
+    using RGBAColorf = TRGBAColor<float>;
+    using RGBAColorb = TRGBAColor<unsigned char>;
 
     template<typename VALUE_TYPE> class TRGBColor;
     using RGBColord = TRGBColor<double>;
     using RGBColorf = TRGBColor<float>;
     using RGBColorb = TRGBColor<unsigned char>;
-
-    template<typename VALUE_TYPE> class TRGBAColor;
-    using RGBAColord = TRGBAColor<double>;
-    using RGBAColorf = TRGBAColor<float>;
-    using RGBAColorb = TRGBAColor<unsigned char>;
 
     using Color = RGBAColorf;
     using ColorPtr = std::shared_ptr<Color>;

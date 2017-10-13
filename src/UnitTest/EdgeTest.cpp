@@ -1,8 +1,5 @@
 #include "CommonTestFunctionality.h"
 
-#include "Edge.h"
-#include "Shape.h"
-
 class EdgeTest : public Test 
 {
 protected:
@@ -18,15 +15,15 @@ protected:
 TEST_F(EdgeTest, Split) 
 {
     Shape shape;
-    HullPtr hull = Hull::Construct(shape);
+    HullPtr hull = Construct<Hull>(shape);
     shape.AddHull(hull);
-    PatchPtr patch = Patch::Construct(*hull);
+    PatchPtr patch = Construct<Patch>(*hull);
     hull->AddPatch(patch);
     FacePtr f_top = patch->ConstructAndAddFace();
     FacePtr f_bottom = patch->ConstructAndAddFace();
-    VertexPtr v0 = Vertex::Construct(0, 0, 0);
-    VertexPtr v1 = Vertex::Construct(1, 0, 0);
-    VertexPtr v2 = Vertex::Construct(0, 1, 0);
+    VertexPtr v0 = Construct<Vertex>(0, 0, 0);
+    VertexPtr v1 = Construct<Vertex>(1, 0, 0);
+    VertexPtr v2 = Construct<Vertex>(0, 1, 0);
     EdgePtr e0t = Face::ConstructAndAddEdge(f_top,v0);
     EdgePtr e1t = Face::ConstructAndAddEdge(f_top,v1);
     EdgePtr e2t = Face::ConstructAndAddEdge(f_top,v2);

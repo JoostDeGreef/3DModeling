@@ -1,13 +1,10 @@
 #ifndef GEOMETRY_QUATERNION_H
 #define GEOMETRY_QUATERNION_H 1
 
-#include "Numerics.h"
-#include "Vector.h"
-
 namespace Geometry
 {
     template<typename VALUE_TYPE>
-    class TQuaternion : public SmallObjectAllocator<TQuaternion<VALUE_TYPE>>::Object
+    class TQuaternion 
     {
     public:
         typedef TQuaternion<VALUE_TYPE> this_type;
@@ -312,8 +309,6 @@ namespace Geometry
     {
         return q * value;
     }
-
-    using Quat = TQuaternion<double>;
 };
 
 #endif // GEOMETRY_QUATERNION_H

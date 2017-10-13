@@ -1,16 +1,11 @@
 #ifndef GEOMETRY_HULL_H
 #define GEOMETRY_HULL_H 1
 
-#include <unordered_set>
-
-#include "Aliases.h"
-#include "Patch.h"
-
 namespace Geometry
 {
     class Shape;
 
-    class Hull : public SmallObjectAllocator<Hull>::Object
+    class Hull 
     {
     public:
         typedef std::unordered_set<PatchPtr> container_type;
@@ -27,7 +22,6 @@ namespace Geometry
         Orientation m_orientation;
         container_type m_patches;
         BoundingShape3d m_boundingShape;
-    public:
 
         Hull(Shape& shape)
             : m_shape(shape)
@@ -37,8 +31,9 @@ namespace Geometry
         // shallow copy only!
         Hull(const this_type &other) = default;
         Hull(this_type &&other) = default;
-        Hull& operator = (const this_type &other) = default;
-        Hull& operator = (this_type &&other) = default;
+    public:
+        Hull& operator = (const this_type &other) = delete;
+        Hull& operator = (this_type &&other) = delete;
 
         ~Hull()
         {}
@@ -55,9 +50,9 @@ namespace Geometry
             m_patches.erase(patch);
         }
         template<typename... Args>
-        PatchPtr ConstructAndAddPatch(Args&... args)
+        PatchPtr ConstructAndAddPatch(Args&&... args)
         {
-            PatchPtr patch = Patch::Construct(*this, args...);
+            PatchPtr patch = Construct<Patch>(*this, std::forward<Args>(args)...);
             AddPatch(patch);
             return patch;
         }
@@ -69,18 +64,9 @@ namespace Geometry
         BoundingShape3d GetBoundingShape() const { return m_boundingShape; }
         void SetBoundingShape(const BoundingShape3d & boundingShape) { m_boundingShape = boundingShape; }
 
-        void ForEachPatch(std::function<void(const PatchPtr& patch)> func) const
-        {
-            for (const PatchPtr& patch : m_patches) { func(patch); }
-        }
-        void ForEachFace(std::function<void(const FacePtr& facePtr)> func) const
-        {
-            ForEachPatch([func](const PatchPtr& patch) { patch->ForEachFace(func); });
-        }
-        void ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const
-        {
-            ForEachFace([func](const FacePtr& face) { face->ForEachEdge(func); });
-        }
+        void ForEachPatch(std::function<void(const PatchPtr& patch)> func) const;
+        void ForEachFace(std::function<void(const FacePtr& facePtr)> func) const;
+        void ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const;
 
         // Get all patches in the hull
         const container_type& GetPatches() const { return m_patches; }

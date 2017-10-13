@@ -1,10 +1,5 @@
-#include <algorithm>
-#include <cassert>
-#include <map>
-#include <stack>
+#include "Geometry.h"
 using namespace std;
-
-#include "Shape.h"
 using namespace Geometry;
 
 Shape::Shape()
@@ -34,6 +29,70 @@ Shape::Shape(this_type &&other)
 Shape::~Shape()
 {
     Clear();
+}
+
+void Shape::ForEachHull(std::function<void(const HullPtr& hull)> func) const
+{
+    for (const HullPtr& hull : GetHulls()) 
+    { 
+        func(hull); 
+    }
+}
+
+void Shape::ForEachPatch(std::function<void(const PatchPtr& patch)> func) const
+{
+    ForEachHull([func](const HullPtr& hull) 
+    { 
+        hull->ForEachPatch(func); 
+    });
+}
+
+void Shape::ForEachFace(std::function<void(const FacePtr& facePtr)> func) const
+{
+    ForEachHull([func](const HullPtr& hull) 
+    { 
+        hull->ForEachFace(func); 
+    });
+}
+
+void Shape::ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const
+{
+    ForEachHull([func](const HullPtr& hull) 
+    { 
+        hull->ForEachEdge(func); 
+    });
+}
+
+void Shape::ForEachVertex(std::function<void(const VertexPtr& vertexPtr)> func) const
+{
+    std::unordered_set<VertexPtr> vertices;
+    ForEachFace([&vertices](const FacePtr& face)
+    {
+        face->ForEachVertex([&vertices](const VertexPtr& vertex)
+        {
+            vertices.insert(vertex);
+        });
+    });
+    for (const VertexPtr& vertex : vertices)
+    {
+        func(vertex);
+    }
+}
+
+void Shape::SplitTrianglesIn4()
+{
+    ForEachHull([](const HullPtr& hull) 
+    {
+        hull->SplitTrianglesIn4(); 
+    });
+}
+
+void Shape::Triangulate()
+{
+    ForEachHull([](const HullPtr& hull) 
+    {
+        hull->Triangulate(); 
+    });
 }
 
 

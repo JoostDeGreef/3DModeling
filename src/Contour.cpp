@@ -1,10 +1,7 @@
-#include <cassert>
-#include <algorithm>
 
 using namespace std;
 
-#include "Contour.h"
-#include "Line.h"
+#include "Geometry.h"
 
 using namespace Geometry;
 

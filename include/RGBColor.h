@@ -4,7 +4,7 @@
 namespace Geometry
 {
     template<typename VALUE_TYPE>
-    class TRGBColor : public SmallObjectAllocator<TRGBColor<VALUE_TYPE>>::Object
+    class TRGBColor 
     {
     public:
         typedef TRGBColor<VALUE_TYPE> this_type;
@@ -130,8 +130,6 @@ namespace Geometry
         };
         using Value = TValue<value_type>;
     };
-
-
 }
 
 #endif // GEOMETRY_RGBCOLOR_H

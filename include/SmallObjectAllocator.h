@@ -1,10 +1,6 @@
 #ifndef SMALL_OBJECT_POOL_ALLOCATOR_H
 #define SMALL_OBJECT_POOL_ALLOCATOR_H 1
 
-#include <deque>
-#include <vector>
-#include <mutex>
-
 namespace Geometry
 {
     template<typename T>
@@ -29,8 +25,8 @@ namespace Geometry
             else
             {
                 if (auto p = reinterpret_cast<T*>(new unsigned char[n * sizeof(T)])) return p;
+                throw std::bad_alloc();
             }
-            throw std::bad_alloc();
         }
 
         void deallocate(T* p, std::size_t n) noexcept
@@ -41,20 +37,9 @@ namespace Geometry
             }
             else
             {
-                delete[] reinterpret_cast<char*>(p);
+                delete [] reinterpret_cast<char*>(p);
             }
         }
-
-        class Object
-        {
-        public:
-            template<typename... Args>
-            static std::shared_ptr<T> Construct(Args&&... args)
-            {
-                SmallObjectAllocator<T> allocator;
-                return std::allocate_shared<T>(allocator, std::forward<Args>(args)...);
-            }
-        };
 
     private:
         class GlobalPool
@@ -62,6 +47,11 @@ namespace Geometry
         public:
             static const size_t block_size = 1024;
             typedef std::array<unsigned char, block_size * sizeof(T)> block;
+
+            GlobalPool()
+            {
+                m_available.reserve(block_size * 2);
+            }
 
             void allocate_new_block(std::vector<T*>& res)
             {
@@ -120,6 +110,10 @@ namespace Geometry
         class ThreadLocalPool
         {
         public:
+            ThreadLocalPool()
+            {
+                m_available.reserve(GlobalPool::block_size * 2);
+            }
             ~ThreadLocalPool()
             {
                 GetPool().return_for_reuse(m_available);
@@ -150,7 +144,7 @@ namespace Geometry
             }
         }; // ThreadLocalPool
 
-        ThreadLocalPool& GetPool()
+        static ThreadLocalPool& GetPool()
         {
             thread_local static ThreadLocalPool pool;
             return pool;
@@ -158,13 +152,37 @@ namespace Geometry
 
     };
 
-
     template <class T, class U>
     bool operator==(const SmallObjectAllocator<T>&, const SmallObjectAllocator<U>&) { return true; }
 
     template <class T, class U>
     bool operator!=(const SmallObjectAllocator<T>&, const SmallObjectAllocator<U>&) { return false; }
 
+    /* Wrapper to construct classes with protected constructors
+    */
+    template <class T>
+    class SmallObjectPtr : public T
+    {
+    public:
+        template <typename... Args>
+        SmallObjectPtr(Args&&... args)
+            : T(std::forward<Args>(args)...)
+        {}
+
+        template <typename... Args>
+        static std::shared_ptr<T> Construct(Args&&... args)
+        {
+            return std::allocate_shared<SmallObjectPtr<T>>(SmallObjectAllocator<SmallObjectPtr<T>>(), std::forward<Args>(args)...);
+        }
+    };
+
+    /* Construct a shared pointer using the SmallObjectAllocator
+    */
+    template <class T,typename... Args>
+    std::shared_ptr<T> Construct(Args&&... args)
+    {
+        return SmallObjectPtr<T>::Construct(std::forward<Args>(args)...);
+    }
 } // namespace Geometry
 
 #endif // SMALL_OBJECT_POOL_ALLOCATOR_H

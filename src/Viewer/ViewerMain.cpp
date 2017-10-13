@@ -1,6 +1,6 @@
 #include <cstdlib>
 
-#include "Dodecahedron.h"
+#include "Geometry.h"
 using namespace Geometry;
 
 #include "UserInterface.h"
@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    ShapePtr s = Dodecahedron::Construct(12);
+    ShapePtr s = Construct<Dodecahedron>(12);
     ui.AddShape(s);
 
     ui.Run();

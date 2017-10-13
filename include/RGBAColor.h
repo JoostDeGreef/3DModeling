@@ -1,15 +1,10 @@
 #ifndef GEOMETRY_RGBACOLOR_H
 #define GEOMETRY_RGBACOLOR_H 1
 
-#include <memory>
-
-#include "Aliases.h"
-#include "SmallObjectAllocator.h"
-
 namespace Geometry
 {
     template<typename VALUE_TYPE>
-    class TRGBAColor : public SmallObjectAllocator<TRGBAColor<VALUE_TYPE>>::Object
+    class TRGBAColor 
     {
     public:
         typedef TRGBAColor<VALUE_TYPE> this_type;
@@ -145,8 +140,8 @@ namespace Geometry
             static           unsigned char FromByte(const unsigned int value) { return value; }
         };
         using Value = TValue<value_type>;
-
     };
+
 }
 
 #endif // GEOMETRY_RGBACOLOR_H

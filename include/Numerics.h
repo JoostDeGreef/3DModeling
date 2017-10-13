@@ -1,8 +1,6 @@
 #ifndef GEOMETRY_NUMERICS_H
 #define GEOMETRY_NUMERICS_H 1
 
-#include <limits>
-
 namespace Geometry
 {
     namespace Numerics

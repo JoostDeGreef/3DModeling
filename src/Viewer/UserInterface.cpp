@@ -14,6 +14,7 @@ using namespace std::chrono_literals;
 #include "GLAD/glad.h"
 #include "GLFW/glfw3.h"
 
+#include "Geometry.h"
 #include "GLWrappers.h"
 #include "UserInterface.h"
 using namespace Geometry;

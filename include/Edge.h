@@ -1,12 +1,6 @@
 #ifndef GEOMETRY_EDGE_H
 #define GEOMETRY_EDGE_H 1
 
-#include <functional>
-
-#include "Aliases.h"
-#include "Operations.h"
-#include "SmallObjectAllocator.h"
-
 namespace Geometry
 {
     /* Edge : full edge, linked using face+index
@@ -17,8 +11,10 @@ namespace Geometry
      *       |
      *     start
      * 
+     * The constructors of this class are protected to force usage of 'Construct<Edge>(...)'
+     *
      */
-    class Edge : public SmallObjectAllocator<Edge>::Object
+    class Edge
     {
     private:
         VertexPtr m_startVertex;
@@ -32,6 +28,7 @@ namespace Geometry
     public:
         typedef Edge this_type;
 
+    protected:
         Edge()
             : m_startVertex()
             , m_startNormal()
@@ -62,14 +59,15 @@ namespace Geometry
             , m_startColor()
             , m_startTextureCoord()
         {}
+        Edge(const this_type &other) = default;
+        Edge(this_type &&other) = default;
 
+    public:
         ~Edge()
         {}
 
-        Edge(const this_type &other) = default;
-        Edge(this_type &&other) = default;
-        Edge& operator = (const this_type &other) = default;
-        Edge& operator = (this_type &&other) = default;
+        Edge& operator = (const this_type &other) = delete;
+        Edge& operator = (this_type &&other) = delete;
 
         decltype(auto) GetTwin() const { return m_twin; }
         void SetTwin(const decltype(m_twin)& twin) { m_twin = twin; }
@@ -102,23 +100,11 @@ namespace Geometry
 
         void Split();
 
-        void ForEachEdgeAtStartVertex(std::function<void(EdgePtr& edge)> func) const
-        {
-            EdgePtr me = GetTwin()->GetTwin();
-            EdgePtr next = me;
-            do
-            {
-                func(next);
-                next = next->GetTwin()->GetNext();
-            } 
-            while (next != me);
-        }
+        void ForEachEdgeAtStartVertex(std::function<void(EdgePtr& edge)> func) const;
 
-        double GetLength() const
-        {
-            return Geometry::Distance(*GetStartVertex(), *GetEndVertex());
-        }
+        double GetLength() const { return Geometry::Distance(*GetStartVertex(), *GetEndVertex()); }
     };
+
 }
 
 #endif // GEOMETRY_EDGE_H

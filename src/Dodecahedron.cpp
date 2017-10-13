@@ -1,11 +1,5 @@
-#include <vector>
-#include <memory>
-#include <cassert>
+#include "Geometry.h"
 using namespace std;
-
-#include "Dodecahedron.h"
-#include "Quaternion.h"
-#include "RotationMatrix.h"
 using namespace Geometry;
 
 Dodecahedron::Dodecahedron(const int initialFaceCount)
@@ -16,26 +10,26 @@ Dodecahedron::Dodecahedron(const int initialFaceCount)
     const double s = 1 / sqrt(3.0);
 
     // calculate all vertices
-    VertexPtr A = Vertex::Construct(s * t, s * 0, s * ti);
-    VertexPtr B = Vertex::Construct(s *-t, s * 0, s * ti);
-    VertexPtr C = Vertex::Construct(s *-t, s * 0, s *-ti);
-    VertexPtr D = Vertex::Construct(s * t, s * 0, s *-ti);
-    VertexPtr E = Vertex::Construct(s * ti, s * t, s * 0);
-    VertexPtr F = Vertex::Construct(s * ti, s *-t, s * 0);
-    VertexPtr G = Vertex::Construct(s *-ti, s *-t, s * 0);
-    VertexPtr H = Vertex::Construct(s *-ti, s * t, s * 0);
-    VertexPtr I = Vertex::Construct(s * 0, s * ti, s * t);
-    VertexPtr J = Vertex::Construct(s * 0, s * ti, s *-t);
-    VertexPtr K = Vertex::Construct(s * 0, s *-ti, s *-t);
-    VertexPtr L = Vertex::Construct(s * 0, s *-ti, s * t);
-    VertexPtr M = Vertex::Construct(s * 1, s * 1, s * 1);
-    VertexPtr N = Vertex::Construct(s * 1, s *-1, s * 1);
-    VertexPtr O = Vertex::Construct(s *-1, s *-1, s * 1);
-    VertexPtr P = Vertex::Construct(s *-1, s * 1, s * 1);
-    VertexPtr Q = Vertex::Construct(s *-1, s * 1, s *-1);
-    VertexPtr R = Vertex::Construct(s * 1, s * 1, s *-1);
-    VertexPtr S = Vertex::Construct(s * 1, s *-1, s *-1);
-    VertexPtr T = Vertex::Construct(s *-1, s *-1, s *-1);
+    VertexPtr A = Construct<Vertex>(s * t, s * 0, s * ti);
+    VertexPtr B = Construct<Vertex>(s *-t, s * 0, s * ti);
+    VertexPtr C = Construct<Vertex>(s *-t, s * 0, s *-ti);
+    VertexPtr D = Construct<Vertex>(s * t, s * 0, s *-ti);
+    VertexPtr E = Construct<Vertex>(s * ti, s * t, s * 0);
+    VertexPtr F = Construct<Vertex>(s * ti, s *-t, s * 0);
+    VertexPtr G = Construct<Vertex>(s *-ti, s *-t, s * 0);
+    VertexPtr H = Construct<Vertex>(s *-ti, s * t, s * 0);
+    VertexPtr I = Construct<Vertex>(s * 0, s * ti, s * t);
+    VertexPtr J = Construct<Vertex>(s * 0, s * ti, s *-t);
+    VertexPtr K = Construct<Vertex>(s * 0, s *-ti, s *-t);
+    VertexPtr L = Construct<Vertex>(s * 0, s *-ti, s * t);
+    VertexPtr M = Construct<Vertex>(s * 1, s * 1, s * 1);
+    VertexPtr N = Construct<Vertex>(s * 1, s *-1, s * 1);
+    VertexPtr O = Construct<Vertex>(s *-1, s *-1, s * 1);
+    VertexPtr P = Construct<Vertex>(s *-1, s * 1, s * 1);
+    VertexPtr Q = Construct<Vertex>(s *-1, s * 1, s *-1);
+    VertexPtr R = Construct<Vertex>(s * 1, s * 1, s *-1);
+    VertexPtr S = Construct<Vertex>(s * 1, s *-1, s *-1);
+    VertexPtr T = Construct<Vertex>(s *-1, s *-1, s *-1);
     vector<VertexPtr> vertices({ A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T });
 
     // normalize all vertices, just to be sure
@@ -161,7 +155,7 @@ void Dodecahedron::InitialRefinement()
         vertices.push_back(vertices.front());
         edges.push_back(edges.front());
 
-        VertexPtr centerPtr = Vertex::Construct(center);
+        VertexPtr centerPtr = Construct<Vertex>(center);
         std::vector<FacePtr> newFaces({ patch.ConstructAndAddFace(), patch.ConstructAndAddFace(), patch.ConstructAndAddFace(), patch.ConstructAndAddFace(), patch.ConstructAndAddFace() });
         for (size_t i = 0; i < 5; ++i)
         {
@@ -243,7 +237,7 @@ void Dodecahedron::Refine(int initialFaceCount)
         // give all edges at this vertex the same normal
         if (!edge->GetStartNormal())
         {
-            NormalPtr normal = Normal::Construct(*edge->GetStartVertex());
+            NormalPtr normal = Construct<Normal>(*edge->GetStartVertex());
             edge->ForEachEdgeAtStartVertex([normal](const EdgePtr& edge) {edge->SetStartNormal(normal); });
         }
     });

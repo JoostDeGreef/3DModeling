@@ -1,20 +1,18 @@
-#include <vector>
+#include "Geometry.h"
 using namespace std;
-
-#include "Cube.h"
 using namespace Geometry;
 
 Cube::Cube()
 {
     // calculate all vertices
-    VertexPtr A = Vertex::Construct(-1,-1, 1);
-    VertexPtr B = Vertex::Construct( 1,-1, 1);
-    VertexPtr C = Vertex::Construct( 1, 1, 1);
-    VertexPtr D = Vertex::Construct(-1, 1, 1);
-    VertexPtr E = Vertex::Construct(-1,-1,-1);
-    VertexPtr F = Vertex::Construct(-1, 1,-1);
-    VertexPtr G = Vertex::Construct( 1, 1,-1);
-    VertexPtr H = Vertex::Construct( 1,-1,-1);
+    VertexPtr A = Construct<Vertex>(-1,-1, 1);
+    VertexPtr B = Construct<Vertex>( 1,-1, 1);
+    VertexPtr C = Construct<Vertex>( 1, 1, 1);
+    VertexPtr D = Construct<Vertex>(-1, 1, 1);
+    VertexPtr E = Construct<Vertex>(-1,-1,-1);
+    VertexPtr F = Construct<Vertex>(-1, 1,-1);
+    VertexPtr G = Construct<Vertex>( 1, 1,-1);
+    VertexPtr H = Construct<Vertex>( 1,-1,-1);
     vector<VertexPtr> vertices({ A,B,C,D,E,F,G,H });
 
     // create the hull

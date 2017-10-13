@@ -1,12 +1,6 @@
 #ifndef GEOMETRY_CONTOUR_H
 #define GEOMETRY_CONTOUR_H 1
 
-#include <functional>
-#include <vector>
-
-#include "Aliases.h"
-#include "Vector.h"
-
 namespace Geometry
 {
     /* contour: line shape in the x,y plane
@@ -16,7 +10,7 @@ namespace Geometry
     *   - for now, selfintersections are not detected and/or corrected.
     *
     */
-    class Contour : public SmallObjectAllocator<Contour>::Object
+    class Contour 
     {
     public:
         Contour();

@@ -17,8 +17,11 @@
 #include <unordered_set>
 #include <vector>
 
+#include "boost/format.hpp"
+
 #include "Aliases.h"
 
+#include "SQLiteDB.h"
 #include "Operations.h"
 #include "Numerics.h"
 #include "MiniBall.h"

@@ -62,6 +62,9 @@ namespace Geometry
         void Translate(const Vector3d& translation);
         //void Rotate(const Vector3d& origin, )
 
+        // Store/Retrieve shape to db.
+        void Store(SQLite::DB& db) const;
+        void Retrieve(SQLite::DB& db);
     protected:
         void Clear();
     };

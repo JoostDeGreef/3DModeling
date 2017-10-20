@@ -15,6 +15,15 @@
     <Filter Include="Source Files\Shapes">
       <UniqueIdentifier>{23f6d2ed-fdda-4c72-bf40-b0d273de6787}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SQLiteDB">
+      <UniqueIdentifier>{cb158dc6-63f1-4b3c-a547-0463a6ae83e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SQLiteDB">
+      <UniqueIdentifier>{5c4de740-f6fd-42e7-9940-f031a2eaafca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\SQLiteDB\internal">
+      <UniqueIdentifier>{bf5597af-110e-41f6-b850-545336993dee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\BoundingShape.h">
@@ -80,6 +89,21 @@
     <ClInclude Include="..\include\Aliases.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\SQLiteDB.h">
+      <Filter>Header Files\SQLiteDB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SQLiteDB\SQLiteDBState.h">
+      <Filter>Header Files\SQLiteDB\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SQLiteDB\SQLiteQueryState.h">
+      <Filter>Header Files\SQLiteDB\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SQLiteDB\SQLiteStatementState.h">
+      <Filter>Header Files\SQLiteDB\internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SQLiteDB\SQLiteSupport.h">
+      <Filter>Header Files\SQLiteDB\internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Edge.cpp">
@@ -105,6 +129,15 @@
     </ClCompile>
     <ClCompile Include="..\src\Contour.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLiteDB\SQLiteDB.cpp">
+      <Filter>Source Files\SQLiteDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLiteDB\SQLiteQuery.cpp">
+      <Filter>Source Files\SQLiteDB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SQLiteDB\SQLiteStatement.cpp">
+      <Filter>Source Files\SQLiteDB</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

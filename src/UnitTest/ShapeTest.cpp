@@ -1,4 +1,5 @@
 #include "CommonTestFunctionality.h"
+#include "SQLiteDB.h"
 
 class ShapeTest : public Test 
 {
@@ -55,42 +56,23 @@ TEST_F(ShapeTest, SplitTrianglesIn4)
     EXPECT_EQ(48, FaceCount(shape));
 }
 
-TEST_F(ShapeTest, SerializeBlob)
-{
-//    ShapePtr::Shared shape0 = Dodecahedron::Construct(12);
-////    ShapePtr::Shared shape0 = Cube::Construct();
-//    auto s = shape0->Serialize();
-//    ShapePtr::Shared shape1 = Shape::Construct();
-//    shape1->Deserialize(s);
-//    int count0 = 0;
-//    int count1 = 0;
-//    shape0->ForEachVertex([&count0](const VertexPtr::Raw& vertex) { count0++; });
-//    shape1->ForEachVertex([&count1](const VertexPtr::Raw& vertex) { count1++; });
-//    ASSERT_EQ(count0,count1);
-//    count0 = 0;
-//    count1 = 0;
-//    shape0->ForEachFace([&count0](const FacePtr::Raw& face) { count0++; });
-//    shape1->ForEachFace([&count1](const FacePtr::Raw& face) { count1++; });
-//    ASSERT_EQ(count0, count1);
-}
 
-TEST_F(ShapeTest, SerializeDB)
+TEST_F(ShapeTest, StoreRetrieve)
 {
-    ////ShapePtr::Shared shape0 = Dodecahedron::Construct(12);
-    //ShapePtr::Shared shape0 = Cube::Construct();
-    //Common::DB db;
-    //db.open(":memory:");
-    //shape0->Store(db);
-    //ShapePtr::Shared shape1 = Shape::Construct();
+    ShapePtr shape0 = Construct<Cube>();
+    SQLite::DB db;
+    db.Open(":memory:");
+    shape0->Store(db);
+    //ShapePtr shape1 = Construct<Shape>();
     //shape1->Retrieve(db);
     //int count0 = 0;
     //int count1 = 0;
-    //shape0->ForEachVertex([&count0](const VertexPtr::Raw& vertex) { count0++; });
-    //shape1->ForEachVertex([&count1](const VertexPtr::Raw& vertex) { count1++; });
+    //shape0->ForEachVertex([&count0](const VertexPtr& vertex) { count0++; });
+    //shape1->ForEachVertex([&count1](const VertexPtr& vertex) { count1++; });
     //ASSERT_EQ(count0, count1);
     //count0 = 0;
     //count1 = 0;
-    //shape0->ForEachFace([&count0](const FacePtr::Raw& face) { count0++; });
-    //shape1->ForEachFace([&count1](const FacePtr::Raw& face) { count1++; });
+    //shape0->ForEachFace([&count0](const FacePtr& face) { count0++; });
+    //shape1->ForEachFace([&count1](const FacePtr& face) { count1++; });
     //ASSERT_EQ(count0, count1);
 }

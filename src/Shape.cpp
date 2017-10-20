@@ -2,6 +2,11 @@
 using namespace std;
 using namespace Geometry;
 
+namespace
+{
+    size_t SerializationVersion = 1;
+}
+
 Shape::Shape()
     : m_hulls()
     , m_boundingShape()
@@ -1115,4 +1120,54 @@ void Shape::Translate(const Vector3d& translation)
     {
         (*vertex) += translation;
     });
+}
+
+void Shape::Store(SQLite::DB& db) const
+{
+    std::map<HullPtr, size_t> hulls;
+    std::map<EdgePtr, size_t> edges;
+    std::map<VertexPtr, size_t> vertices;
+    std::map<NormalPtr, size_t> normals;
+    std::map<TextureCoordPtr, size_t> textureCoords;
+    std::map<FacePtr, size_t> faces;
+    std::map<PatchPtr, size_t> patches;
+    
+    hulls.emplace(nullptr, 0);
+    patches.emplace(nullptr, 0);
+    normals.emplace(nullptr, 0);
+    faces.emplace(nullptr, 0);
+    edges.emplace(nullptr, 0);
+    vertices.emplace(nullptr, 0);
+    textureCoords.emplace(nullptr, 0);
+
+    ForEachHull([&](const HullPtr& hull)
+    {
+        hulls.emplace(hull, hulls.size());
+        hull->ForEachPatch([&](const PatchPtr& patch)
+        {
+            patches.emplace(patch, patches.size());
+            patch->ForEachFace([&](const FacePtr& face)
+            {
+                normals.emplace(face->GetNormal(), 0);
+                faces.emplace(face, faces.size());
+                face->ForEachEdge([&](const EdgePtr& edge)
+                {
+                    edges.emplace(edge, edges.size());
+                    vertices.emplace(edge->GetStartVertex(), vertices.size());
+                    normals.emplace(edge->GetStartNormal(), normals.size());
+                    textureCoords.emplace(edge->GetStartTextureCoord(), textureCoords.size());
+                });
+            });
+        });
+    });
+
+
+    db.ExecDML("CREATE TABLE HEADER(Key TEXT PRIMARY KEY,Value) WITHOUT ROWID");
+    db.ExecDML(("INSERT INTO HEADER(Key,Value) VALUES('Version'," + std::to_string(SerializationVersion) + ")").c_str());
+
+}
+
+void Shape::Retrieve(SQLite::DB& db)
+{
+    Clear();
 }

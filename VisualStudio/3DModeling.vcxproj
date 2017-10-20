@@ -70,22 +70,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)..\..\lib\</OutDir>
+    <OutDir>$(SolutionDir)..\lib\</OutDir>
     <IntDir>$(SolutionDir)..\tmp\$(Configuration).$(Platform).$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName).$(Configuration).$(Platform)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)..\..\lib\</OutDir>
+    <OutDir>$(SolutionDir)..\lib\</OutDir>
     <IntDir>$(SolutionDir)..\tmp\$(Configuration).$(Platform).$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName).$(Configuration).$(Platform)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)..\..\lib\</OutDir>
+    <OutDir>$(SolutionDir)..\lib\</OutDir>
     <IntDir>$(SolutionDir)..\tmp\$(Configuration).$(Platform).$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName).$(Configuration).$(Platform)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)..\..\lib\</OutDir>
+    <OutDir>$(SolutionDir)..\lib\</OutDir>
     <IntDir>$(SolutionDir)..\tmp\$(Configuration).$(Platform).$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName).$(Configuration).$(Platform)</TargetName>
   </PropertyGroup>
@@ -94,7 +94,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(solutiondir)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -102,7 +102,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(solutiondir)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -112,7 +112,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(solutiondir)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -126,7 +126,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(solutiondir)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -154,7 +154,12 @@
     <ClInclude Include="..\include\RotationMatrix.h" />
     <ClInclude Include="..\include\Shape.h" />
     <ClInclude Include="..\include\SmallObjectAllocator.h" />
+    <ClInclude Include="..\include\SQLiteDB.h" />
     <ClInclude Include="..\include\Vector.h" />
+    <ClInclude Include="..\src\SQLiteDB\SQLiteDBState.h" />
+    <ClInclude Include="..\src\SQLiteDB\SQLiteQueryState.h" />
+    <ClInclude Include="..\src\SQLiteDB\SQLiteStatementState.h" />
+    <ClInclude Include="..\src\SQLiteDB\SQLiteSupport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Contour.cpp" />
@@ -175,6 +180,9 @@
     <ClCompile Include="..\src\Hull.cpp" />
     <ClCompile Include="..\src\Patch.cpp" />
     <ClCompile Include="..\src\Shape.cpp" />
+    <ClCompile Include="..\src\SQLiteDB\SQLiteDB.cpp" />
+    <ClCompile Include="..\src\SQLiteDB\SQLiteQuery.cpp" />
+    <ClCompile Include="..\src\SQLiteDB\SQLiteStatement.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

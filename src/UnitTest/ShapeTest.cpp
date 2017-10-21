@@ -56,7 +56,6 @@ TEST_F(ShapeTest, SplitTrianglesIn4)
     EXPECT_EQ(48, FaceCount(shape));
 }
 
-
 TEST_F(ShapeTest, StoreRetrieve)
 {
     ShapePtr shape0 = Construct<Cube>();

@@ -187,6 +187,8 @@ static void ReadVectorMap(SQLite::DB& db, std::unordered_map<size_t, std::shared
 
 void Shape::Store(SQLite::DB& db) const
 {
+    ForEachFace([](const FacePtr& face) {face->CheckPointering(); });
+
     std::unordered_map<HullPtr, size_t> hulls;
     std::unordered_map<EdgePtr, size_t> edges;
     std::unordered_map<VertexPtr, size_t> vertices;
@@ -272,7 +274,7 @@ void Shape::Store(SQLite::DB& db) const
             statEdge.Bind(5, (int64_t)edges[edge.first->GetTwin()]);
             statEdge.Bind(6, (int64_t)edges[edge.first->GetNext()]);
             statEdge.Bind(7, (int64_t)edges[edge.first->GetPrev()]); // not needed?
-            statEdge.Bind(8, (int64_t)(edge.first->GetStartColor()?edge.first->GetStartColor()->GetInt():0));
+            statEdge.Bind(8, (int64_t)(edge.first->GetStartColor()?edge.first->GetStartColor()->GetInt():-1));
             statEdge.Bind(9, (int64_t)textureCoords[edge.first->GetStartTextureCoord()]);
             statEdge.ExecDML();
         }
@@ -290,7 +292,7 @@ void Shape::Store(SQLite::DB& db) const
             statFace.Bind(1, (int64_t)face.second);
             statFace.Bind(2, (int64_t)patchesRaw[&face.first->GetPatch()]);
             statFace.Bind(3, (int64_t)normals[face.first->GetNormal()]);
-            statFace.Bind(4, (int64_t)(face.first->GetColor()?face.first->GetColor()->GetInt():0));
+            statFace.Bind(4, (int64_t)(face.first->GetColor()?face.first->GetColor()->GetInt():-1));
             statFace.ExecDML();
         }
     }
@@ -307,7 +309,7 @@ void Shape::Store(SQLite::DB& db) const
             statPatch.Reset();
             statPatch.Bind(1, (int64_t)patch.second);
             statPatch.Bind(2, (int64_t)hullsRaw[&patch.first->GetHull()]);
-            statPatch.Bind(3, (int64_t)(patch.first->GetColor()?patch.first->GetColor()->GetInt():0));
+            statPatch.Bind(3, (int64_t)(patch.first->GetColor()?patch.first->GetColor()->GetInt():-1));
             statPatch.ExecDML();
         }
     }
@@ -352,6 +354,19 @@ void Shape::Retrieve(SQLite::DB& db)
     int64_t serializationVersion = db.ExecSingleInt64("SELECT Value FROM Header WHERE Key='Version'");
     // TODO: check type and serializationVersion
 
+    // Keep track of assigned colors
+    std::unordered_map<int64_t, ColorPtr> colors;
+    colors.emplace(-1, nullptr);
+    auto ColorFromId = [&colors](const int64_t id)
+    {
+        auto iter = colors.find(id);
+        if (colors.end() == iter)
+        {
+            iter = colors.emplace(id, Construct<Color>((unsigned int)id)).first;
+        }
+        return iter->second;
+    };
+
     // Read vertices
     ReadVectorMap(db, vertices, "Vertices");
 
@@ -364,11 +379,64 @@ void Shape::Retrieve(SQLite::DB& db)
     // Shape
 
     // Hulls
+    SQLite::Query query = db.ExecQuery("SELECT Id,Orientation FROM Hulls");
+    for (; !query.IsEOF(); query.NextRow())
+    {
+        int64_t Id = query.GetInt64Field(0);
+        auto hull = ConstructAndAddHull();
+        hull->SetOrientation((Hull::Orientation)query.GetIntField(1));
+        hulls.emplace(Id, hull);
+    }
 
     // Patches
+    query = db.ExecQuery("SELECT Id,Hull,Color FROM Patches");
+    for (; !query.IsEOF(); query.NextRow())
+    {
+        int64_t Id = query.GetInt64Field(0);
+        int64_t hullId = query.GetInt64Field(1);
+        auto patch = hulls[hullId]->ConstructAndAddPatch();
+        patch->SetColor(ColorFromId(query.GetInt64Field(2)));
+        patches.emplace(Id, patch);
+    }
 
     // Faces
+    query = db.ExecQuery("SELECT Id,Patch,Normal,Color FROM Faces");
+    for (; !query.IsEOF(); query.NextRow())
+    {
+        int64_t Id = query.GetInt64Field(0);
+        int64_t patchId = query.GetInt64Field(1);
+        auto face = patches[patchId]->ConstructAndAddFace();
+        face->SetNormal(normals[query.GetInt64Field(2)]);
+        face->SetColor(ColorFromId(query.GetInt64Field(3)));
+        faces.emplace(Id, face);
+    }
 
-    // Edges
+    // Edges   
+    // First add the edges, then fill the relation with others
+    query = db.ExecQuery("SELECT Id,Vertex,Normal,Face FROM Edges");
+    for (; !query.IsEOF(); query.NextRow())
+    {
+        int64_t Id = query.GetInt64Field(0);
+        auto& vertex = vertices[query.GetInt64Field(1)];
+        auto& normal = normals[query.GetInt64Field(2)];
+        int64_t faceId = query.GetInt64Field(3);
+        auto edge = Face::ConstructAndAddEdge(faces[faceId],vertex,normal);
+        edges.emplace(Id, edge);
+    }
+    query = db.ExecQuery("SELECT Id,Twin,Next,Prev,Color,TextureCoord FROM Edges");
+    for (; !query.IsEOF(); query.NextRow())
+    {
+        auto& edge = edges[query.GetInt64Field(0)];
+        auto& twin = edges[query.GetInt64Field(1)];
+        auto& next = edges[query.GetInt64Field(2)];
+        auto& prev = edges[query.GetInt64Field(3)];
+        edge->SetTwin(twin);
+        edge->SetNext(next);
+        edge->SetPrev(prev);
+        edge->SetStartColor(ColorFromId(query.GetInt64Field(4)));
+        edge->SetStartTextureCoord(textureCoords[query.GetInt64Field(5)]);
+    }
 
+    // check the result
+    ForEachFace([](const FacePtr& face) {face->CheckPointering(); });
 }

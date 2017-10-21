@@ -17,9 +17,13 @@ namespace SQLite
     public:
         class State;
     public:
-        Query(std::unique_ptr<State>&& state);
+        Query();
+        Query(std::shared_ptr<State>&& state);
         Query(Query&& query);
+        Query(const Query& query);
         ~Query();
+
+        Query& operator = (const Query& query);
 
         int GetFieldCount() const;
         const std::vector<std::string>& GetFieldNames() const;
@@ -45,7 +49,7 @@ namespace SQLite
         void NextRow();
         void Finalize();
     private:
-        std::unique_ptr<State> m_state;
+        std::shared_ptr<State> m_state;
     };
 
     class Statement
@@ -53,9 +57,13 @@ namespace SQLite
     public:
         class State;
     public:
-        Statement(std::unique_ptr<State>&& state);
+        Statement();
+        Statement(std::shared_ptr<State>&& state);
         Statement(Statement&& statement);
+        Statement(const Statement& statement);
         ~Statement();
+
+        Statement& operator = (const Statement& statement);
 
         int ExecDML();
         Query ExecQuery();
@@ -69,7 +77,7 @@ namespace SQLite
         void Reset();
         void Finalize();
     private:
-        std::unique_ptr<State> m_state;
+        std::shared_ptr<State> m_state;
     };
 
     class DB
@@ -91,11 +99,18 @@ namespace SQLite
             return ExecDML(FormatArgs(fmt,t0,tn...));
         }
 
-        int64_t ExecScalar(const std::string& sql);
+        int64_t ExecSingleInt64(const std::string& sql);
         template<typename T0, typename... TN>
-        int64_t ExecScalar(const std::string& fmt, T0&& t0, TN&&... tn)
+        int64_t ExecSingleInt64(const std::string& fmt, T0&& t0, TN&&... tn)
         {
-            return ExecScalar(FormatArgs(fmt, t0, tn...));
+            return ExecSingleInt64(FormatArgs(fmt, t0, tn...));
+        }
+
+        std::string ExecSingleString(const std::string& sql);
+        template<typename T0, typename... TN>
+        std::string ExecSingleString(const std::string& fmt, T0&& t0, TN&&... tn)
+        {
+            return ExecSingleString(FormatArgs(fmt, t0, tn...));
         }
 
         Query ExecQuery(const std::string& sql);
@@ -112,6 +127,9 @@ namespace SQLite
             return CompileStatement(FormatArgs(fmt, t0, tn...));
         }
 
+        void BeginTransaction();
+        void CommitTransaction();
+
         int64_t LastRowId() const;
         void Interrupt();
         void SetBusyTimeout(int milliSecs);
@@ -125,7 +143,7 @@ namespace SQLite
             return boost::str(f);
         }
 
-        std::unique_ptr<State> m_state;
+        std::shared_ptr<State> m_state;
     };
 } // namespace SQLite
 

@@ -10,10 +10,14 @@ public:
         , m_eof(eof)
         , m_columnCount(columnCount)
     {
-        if (-1 == m_columnCount)
+        if (-1 == m_columnCount && nullptr != m_statement)
         {
             m_columnCount = sqlite3_column_count(m_statement);
         }
+    }
+    ~State()
+    {
+        Finalize();
     }
 
     void Check()
@@ -27,6 +31,26 @@ public:
             ThrowError("Statement not active");
         }
     }
+
+    void Finalize()
+    {
+        if (m_statement)
+        {
+            int ret = sqlite3_finalize(m_statement);
+            m_statement = nullptr;
+            ThrowErrorIfNotOK(m_db, ret);
+        }
+    }
+
+    void Reset()
+    {
+        if (m_statement)
+        {
+            int ret = sqlite3_reset(m_statement);
+            ThrowErrorIfNotOK(m_db, ret);
+        }
+    }
+
 
     sqlite3_stmt* m_statement;
     sqlite3* m_db;

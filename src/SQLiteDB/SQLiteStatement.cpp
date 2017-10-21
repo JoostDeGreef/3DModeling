@@ -13,17 +13,29 @@ using namespace SQLite;
 #include "SQLiteStatementState.h"
 #include "SQLiteQueryState.h"
 
-Statement::Statement(std::unique_ptr<State>&& state)
-    : m_state(std::move(state))
+Statement::Statement(std::shared_ptr<State>&& state)
+    : m_state(state)
 {}
 
 Statement::Statement(Statement&& statement)
-    : m_state(std::move(statement.m_state))
+    : m_state(statement.m_state)
+{}
+
+Statement::Statement(const Statement& statement)
+    : m_state(statement.m_state)
+{}
+
+Statement::Statement()
+    : m_state(make_shared<State>(nullptr,nullptr,true))
 {}
 
 Statement::~Statement()
+{}
+
+Statement& Statement::operator = (const Statement& statement)
 {
-    Finalize();
+    m_state = statement.m_state;
+    return *this;
 }
 
 int Statement::ExecDML()
@@ -61,12 +73,12 @@ Query Statement::ExecQuery()
     if (ret == SQLITE_DONE)
     {
         // no rows
-        return std::make_unique<Query::State>(m_state->m_db, m_state->m_statement, true, false);
+        return std::make_shared<Query::State>(m_state->m_db, m_state->m_statement, true, false);
     }
     else if (ret == SQLITE_ROW)
     {
         // at least 1 row
-        return std::make_unique<Query::State>(m_state->m_db, m_state->m_statement, false, false);
+        return std::make_shared<Query::State>(m_state->m_db, m_state->m_statement, false, false);
     }
     else
     {
@@ -125,19 +137,10 @@ void Statement::BindNull(int param)
 
 void Statement::Reset()
 {
-    if (m_state->m_statement)
-    {
-        int ret = sqlite3_reset(m_state->m_statement);
-        ThrowErrorIfNotOK(m_state->m_db, ret);
-    }
+    m_state->Reset();
 }
 
 void Statement::Finalize()
 {
-    if (m_state->m_statement)
-    {
-        int ret = sqlite3_finalize(m_state->m_statement);
-        m_state->m_statement = nullptr;
-        ThrowErrorIfNotOK(m_state->m_db, ret);
-    }
+    m_state->Finalize();
 }

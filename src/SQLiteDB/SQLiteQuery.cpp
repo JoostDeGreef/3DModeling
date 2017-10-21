@@ -13,17 +13,29 @@ using namespace SQLite;
 #include "SQLiteSupport.h"
 #include "SQLiteQueryState.h"
 
-Query::Query(std::unique_ptr<State>&& state)
-    : m_state(std::move(state))
+Query::Query()
+    : m_state(make_shared<State>(nullptr,nullptr,true))
+{}
+
+Query::Query(std::shared_ptr<State>&& state)
+    : m_state(state)
 {}
 
 Query::Query(Query&& query)
-    : m_state(std::move(query.m_state))
+    : m_state(query.m_state)
+{}
+
+Query::Query(const Query& query)
+    : m_state(query.m_state)
 {}
 
 Query::~Query()
+{}
+
+Query& Query::operator = (const Query& query)
 {
-    Finalize();
+    m_state = query.m_state;
+    return *this;
 }
 
 bool Query::IsEOF() const
@@ -75,12 +87,7 @@ void Query::NextRow()
 
 void Query::Finalize()
 {
-    if (m_state->m_statement && m_state->m_owner)
-    {
-        int ret = sqlite3_finalize(m_state->m_statement);
-        ThrowErrorIfNotOK(m_state->m_db, ret);
-    }
-    m_state->m_statement = nullptr;
+    m_state->Finalize();
 }
 
 int Query::FieldIndex(const std::string& fieldName) const

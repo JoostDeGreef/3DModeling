@@ -13,7 +13,7 @@ public:
     {
         if (nullptr == m_db)
         {
-//        throw CppSQLite3Exception(nRet, "DB not opened");
+            ThrowError("DB not opened");
         }
     }
 
@@ -21,18 +21,23 @@ public:
     {
         Check();
 
-        char* szError = 0;
         const char* szTail = 0;
-        sqlite3_stmt* pVM;
+        sqlite3_stmt* statement;
 
-        int nRet = sqlite3_prepare(m_db, sql.c_str(), -1, &pVM, &szTail);
+        int ret = sqlite3_prepare(m_db, sql.c_str(), -1, &statement, &szTail);
 
-        if (nRet != SQLITE_OK)
+        ThrowErrorIfNotOK(m_db, ret);
+
+        return statement;
+    }
+
+    void Close()
+    {
+        if (m_db)
         {
-//            throw CppSQLite3Exception(nRet, szError);
+            sqlite3_close(m_db);
+            m_db = nullptr;
         }
-
-        return pVM;
     }
 
     sqlite3* m_db;

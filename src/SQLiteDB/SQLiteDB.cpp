@@ -17,13 +17,11 @@ using namespace SQLite;
 #include "SQLiteStatementState.h"
 
 DB::DB()
-    : m_state(std::make_unique<State>())
+    : m_state(std::make_shared<State>())
 {}
 
 DB::~DB()
-{
-    Close();
-}
+{}
 
 void DB::Open(const std::string& fileName)
 {
@@ -34,16 +32,12 @@ void DB::Open(const std::string& fileName)
 
 void DB::Close()
 {
-    if (m_state->m_db)
-    {
-        sqlite3_close(m_state->m_db);
-        m_state->m_db = nullptr;
-    }
+    m_state->Close();
 }
 
 bool DB::TableExists(const std::string& tableName)
 {
-    return 0 < ExecScalar("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='%1%'",tableName);
+    return 0 < ExecSingleInt64("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='%1%'",tableName);
 }
 
 int DB::ExecDML(const std::string& sql)
@@ -70,12 +64,12 @@ Query DB::ExecQuery(const std::string& sql)
     if (ret == SQLITE_DONE)
     {
         // no rows
-        return std::make_unique<Query::State>(m_state->m_db, statement, true);
+        return std::make_shared<Query::State>(m_state->m_db, statement, true);
     }
     else if (ret == SQLITE_ROW)
     {
         // at least 1 row
-        return std::make_unique<Query::State>(m_state->m_db, statement, false);
+        return std::make_shared<Query::State>(m_state->m_db, statement, false);
     }
     else
     {
@@ -85,22 +79,34 @@ Query DB::ExecQuery(const std::string& sql)
     }
 }
 
-int64_t DB::ExecScalar(const std::string& sql)
+int64_t DB::ExecSingleInt64(const std::string& sql)
 {
     Query q = ExecQuery(sql);
 
     if (q.IsEOF() || q.GetFieldCount() != 1)
     {
-        ThrowError("Invalid scalar query");
+        ThrowError("Invalid single int64 query");
     }
 
     return q.GetInt64Field(0);
 }
 
+string DB::ExecSingleString(const std::string& sql)
+{
+    Query q = ExecQuery(sql);
+
+    if (q.IsEOF() || q.GetFieldCount() != 1)
+    {
+        ThrowError("Invalid single string query");
+    }
+
+    return q.GetStringField(0);
+}
+
 Statement DB::CompileStatement(const std::string& sql)
 {
     sqlite3_stmt* statement = m_state->Compile(sql);
-    return std::make_unique<Statement::State>(m_state->m_db, statement, false);
+    return std::make_shared<Statement::State>(m_state->m_db, statement, false);
 }
 
 int64_t DB::LastRowId() const
@@ -124,4 +130,12 @@ std::string DB::SQLiteVersion()
     return SQLITE_VERSION;;
 }
 
+void DB::BeginTransaction()
+{
+    ExecDML("BEGIN TRANSACTION");
+}
 
+void DB::CommitTransaction()
+{
+    ExecDML("END TRANSACTION");
+}

@@ -63,16 +63,16 @@ TEST_F(ShapeTest, StoreRetrieve)
     SQLite::DB db;
     db.Open(":memory:");
     shape0->Store(db);
-    //ShapePtr shape1 = Construct<Shape>();
-    //shape1->Retrieve(db);
-    //int count0 = 0;
-    //int count1 = 0;
-    //shape0->ForEachVertex([&count0](const VertexPtr& vertex) { count0++; });
-    //shape1->ForEachVertex([&count1](const VertexPtr& vertex) { count1++; });
-    //ASSERT_EQ(count0, count1);
-    //count0 = 0;
-    //count1 = 0;
-    //shape0->ForEachFace([&count0](const FacePtr& face) { count0++; });
-    //shape1->ForEachFace([&count1](const FacePtr& face) { count1++; });
-    //ASSERT_EQ(count0, count1);
+    ShapePtr shape1 = Construct<Shape>();
+    shape1->Retrieve(db);
+    int count0 = 0;
+    int count1 = 0;
+    shape0->ForEachVertex([&count0](const VertexPtr& vertex) { count0++; });
+    shape1->ForEachVertex([&count1](const VertexPtr& vertex) { count1++; });
+    ASSERT_EQ(count0, count1);
+    count0 = 0;
+    count1 = 0;
+    shape0->ForEachFace([&count0](const FacePtr& face) { count0++; });
+    shape1->ForEachFace([&count1](const FacePtr& face) { count1++; });
+    ASSERT_EQ(count0, count1);
 }

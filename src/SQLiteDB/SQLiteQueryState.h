@@ -16,6 +16,10 @@ public:
             m_columnCount = sqlite3_column_count(m_statement);
         }
     }
+    ~State()
+    {
+        Finalize();
+    }
 
     void Check()
     {
@@ -30,6 +34,16 @@ public:
         {
             ThrowError("Invalid field index requested");
         }
+    }
+
+    void Finalize()
+    {
+        if (m_statement && m_owner)
+        {
+            int ret = sqlite3_finalize(m_statement);
+            ThrowErrorIfNotOK(m_db, ret);
+        }
+        m_statement = nullptr;
     }
 
     sqlite3_stmt* m_statement;

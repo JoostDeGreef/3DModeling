@@ -59,6 +59,7 @@ TEST_F(ShapeTest, SplitTrianglesIn4)
 TEST_F(ShapeTest, StoreRetrieve)
 {
     ShapePtr shape0 = Construct<Cube>();
+    shape0->SetBoundingShape(BoundingShape3d(Vertex(1, 2, 3), Vertex(4, 5, 6)));
     SQLite::DB db;
     db.Open(":memory:");
     shape0->Store(db);
@@ -74,4 +75,5 @@ TEST_F(ShapeTest, StoreRetrieve)
     shape0->ForEachFace([&count0](const FacePtr& face) { count0++; });
     shape1->ForEachFace([&count1](const FacePtr& face) { count1++; });
     ASSERT_EQ(count0, count1);
+    ASSERT_EQ(shape0->GetBoundingShape(),shape1->GetBoundingShape());
 }

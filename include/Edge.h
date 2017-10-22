@@ -20,9 +20,9 @@ namespace Geometry
         VertexPtr m_startVertex;
         NormalPtr m_startNormal;
         FacePtr m_face;
-        EdgePtr m_twin;
-        EdgePtr m_next;
-        EdgePtr m_prev;
+        std::weak_ptr<Edge> m_twin;
+        std::weak_ptr<Edge> m_next;
+        std::weak_ptr<Edge> m_prev;
         ColorPtr m_startColor;
         TextureCoordPtr m_startTextureCoord;
     public:
@@ -69,8 +69,8 @@ namespace Geometry
         Edge& operator = (const this_type &other) = delete;
         Edge& operator = (this_type &&other) = delete;
 
-        decltype(auto) GetTwin() const { return m_twin; }
-        void SetTwin(const decltype(m_twin)& twin) { m_twin = twin; }
+        EdgePtr GetTwin() const { return m_twin.lock(); }
+        void SetTwin(const EdgePtr& twin) { m_twin = twin; }
 
         decltype(auto) GetStartVertex() const { return m_startVertex; }
         void SetStartVertex(const decltype(m_startVertex)& startVertex) { m_startVertex = startVertex; }
@@ -84,11 +84,11 @@ namespace Geometry
         void SetFace(const decltype(m_face)& face) { m_face = face; }
         decltype(auto) GetTwinFace() const { return GetTwin()->m_face; }
 
-        decltype(auto) GetNext() const { return m_next; }
-        void SetNext(const decltype(m_next)& next) { m_next = next; }
+        EdgePtr GetNext() const { return m_next.lock(); }
+        void SetNext(const EdgePtr& next) { m_next = next; }
 
-        decltype(auto) GetPrev() const { return m_prev; }
-        void SetPrev(const decltype(m_prev)& prev) { m_prev = prev; }
+        EdgePtr GetPrev() const { return m_prev.lock(); }
+        void SetPrev(const EdgePtr& prev) { m_prev = prev; }
 
         decltype(auto) GetStartColor() const { return m_startColor; }
         void SetStartColor(const decltype(m_startColor)& startColor) { m_startColor = startColor; }

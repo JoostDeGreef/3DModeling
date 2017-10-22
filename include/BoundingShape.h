@@ -29,13 +29,13 @@ namespace Geometry
         {
             Copy(other);
         }
-        TBoundingShape(const vector_type &min_point, const vector_type &max_point)
+        TBoundingShape(const vector_type &min_point, const vector_type &max_point, const bool optimal = true)
         {
-            Set(min_point, max_point);
+            Set(min_point, max_point, optimal);
         }
-        TBoundingShape(const vector_type &center, const value_type &radius)
+        TBoundingShape(const vector_type &center, const value_type &radius, const bool optimal = true)
         {
-            Set(center, radius);
+            Set(center, radius, optimal);
         }
 
         void Set(const vector_type &min_point, const vector_type &max_point, const bool optimal = true)
@@ -104,6 +104,18 @@ namespace Geometry
         {
             Copy(other);
             return *this;
+        }
+
+        bool operator == (const this_type &other) const
+        {
+            switch (m_type)
+            {
+            default:
+                assert(false);
+            case Type::Unknown: return other.m_type == Type::Unknown;
+            case Type::Box: return other.m_type == Type::Box && other.GetMin()==GetMin() && other.GetMax()==other.GetMax() && (other.IsOptimal()==IsOptimal());
+            case Type::Ball: return other.m_type == Type::Ball && other.GetCenter() == GetCenter() && other.GetRadius() == other.GetRadius() && (other.IsOptimal() == IsOptimal());
+            }
         }
 
         void Convert(const Type type)

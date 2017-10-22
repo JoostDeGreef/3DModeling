@@ -24,7 +24,7 @@ public:
         const char* szTail = 0;
         sqlite3_stmt* statement;
 
-        int ret = sqlite3_prepare(m_db, sql.c_str(), -1, &statement, &szTail);
+        int ret = sqlite3_prepare_v2(m_db, sql.c_str(), -1, &statement, &szTail);
 
         ThrowErrorIfNotOK(m_db, ret);
 

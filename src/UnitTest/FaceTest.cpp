@@ -14,7 +14,7 @@ protected:
     int FaceCount(ShapePtr shape)
     {
         int count = 0;
-        shape->ForEachFace([&count](const FacePtr& face)
+        shape->ForEachFace([&count](const FaceRaw& face)
         {
             count++;
         });
@@ -28,9 +28,9 @@ TEST_F(FaceTest, CalcNormal)
     HullPtr hull = shape.ConstructAndAddHull();
     PatchPtr patch = hull->ConstructAndAddPatch();
     FacePtr face = patch->ConstructAndAddFace();
-    auto e0 = Face::ConstructAndAddEdge(face, Construct<Vertex>(0, 0, 0));
-    auto e1 = Face::ConstructAndAddEdge(face, Construct<Vertex>(1, 0, 0));
-    auto e2 = Face::ConstructAndAddEdge(face, Construct<Vertex>(0, 1, 0));
+    auto e0 = face->ConstructAndAddEdge(Construct<Vertex>(0, 0, 0));
+    auto e1 = face->ConstructAndAddEdge(Construct<Vertex>(1, 0, 0));
+    auto e2 = face->ConstructAndAddEdge(Construct<Vertex>(0, 1, 0));
     e0->SetNext(e1);
     e1->SetNext(e2);
     e2->SetNext(e0);

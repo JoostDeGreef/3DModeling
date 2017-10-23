@@ -3,14 +3,14 @@
 
 namespace Geometry
 {
-    class Patch 
+    class Patch : public std::enable_shared_from_this<Patch>
     {
     public:
         typedef std::unordered_set<FacePtr> container_type;
         typedef Patch this_type;
         typedef unsigned int size_type;
     private:
-        Hull& m_hull;
+        HullRaw m_hull;
         container_type m_faces;
         ColorPtr m_color;
         unsigned int m_displayList;
@@ -18,10 +18,10 @@ namespace Geometry
         BoundingShape3d m_boundingShape;
 
     protected:
-        Patch(Hull& hull)
+        Patch(const HullRaw& hull)
             : Patch(hull, Construct<Color>(Color::White()))
         {}
-        Patch(Hull& hull, const ColorPtr& color)
+        Patch(const HullRaw& hull, const ColorPtr& color)
             : m_hull(hull)
             , m_color(color)
             , m_displayList(0)
@@ -35,20 +35,27 @@ namespace Geometry
         Patch& operator = (const this_type &other) = delete;
         Patch& operator = (this_type &&other) = delete;
 
-        void AddFace(FacePtr& face)
+        const FacePtr& AddFace(const FacePtr& face)
         {
-            m_faces.emplace(face);
+            return *m_faces.emplace(face).first;
         }
-        void RemoveFace(FacePtr& face)
+        const FacePtr& AddFace(const FaceRaw& face)
+        {
+            return AddFace(face.lock());
+        }
+        void RemoveFace(const FacePtr& face)
         {
             m_faces.erase(face);
         }
-        template<typename... Args>
-        FacePtr ConstructAndAddFace(Args&& ... args)
+        void RemoveFace(const FaceRaw& face)
         {
-            FacePtr face = Construct<Face>(*this, std::forward<Args>(args)...);
-            AddFace(face);
-            return face;
+            RemoveFace(face.lock());
+        }
+        template<typename... Args>
+        const FacePtr& ConstructAndAddFace(Args&& ... args)
+        {
+            FacePtr face = Construct<Face>(this, std::forward<Args>(args)...);
+            return AddFace(face);
         }
 
         const ColorPtr& GetColor() const { return m_color; }
@@ -65,15 +72,14 @@ namespace Geometry
         void SetDisplayList(const unsigned int displayList) { m_displayList = displayList; }
 
         const container_type& GetFaces() const { return m_faces; }
-        std::unordered_set<VertexPtr> GetVertices() const;
+        std::unordered_set<VertexRaw> GetVertices() const;
 
-        void ForEachFace(std::function<void(const FacePtr& facePtr)> func) const;
-        void ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const;
-        void ForEachVertex(std::function<void(const VertexPtr& vertexPtr)> func) const;
+        void ForEachFace(std::function<void(const FaceRaw& facePtr)> func) const;
+        void ForEachEdge(std::function<void(const EdgeRaw& edgePtr)> func) const;
+        void ForEachVertex(std::function<void(const VertexRaw& vertexPtr)> func) const;
 
-        const Hull& GetHull() const { return m_hull; }
-        const Shape& GetShape() const;
-        //void SetHull(const HullPtr& hull) { m_hull = hull; }
+        const HullRaw& GetHull() const { return m_hull; }
+        const ShapeRaw& GetShape() const;
     };
 }
 

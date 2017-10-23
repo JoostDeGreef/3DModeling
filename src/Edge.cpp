@@ -14,17 +14,17 @@ void Edge::Split()
     ColorPtr color2 = GetEndColor();
     ColorPtr color1;
 
-    FacePtr thisFace = GetFace();
+    FaceRaw thisFace = GetFace();
     thisFace->CheckPointering();
 
-    FacePtr twinFace = GetTwinFace();
+    FaceRaw twinFace = GetTwinFace();
     twinFace->CheckPointering();
 
-    EdgePtr twin0 = GetTwin();
-    EdgePtr twin1 = Face::ConstructAndAddEdge(twinFace,vertex1);
+    EdgeRaw twin0 = GetTwin();
+    EdgeRaw twin1 = twinFace->ConstructAndAddEdge(vertex1);
 
-    EdgePtr this0 = twin0->GetTwin();
-    EdgePtr this1 = Face::ConstructAndAddEdge(thisFace,vertex1);
+    EdgeRaw this0 = twin0->GetTwin();
+    EdgeRaw this1 = thisFace->ConstructAndAddEdge(vertex1);
 
     this0->SetTwin(twin1); 
     this1->SetTwin(twin0);
@@ -60,10 +60,10 @@ void Edge::Split()
     twinFace->CheckPointering();
 }
 
-void Edge::ForEachEdgeAtStartVertex(std::function<void(EdgePtr&edge)> func) const
+void Edge::ForEachEdgeAtStartVertex(std::function<void(const EdgeRaw& edge)> func) const
 {
-    EdgePtr me = GetTwin()->GetTwin();
-    EdgePtr next = me;
+    EdgeRaw me = const_cast<Edge*>(this);
+    EdgeRaw next = me;
     do
     {
         func(next);

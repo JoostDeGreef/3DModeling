@@ -22,10 +22,10 @@ Cube::Cube()
                           EdgePtr& ab, EdgePtr& bc, EdgePtr& cd, EdgePtr& da)
     {
         FacePtr face = hull->ConstructAndAddPatch()->ConstructAndAddFace();
-        ab = Face::ConstructAndAddEdge(face,a);
-        bc = Face::ConstructAndAddEdge(face,b);
-        cd = Face::ConstructAndAddEdge(face,c);
-        da = Face::ConstructAndAddEdge(face,d);
+        ab = face->ConstructAndAddEdge(a);
+        bc = face->ConstructAndAddEdge(b);
+        cd = face->ConstructAndAddEdge(c);
+        da = face->ConstructAndAddEdge(d);
         ab->SetNext(bc);  ab->SetPrev(da);
         bc->SetNext(cd);  bc->SetPrev(ab);
         cd->SetNext(da);  cd->SetPrev(bc);
@@ -67,6 +67,6 @@ Cube::Cube()
     Join(EF, FE);
     
     // check geometric integrity
-    ForEachFace([](const FacePtr& face) {face->CheckPointering(); });
+    ForEachFace([](const FaceRaw& face) {face->CheckPointering(); });
 }
 

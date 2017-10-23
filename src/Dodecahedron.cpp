@@ -53,11 +53,11 @@ Dodecahedron::Dodecahedron(const int initialFaceCount)
                           EdgePtr& ab, EdgePtr& bc, EdgePtr& cd, EdgePtr& de, EdgePtr& ea)
     {
         FacePtr face = hull->ConstructAndAddPatch()->ConstructAndAddFace();
-        ab = Face::ConstructAndAddEdge(face, a);
-        bc = Face::ConstructAndAddEdge(face, b);
-        cd = Face::ConstructAndAddEdge(face, c);
-        de = Face::ConstructAndAddEdge(face, d);
-        ea = Face::ConstructAndAddEdge(face, e);
+        ab = face->ConstructAndAddEdge(a);
+        bc = face->ConstructAndAddEdge(b);
+        cd = face->ConstructAndAddEdge(c);
+        de = face->ConstructAndAddEdge(d);
+        ea = face->ConstructAndAddEdge(e);
         ab->SetNext(bc);  ab->SetPrev(ea);
         bc->SetNext(cd);  bc->SetPrev(ab);
         cd->SetNext(de);  cd->SetPrev(bc);
@@ -126,25 +126,25 @@ Dodecahedron::Dodecahedron(const int initialFaceCount)
     Join(RD, DR);
 
     // check geometric integrity
-    ForEachFace([](const FacePtr& face) {face->CheckPointering(); });
+    ForEachFace([](const FaceRaw& face) {face->CheckPointering(); });
 
     Refine(initialFaceCount);
 }
 
 void Dodecahedron::InitialRefinement()
 {
-    std::vector<FacePtr> faces;
+    std::vector<FaceRaw> faces;
     faces.reserve(12);
-    ForEachFace([&faces](const FacePtr& face){faces.push_back(face);});
+    ForEachFace([&faces](const FaceRaw& face){faces.push_back(face);});
     assert(12 == faces.size());
     for (int i = 0; i < 12; ++i)
     {
-        FacePtr& face = faces[i];
-        Patch& patch = face->GetPatch();
+        FaceRaw face = faces[i];
+        PatchRaw patch = face->GetPatch();
         Vertex center(0, 0, 0);
         vector<VertexPtr> vertices;
-        vector<EdgePtr> edges;
-        face->ForEachEdge([&face,&center,&vertices,&edges](const EdgePtr& edge)
+        vector<EdgeRaw> edges;
+        face->ForEachEdge([&face,&center,&vertices,&edges](const EdgeRaw& edge)
         {
             VertexPtr vertex = edge->GetStartVertex();
             center += *vertex; 
@@ -156,12 +156,12 @@ void Dodecahedron::InitialRefinement()
         edges.push_back(edges.front());
 
         VertexPtr centerPtr = Construct<Vertex>(center);
-        std::vector<FacePtr> newFaces({ patch.ConstructAndAddFace(), patch.ConstructAndAddFace(), patch.ConstructAndAddFace(), patch.ConstructAndAddFace(), patch.ConstructAndAddFace() });
+        std::vector<FacePtr> newFaces({ patch->ConstructAndAddFace(), patch->ConstructAndAddFace(), patch->ConstructAndAddFace(), patch->ConstructAndAddFace(), patch->ConstructAndAddFace() });
         for (size_t i = 0; i < 5; ++i)
         {
-            EdgePtr edge0 = edges[i]; edge0->SetFace(newFaces[i]);
-            EdgePtr edge1 = Face::ConstructAndAddEdge(newFaces[i],vertices[i + 1]);
-            EdgePtr edge2 = Face::ConstructAndAddEdge(newFaces[i],centerPtr);
+            EdgeRaw edge0 = edges[i]; edge0->SetFace(newFaces[i]);
+            EdgePtr edge1 = newFaces[i]->ConstructAndAddEdge(vertices[i + 1]);
+            EdgePtr edge2 = newFaces[i]->ConstructAndAddEdge(centerPtr);
             newFaces[i]->AddEdge(edge0);
             edge0->SetNext(edge1); edge0->SetPrev(edge2);
             edge1->SetNext(edge2); edge1->SetPrev(edge0);
@@ -169,21 +169,21 @@ void Dodecahedron::InitialRefinement()
         }
         for (size_t i = 0; i < 5; ++i)
         {
-            EdgePtr edge0 = edges[i + 0]->GetNext();
-            EdgePtr edge1 = edges[i + 1]->GetPrev();
+            EdgeRaw edge0 = edges[i + 0]->GetNext();
+            EdgeRaw edge1 = edges[i + 1]->GetPrev();
             edge0->SetTwin(edge1);
             edge1->SetTwin(edge0);
         }
-        patch.RemoveFace(face);
+        patch->RemoveFace(face);
     }
-    ForEachFace([](const FacePtr& face) {face->CalcNormal(); });
-    ForEachFace([](const FacePtr& face) {face->CheckPointering(); });
+    ForEachFace([](const FaceRaw& face) {face->CalcNormal(); });
+    ForEachFace([](const FaceRaw& face) {face->CheckPointering(); });
 }
 
 void Dodecahedron::Refine(int initialFaceCount)
 {
     int faceCount = 0;
-    ForEachFace([&faceCount](const FacePtr& face) {faceCount++; });
+    ForEachFace([&faceCount](const FaceRaw& face) {faceCount++; });
 
     if (initialFaceCount > faceCount)
     {
@@ -191,7 +191,7 @@ void Dodecahedron::Refine(int initialFaceCount)
         InitialRefinement();
 
         faceCount = 0;
-        ForEachFace([&faceCount](const FacePtr& face) {faceCount++; });
+        ForEachFace([&faceCount](const FaceRaw& face) {faceCount++; });
 
 // TODO
         // the number of patches should be larger; turn every face into a patch (60)
@@ -214,7 +214,7 @@ void Dodecahedron::Refine(int initialFaceCount)
         //}
 
         // give all patches a boundingsphere
-        ForEachPatch([](const PatchPtr& patch)
+        ForEachPatch([](const PatchRaw& patch)
         {
             patch->CalculateBoundingShape();
         });
@@ -229,16 +229,16 @@ void Dodecahedron::Refine(int initialFaceCount)
         Triangulate();
     }
     // move all vertices to the sphere (dist 1.0 from origin) and correct the face normals
-    ForEachVertex([](const VertexPtr& vertex) {vertex->Normalize(); });
-    ForEachFace([](const FacePtr& face) {face->CalcNormal(); });
+    ForEachVertex([](const VertexRaw& vertex) {vertex->Normalize(); });
+    ForEachFace([](const FaceRaw& face) {face->CalcNormal(); });
     // create perfect sphere edge normals
-    ForEachEdge([&](const EdgePtr& edge)
+    ForEachEdge([&](const EdgeRaw& edge)
     {
         // give all edges at this vertex the same normal
         if (!edge->GetStartNormal())
         {
             NormalPtr normal = Construct<Normal>(*edge->GetStartVertex());
-            edge->ForEachEdgeAtStartVertex([normal](const EdgePtr& edge) {edge->SetStartNormal(normal); });
+            edge->ForEachEdgeAtStartVertex([normal](const EdgeRaw& edge) {edge->SetStartNormal(normal); });
         }
     });
 }

@@ -5,7 +5,7 @@ namespace Geometry
 {
     class Shape;
 
-    class Hull 
+    class Hull : public std::enable_shared_from_this<Hull>
     {
     public:
         typedef std::unordered_set<PatchPtr> container_type;
@@ -18,12 +18,12 @@ namespace Geometry
             Inward = 1
         };
     protected:
-        Shape& m_shape;
+        ShapeRaw m_shape;
         Orientation m_orientation;
         container_type m_patches;
         BoundingShape3d m_boundingShape;
 
-        Hull(Shape& shape)
+        Hull(const ShapeRaw& shape)
             : m_shape(shape)
             , m_orientation(Orientation::Outward)
         {}
@@ -41,20 +41,27 @@ namespace Geometry
         // copies the hull into newShape
         HullPtr Hull::Copy(Shape& newShape) const;
 
-        void AddPatch(PatchPtr& patch)
+        const PatchPtr& AddPatch(const PatchPtr& patch)
         {
-            m_patches.emplace(patch);
+            return *m_patches.emplace(patch).first;
         }
-        void RemovePatch(PatchPtr& patch)
+        const PatchPtr& AddPatch(const PatchRaw& patch)
+        {
+            return AddPatch(patch.lock());
+        }
+        void RemovePatch(const PatchPtr& patch)
         {
             m_patches.erase(patch);
         }
-        template<typename... Args>
-        PatchPtr ConstructAndAddPatch(Args&&... args)
+        void RemovePatch(const PatchRaw& patch)
         {
-            PatchPtr patch = Construct<Patch>(*this, std::forward<Args>(args)...);
-            AddPatch(patch);
-            return patch;
+            RemovePatch(patch.lock());
+        }
+        template<typename... Args>
+        const PatchPtr& ConstructAndAddPatch(Args&&... args)
+        {
+            PatchPtr patch = Construct<Patch>(this, std::forward<Args>(args)...);
+            return AddPatch(patch);
         }
 
         // Return the hull orientation
@@ -64,9 +71,9 @@ namespace Geometry
         BoundingShape3d GetBoundingShape() const { return m_boundingShape; }
         void SetBoundingShape(const BoundingShape3d & boundingShape) { m_boundingShape = boundingShape; }
 
-        void ForEachPatch(std::function<void(const PatchPtr& patch)> func) const;
-        void ForEachFace(std::function<void(const FacePtr& facePtr)> func) const;
-        void ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const;
+        void ForEachPatch(std::function<void(const PatchRaw& patch)> func) const;
+        void ForEachFace(std::function<void(const FaceRaw& facePtr)> func) const;
+        void ForEachEdge(std::function<void(const EdgeRaw& edgePtr)> func) const;
 
         // Get all patches in the hull
         const container_type& GetPatches() const { return m_patches; }
@@ -78,7 +85,7 @@ namespace Geometry
         // Make sure the hull exist solely out of triangles
         void Triangulate();
 
-        decltype(auto) GetShape() const { return m_shape; }
+        const ShapeRaw& GetShape() const { return m_shape; }
         //void SetShape(const ShapePtr& shape) { m_shape = shape; }
     };
 }

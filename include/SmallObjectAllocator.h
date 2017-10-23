@@ -183,6 +183,61 @@ namespace Geometry
     {
         return SmallObjectPtr<T>::Construct(std::forward<Args>(args)...);
     }
+
+    /* Wrapper class for unowned ptrs
+    */
+    template <class T>
+    class raw_ptr
+    {
+    public:
+        typedef T element_type;
+
+        raw_ptr() : m_ptr(nullptr) {}
+        raw_ptr(T* ptr) : m_ptr(ptr) {}
+        raw_ptr(const raw_ptr<T>& other) : m_ptr(other.m_ptr) {}
+        raw_ptr(raw_ptr<T>&& other) : m_ptr(std::move(other.m_ptr)) {}
+        raw_ptr(const std::shared_ptr<T>& shared) : m_ptr(shared.get()) {}
+        raw_ptr(const std::unique_ptr<T>& unique) : m_ptr(unique.get()) {}
+        raw_ptr(const std::weak_ptr<T>& weak) : m_ptr(weak.lock().get()) {}
+        ~raw_ptr() {}
+
+        raw_ptr<T>& operator = (const raw_ptr<T>& other) { m_ptr = other.m_ptr; return *this; }
+        raw_ptr<T>& operator = (raw_ptr<T>&& other) { std::swap(m_ptr,other.m_ptr); return *this; }
+        raw_ptr<T>& operator = (const std::shared_ptr<T>& shared) { m_ptr = shared.get(); }
+        raw_ptr<T>& operator = (const std::unique_ptr<T>& unique) { m_ptr = unique.get(); }
+        raw_ptr<T>& operator = (const std::weak_ptr<T>& weak) { m_ptr = weak.lock().get(); }
+
+        T* operator -> () const { return m_ptr; }
+        T* get() const { return m_ptr; }
+
+        T& operator * () const { return *m_ptr; }
+
+        operator bool() const { return nullptr != m_ptr; }
+
+        bool operator == (const raw_ptr<T>& other) const { return other.m_ptr == m_ptr; }
+        bool operator != (const raw_ptr<T>& other) const { return other.m_ptr != m_ptr; }
+        bool operator >= (const raw_ptr<T>& other) const { return other.m_ptr >= m_ptr; }
+        bool operator <= (const raw_ptr<T>& other) const { return other.m_ptr <= m_ptr; }
+        bool operator > (const raw_ptr<T>& other) const { return other.m_ptr > m_ptr; }
+        bool operator < (const raw_ptr<T>& other) const { return other.m_ptr < m_ptr; }
+
+        std::shared_ptr<T> lock() const { return m_ptr->shared_from_this(); };
+
+    private:
+        T* m_ptr;
+    };
 } // namespace Geometry
+
+namespace std 
+{
+    template <typename T>
+    struct hash<Geometry::raw_ptr<T>>
+    {
+        std::size_t operator()(const Geometry::raw_ptr<T>& ptr) const
+        {
+            return hash<T*>()(ptr.get());
+        }
+    };
+} // namespace std
 
 #endif // SMALL_OBJECT_POOL_ALLOCATOR_H

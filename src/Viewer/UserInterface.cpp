@@ -261,23 +261,26 @@ namespace Viewer
 
         void State::DrawShapes()
         {
-            auto EdgeDummy = [](const EdgePtr& edge) {};
-            auto EdgeNormal = [](const EdgePtr& edge)
+            auto EdgeDummy = [](const EdgeRaw& edge) {};
+            auto EdgeNormal = [](const EdgeRaw& edge)
             {
                 glNormal(edge->GetStartNormal());
             };
-            auto EdgeColor = [](const EdgePtr& edge)
+            auto EdgeColor = [](const EdgeRaw& edge)
             {
                 glColor(edge->GetStartColor());
             };
-            auto EdgeTextureCoord = [](const EdgePtr& edge)
+            auto EdgeTextureCoord = [](const EdgeRaw& edge)
             {
                 glTextureCoord(edge->GetStartTextureCoord());
             };
 
-            auto DrawFace3 = [&](const FacePtr& face, std::function<void(const EdgePtr& edge)> edgeNormal, std::function<void(const EdgePtr& edge)> edgeColor, std::function<void(const EdgePtr& edge)> edgeTextureCoord)
+            auto DrawFace3 = [&](const FaceRaw& face, 
+                                 std::function<void(const EdgeRaw& edge)> edgeNormal, 
+                                 std::function<void(const EdgeRaw& edge)> edgeColor, 
+                                 std::function<void(const EdgeRaw& edge)> edgeTextureCoord)
             {
-                face->ForEachEdge([&](const EdgePtr& edge)
+                face->ForEachEdge([&](const EdgeRaw& edge)
                 {
                     edgeNormal(edge);
                     edgeColor(edge);
@@ -285,7 +288,9 @@ namespace Viewer
                     glVertex(*edge->GetStartVertex());
                 });
             };
-            auto DrawFace2 = [&](const FacePtr& face, std::function<void(const EdgePtr& edge)> edgeNormal, std::function<void(const EdgePtr& edge)> edgeColor)
+            auto DrawFace2 = [&](const FaceRaw& face, 
+                                 std::function<void(const EdgeRaw& edge)> edgeNormal, 
+                                 std::function<void(const EdgeRaw& edge)> edgeColor)
             {
                 if (face->GetStartEdge()->GetStartTextureCoord())
                 {
@@ -296,7 +301,7 @@ namespace Viewer
                     DrawFace3(face, edgeNormal, edgeColor, EdgeDummy);
                 }
             };
-            auto DrawFace1 = [&](const FacePtr& face, std::function<void(const EdgePtr& edge)> edgeNormal)
+            auto DrawFace1 = [&](const FaceRaw& face, std::function<void(const EdgeRaw& edge)> edgeNormal)
             {
                 if (face->GetStartEdge()->GetStartColor())
                 {
@@ -312,7 +317,7 @@ namespace Viewer
                     DrawFace2(face, edgeNormal, EdgeDummy);
                 }
             };
-            auto DrawFace0 = [&](const FacePtr& face)
+            auto DrawFace0 = [&](const FaceRaw& face)
             {
                 if (face->GetStartEdge()->GetStartNormal())
                 {
@@ -328,7 +333,7 @@ namespace Viewer
                     DrawFace1(face, EdgeDummy);
                 }
             };
-            auto DrawFaces = [&](const PatchPtr& patch)
+            auto DrawFaces = [&](const PatchRaw& patch)
             {
                 const auto& faces = patch->GetFaces();
                 for (auto face : faces)
@@ -355,7 +360,7 @@ namespace Viewer
             //Projection<double> projection;
             //Vertex front = projection.Project(Vector2d(projection.GetWidth()/2, projection.GetHeight()/2), -100);
             //front.Normalize();
-            auto DrawPatch = [&](const PatchPtr& patch)
+            auto DrawPatch = [&](const PatchRaw& patch)
             {
                 unsigned int displayList = patch->GetDisplayList();
                 if (0 == displayList)
@@ -380,7 +385,7 @@ namespace Viewer
 
             glMultMatrix(CalculateRotation());
 
-            for (const Geometry::ShapePtr& shape : m_shapes)
+            for (const Geometry::ShapeRaw& shape : m_shapes)
             {
                 shape->ForEachPatch(DrawPatch);
             }

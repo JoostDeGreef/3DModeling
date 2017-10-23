@@ -4,37 +4,37 @@ using namespace Geometry;
 
 HullPtr Hull::Copy(Shape& newShape) const
 {
-    ForEachFace([](const FacePtr& face) { face->CheckPointering(); });
+    ForEachFace([](const FaceRaw& face) { face->CheckPointering(); });
 
     HullPtr newHull = newShape.ConstructAndAddHull();
     newHull->SetOrientation(GetOrientation());
     newHull->SetBoundingShape(GetBoundingShape());
       
-    std::unordered_map<Patch*, PatchPtr> patches;
-    std::unordered_map<FacePtr, FacePtr> faces;
-    std::unordered_map<EdgePtr, EdgePtr> edges;
-    std::unordered_map<VertexPtr, VertexPtr> vertices;
-    std::unordered_map<NormalPtr, NormalPtr> normals;
-    std::unordered_map<ColorPtr, ColorPtr> colors;
-    std::unordered_map<TextureCoordPtr, TextureCoordPtr> textureCoordinates;
+    std::unordered_map<PatchRaw, PatchPtr> patches;
+    std::unordered_map<FaceRaw, FacePtr> faces;
+    std::unordered_map<EdgeRaw, EdgePtr> edges;
+    std::unordered_map<VertexRaw, VertexPtr> vertices;
+    std::unordered_map<NormalRaw, NormalPtr> normals;
+    std::unordered_map<ColorRaw, ColorPtr> colors;
+    std::unordered_map<TextureCoordRaw, TextureCoordPtr> textureCoordinates;
 
     // create a new instance for each existing patch, face, edge, vertex, normal, color and texturecoordinate
-    ForEachPatch([&](const PatchPtr& patch)
+    ForEachPatch([&](const PatchRaw& patch)
     {
-        colors.emplace(patch->GetColor(), ColorPtr());
-        patches.emplace(patch.get(), PatchPtr());
-        patch->ForEachFace([&](const FacePtr& face)
+        colors.emplace(patch->GetColor(), nullptr);
+        patches.emplace(patch, nullptr);
+        patch->ForEachFace([&](const FaceRaw& face)
         {
-            normals.emplace(face->GetNormal(), NormalPtr());
-            colors.emplace(face->GetColor(), ColorPtr());
-            faces.emplace(face, FacePtr());
-            face->ForEachEdge([&](const EdgePtr& edge)
+            normals.emplace(face->GetNormal(), nullptr);
+            colors.emplace(face->GetColor(), nullptr);
+            faces.emplace(face, nullptr);
+            face->ForEachEdge([&](const EdgeRaw& edge)
             {
-                edges.emplace(edge, EdgePtr());
-                vertices.emplace(edge->GetStartVertex(), VertexPtr());
-                normals.emplace(edge->GetStartNormal(), NormalPtr());
-                colors.emplace(edge->GetStartColor(), ColorPtr());
-                textureCoordinates.emplace(edge->GetStartTextureCoord(), TextureCoordPtr());
+                edges.emplace(edge, nullptr);
+                vertices.emplace(edge->GetStartVertex(), nullptr);
+                normals.emplace(edge->GetStartNormal(), nullptr);
+                colors.emplace(edge->GetStartColor(), nullptr);
+                textureCoordinates.emplace(edge->GetStartTextureCoord(), nullptr);
             });
         });
     });
@@ -65,7 +65,7 @@ HullPtr Hull::Copy(Shape& newShape) const
     }
     for (auto& faceMap : faces)
     {
-        PatchPtr patch = patches[&faceMap.first->GetPatch()];
+        PatchPtr patch = patches[faceMap.first->GetPatch()];
         assert(patch != nullptr);
         faceMap.second = patch->ConstructAndAddFace();
         patch->AddFace(faceMap.second);
@@ -95,26 +95,26 @@ HullPtr Hull::Copy(Shape& newShape) const
         faceMap.second->SetNormal(normals[faceMap.first->GetNormal()]);
         faceMap.second->SetColor(colors[faceMap.first->GetColor()]);
     }
-    newHull->ForEachFace([](const FacePtr& face) { face->CheckPointering(); });
+    newHull->ForEachFace([](const FaceRaw& face) { face->CheckPointering(); });
     return newHull;
 }
 
 void Hull::SplitTrianglesIn4()
 {
     size_t count = 0;
-    std::vector<FacePtr> faces;
-    std::unordered_set<EdgePtr> edges;
-    ForEachFace([&count](const FacePtr& face) 
+    std::vector<FaceRaw> faces;
+    std::unordered_set<EdgeRaw> edges;
+    ForEachFace([&count](const FaceRaw& face) 
     {
         ++count;
         face->CheckPointering(); 
     });
     faces.reserve(count);
-    ForEachFace([&edges,&faces](const FacePtr& face)
+    ForEachFace([&edges,&faces](const FaceRaw& face)
     {
         assert(3==face->GetEdgeCount());
         faces.emplace_back(face);
-        face->ForEachEdge([&](const EdgePtr& edge)
+        face->ForEachEdge([&](const EdgeRaw& edge)
         {
             if (edge < edge->GetTwin())
             {
@@ -122,29 +122,29 @@ void Hull::SplitTrianglesIn4()
             }
         });
     });
-    for (const EdgePtr& edge : edges)
+    for (const EdgeRaw& edge : edges)
     {
         edge->Split();
     }
-    for (FacePtr& face : faces)
+    for (FaceRaw& face : faces)
     {
-        Patch& patch = face->GetPatch();
+        PatchRaw patch = face->GetPatch();
         // new faces
-        FacePtr f0 = patch.ConstructAndAddFace();
-        FacePtr f1 = patch.ConstructAndAddFace();
-        FacePtr f2 = patch.ConstructAndAddFace();
-        FacePtr f3 = patch.ConstructAndAddFace();
+        FacePtr f0 = patch->ConstructAndAddFace();
+        FacePtr f1 = patch->ConstructAndAddFace();
+        FacePtr f2 = patch->ConstructAndAddFace();
+        FacePtr f3 = patch->ConstructAndAddFace();
         // edges, with e01 pre-existing
-        EdgePtr e01 = face->GetStartEdge();
+        EdgeRaw e01 = face->GetStartEdge();
         if (edges.find(e01) == edges.end())
         {
             e01 = e01->GetNext();
         }
-        EdgePtr e12 = e01->GetNext();
-        EdgePtr e23 = e12->GetNext();
-        EdgePtr e34 = e23->GetNext();
-        EdgePtr e45 = e34->GetNext();
-        EdgePtr e50 = e45->GetNext();
+        EdgeRaw e12 = e01->GetNext();
+        EdgeRaw e23 = e12->GetNext();
+        EdgeRaw e34 = e23->GetNext();
+        EdgeRaw e45 = e34->GetNext();
+        EdgeRaw e50 = e45->GetNext();
         // newly created vertices
         VertexPtr v1 = e12->GetStartVertex();
         VertexPtr v3 = e34->GetStartVertex();
@@ -154,18 +154,18 @@ void Hull::SplitTrianglesIn4()
         NormalPtr n3 = e34->GetStartNormal();
         NormalPtr n5 = e50->GetStartNormal();
         // create new edges
-        EdgePtr e13 = Face::ConstructAndAddEdge(f3, v1, n1);
-        EdgePtr e31 = Face::ConstructAndAddEdge(f1, v3, n3);
-        EdgePtr e35 = Face::ConstructAndAddEdge(f3, v3, n3);
-        EdgePtr e53 = Face::ConstructAndAddEdge(f2, v5, n5);
-        EdgePtr e15 = Face::ConstructAndAddEdge(f0, v1, n1);
-        EdgePtr e51 = Face::ConstructAndAddEdge(f3, v5, n5);
+        EdgePtr e13 = f3->ConstructAndAddEdge(v1, n1);
+        EdgePtr e31 = f1->ConstructAndAddEdge(v3, n3);
+        EdgePtr e35 = f3->ConstructAndAddEdge(v3, n3);
+        EdgePtr e53 = f2->ConstructAndAddEdge(v5, n5);
+        EdgePtr e15 = f0->ConstructAndAddEdge(v1, n1);
+        EdgePtr e51 = f3->ConstructAndAddEdge(v5, n5);
         // set new edge twins
         e13->SetTwin(e31); e31->SetTwin(e13);
         e35->SetTwin(e53); e53->SetTwin(e35);
         e15->SetTwin(e51); e51->SetTwin(e15);
         // set next/prev
-        auto Link = [](EdgePtr& e0, EdgePtr& e1) {e0->SetNext(e1); e1->SetPrev(e0); };
+        auto Link = [](EdgeRaw e0, EdgeRaw e1) {e0->SetNext(e1); e1->SetPrev(e0); };
         Link(e01, e15); Link(e15, e50);
         Link(e23, e31); Link(e31, e12);
         Link(e45, e53); Link(e53, e34);
@@ -192,41 +192,41 @@ void Hull::SplitTrianglesIn4()
         f2->CheckPointering();
         f3->CheckPointering();
         // remove old face
-        patch.RemoveFace(face);
+        patch->RemoveFace(face);
     }
 }
 
 void Hull::Triangulate()
 {
-    std::vector<FacePtr> faces;
-    ForEachFace([&faces](const FacePtr& face) 
+    std::vector<FaceRaw> faces;
+    ForEachFace([&faces](const FaceRaw& face) 
     {
         faces.emplace_back(face);
         face->CheckPointering();
     });
-    for (FacePtr& face : faces)
+    for (FaceRaw& face : faces)
     {
         face->Triangulate();
     }
 }
 
-void Hull::ForEachPatch(std::function<void(const PatchPtr& patch)> func) const
+void Hull::ForEachPatch(std::function<void(const PatchRaw& patch)> func) const
 {
-    for (const PatchPtr& patch : m_patches) 
+    for (const PatchRaw& patch : m_patches) 
     { 
         func(patch); 
     }
 }
-void Hull::ForEachFace(std::function<void(const FacePtr& facePtr)> func) const
+void Hull::ForEachFace(std::function<void(const FaceRaw& facePtr)> func) const
 {
-    ForEachPatch([func](const PatchPtr& patch) 
+    ForEachPatch([func](const PatchRaw& patch) 
     { 
         patch->ForEachFace(func); 
     });
 }
-void Hull::ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const
+void Hull::ForEachEdge(std::function<void(const EdgeRaw& edgePtr)> func) const
 {
-    ForEachFace([func](const FacePtr& face) 
+    ForEachFace([func](const FaceRaw& face) 
     { 
         face->ForEachEdge(func); 
     });

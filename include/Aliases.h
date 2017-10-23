@@ -18,9 +18,11 @@ namespace Geometry
 
     using Vertex = Vector3d;
     using VertexPtr = std::shared_ptr<Vertex>;
+    using VertexRaw = raw_ptr<Vertex>;
 
     using Normal = Vector3d;
     using NormalPtr = std::shared_ptr<Normal>;
+    using NormalRaw = raw_ptr<Normal>;
 
     template<typename POINT> class TLine;
     using Line2d = TLine<Vector2d>;
@@ -31,21 +33,27 @@ namespace Geometry
 
     class Edge;
     using EdgePtr = std::shared_ptr<Edge>;
+    using EdgeRaw = raw_ptr<Edge>;
 
     class Face;
     using FacePtr = std::shared_ptr<Face>;
+    using FaceRaw = raw_ptr<Face>;
 
     class Patch;
     using PatchPtr = std::shared_ptr<Patch>;
+    using PatchRaw = raw_ptr<Patch>;
 
     class Hull;
     using HullPtr = std::shared_ptr<Hull>;
+    using HullRaw = raw_ptr<Hull>;
 
     class Shape;
     using ShapePtr = std::shared_ptr<Shape>;
+    using ShapeRaw = raw_ptr<Shape>;
 
     using TextureCoord = Vector2d;
     using TextureCoordPtr = std::shared_ptr<TextureCoord>;
+    using TextureCoordRaw = raw_ptr<TextureCoord>;
 
     using MousePos = Vector2i;
 
@@ -61,6 +69,7 @@ namespace Geometry
 
     using Color = RGBAColorf;
     using ColorPtr = std::shared_ptr<Color>;
+    using ColorRaw = raw_ptr<Color>;
 
     template<typename VECTOR_TYPE> class TBoundingShape;
     using BoundingShape2d = TBoundingShape<Vector2d>;

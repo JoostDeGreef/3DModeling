@@ -9,8 +9,8 @@ void Face::CalcNormal()
 {
     CheckPointering();
     Normal normal(0, 0, 0);
-    VertexPtr p0 = (*m_edges.begin())->GetPrev()->GetStartVertex();
-    ForEachVertex([&normal,&p0](const VertexPtr& p1)
+    VertexRaw p0 = (*m_edges.begin())->GetPrev()->GetStartVertex();
+    ForEachVertex([&normal,&p0](const VertexRaw& p1)
     {
         normal += CrossProduct(*p0, *p1);
         p0 = p1;
@@ -19,11 +19,11 @@ void Face::CalcNormal()
     m_normal = Construct<Normal>(normal / surface);
 }
 
-const std::vector<EdgePtr> Face::GetEdgesOrdered() const
+const std::vector<EdgeRaw> Face::GetEdgesOrdered() const
 {
-    std::vector<EdgePtr> res;
+    std::vector<EdgeRaw> res;
     res.reserve(m_edges.size());
-    ForEachEdge([&](EdgePtr edge) 
+    ForEachEdge([&](const EdgeRaw& edge) 
     {
         res.emplace_back(edge);
     });
@@ -43,10 +43,10 @@ public:
 
 private:
     // return two strips which connect the 'extreme' points
-    std::pair<std::pair<EdgePtr,int>, std::pair<EdgePtr,int>> FindExtremeVertices(bool AllowNeighbors)
+    std::pair<std::pair<EdgeRaw,int>, std::pair<EdgeRaw,int>> FindExtremeVertices(bool AllowNeighbors)
     {
-        std::vector<std::pair<VertexPtr, EdgePtr>> edges;
-        m_face->ForEachEdge([&](const EdgePtr& edge)
+        std::vector<std::pair<VertexPtr, EdgeRaw>> edges;
+        m_face->ForEachEdge([&](const EdgeRaw& edge)
         {
             edges.emplace_back(edge->GetStartVertex(),edge);
         });
@@ -79,7 +79,7 @@ private:
         // check the input face is valid
         assert(m_face->GetEdgeCount() >= (size_t)(AddVertices?3:4));
         // parent objects
-        Patch& patch = m_face->GetPatch();
+        PatchRaw patch = m_face->GetPatch();
         // find the two extreme vertices
         auto extremes = FindExtremeVertices(AddVertices);
         // split edges if needed
@@ -94,24 +94,22 @@ private:
             extremes.second.second++;
         }
         // get the 2 edges _after_ which the connecting edges should be attached
-        EdgePtr split0 = extremes.first.first;
+        EdgeRaw split0 = extremes.first.first;
         for (int i = 1; i < extremes.first.second / 2; ++i)
         {
             split0 = split0->GetNext();
         }
-        EdgePtr split1 = extremes.second.first;
+        EdgeRaw split1 = extremes.second.first;
         for (int i = 1; i < extremes.second.second / 2; ++i)
         {
             split1 = split1->GetNext();
         }
         // create new face and connecting edges
-        FacePtr newFace0 = Construct<Face>(patch);
-        FacePtr newFace1 = Construct<Face>(patch);
-        patch.AddFace(newFace0);
-        patch.AddFace(newFace1);
+        FacePtr newFace0 = patch->ConstructAndAddFace();
+        FacePtr newFace1 = patch->ConstructAndAddFace();
 
-        EdgePtr edge0 = Face::ConstructAndAddEdge(newFace0,split0->GetEndVertex());
-        EdgePtr edge1 = Face::ConstructAndAddEdge(newFace1,split1->GetEndVertex());
+        EdgePtr edge0 = newFace0->ConstructAndAddEdge(split0->GetEndVertex());
+        EdgePtr edge1 = newFace1->ConstructAndAddEdge(split1->GetEndVertex());
 
         edge0->SetStartNormal(split0->GetEndNormal());
         edge1->SetStartNormal(split1->GetEndNormal());
@@ -129,9 +127,9 @@ private:
         split1->SetNext(edge1);
         
         // move all the edges to their new face
-        auto MoveEdges = [&](const EdgePtr& edge, const FacePtr& newFace)
+        auto MoveEdges = [&](const EdgeRaw& edge, const FacePtr& newFace)
         {
-            EdgePtr next = edge->GetNext();
+            EdgeRaw next = edge->GetNext();
             while (next != edge)
             {
                 newFace->AddEdge(next);
@@ -146,7 +144,7 @@ private:
         newFace0->SetColor(m_face->GetColor());
         newFace1->SetColor(m_face->GetColor());
         // remove the original face
-        patch.RemoveFace(m_face);
+        patch->RemoveFace(m_face);
         // update and check
         newFace0->CalcNormal();
         newFace1->CalcNormal();
@@ -176,10 +174,10 @@ public:
 
 };
 
-void Face::ForEachEdge(std::function<void(const EdgePtr&edge)> func) const
+void Face::ForEachEdge(std::function<void(const EdgeRaw& edge)> func) const
 {
-    const EdgePtr startEdge = GetStartEdge();
-    EdgePtr edge = startEdge;
+    EdgeRaw startEdge = GetStartEdge();
+    EdgeRaw edge = startEdge;
     do
     {
         func(edge);
@@ -187,9 +185,9 @@ void Face::ForEachEdge(std::function<void(const EdgePtr&edge)> func) const
     } while (edge != startEdge);
 }
 
-void Face::ForEachVertex(std::function<void(const VertexPtr&vertex)> func) const
+void Face::ForEachVertex(std::function<void(const VertexRaw& vertex)> func) const
 {
-    ForEachEdge([func](const EdgePtr& edge)
+    ForEachEdge([func](const EdgeRaw& edge)
     {
         func(edge->GetStartVertex());
     });
@@ -197,13 +195,13 @@ void Face::ForEachVertex(std::function<void(const VertexPtr&vertex)> func) const
 
 std::pair<FacePtr, FacePtr> Face::Split()
 {
-    FaceSplitter splitter(this->GetStartEdge()->GetFace());
+    FaceSplitter splitter(shared_from_this());
     return splitter.Split();
 }
 
 void Face::Triangulate()
 {
-    FaceSplitter splitter(this->GetStartEdge()->GetFace());
+    FaceSplitter splitter(shared_from_this());
     splitter.Triangulate();
 }
 
@@ -214,29 +212,29 @@ void Face::CheckPointering() const
     assert(!m_edges.empty());
     // valid faces have more than 2 edges
     size_t count = 0;
-    ForEachEdge([&count](const EdgePtr& edge) {++count; });
+    ForEachEdge([&count](const EdgeRaw& edge) {++count; });
     assert(count > 2);
     // all edges should be linked
     assert(m_edges.size() == count);
     // all linked edges should be 'owned' by this face
-    ForEachEdge([&](const EdgePtr& edge)
+    ForEachEdge([&](const EdgeRaw& edge)
     {
-        assert(m_edges.find(edge) != m_edges.end());
+        assert(m_edges.find(edge.lock()) != m_edges.end());
     });
     // check that twins know eachother
-    ForEachEdge([](const EdgePtr& edge)
+    ForEachEdge([](const EdgeRaw& edge)
     {
         assert(edge->GetTwin() != nullptr);
         assert(edge == edge->GetTwin()->GetTwin());
     });
     // check that every edge knows this face
-    ForEachEdge([&](const EdgePtr& edge)
+    ForEachEdge([&](const EdgeRaw& edge)
     {
         assert(edge->GetFace() != nullptr);
     });
     // check that all edge normals are set or none
     int normalCount = 0;
-    ForEachEdge([&normalCount](const EdgePtr& edge)
+    ForEachEdge([&normalCount](const EdgeRaw& edge)
     {
         if (edge->GetStartNormal())
         {

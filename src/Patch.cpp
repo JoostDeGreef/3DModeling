@@ -8,17 +8,17 @@ void Patch::CalculateBoundingShape()
     m_boundingShape.Set(BoundingShape3d::Type::Ball, vertices.begin(), vertices.end());
 }
 
-const Shape& Patch::GetShape() const
+const ShapeRaw& Patch::GetShape() const
 {
-    return GetHull().GetShape();
+    return GetHull()->GetShape();
 }
 
-std::unordered_set<VertexPtr> Patch::GetVertices() const
+std::unordered_set<VertexRaw> Patch::GetVertices() const
 {
-    std::unordered_set<VertexPtr> vertices;
-    ForEachFace([&vertices](const FacePtr& face)
+    std::unordered_set<VertexRaw> vertices;
+    ForEachFace([&vertices](const FaceRaw& face)
     {
-        face->ForEachVertex([&vertices](const VertexPtr& vertex)
+        face->ForEachVertex([&vertices](const VertexRaw& vertex)
         {
             vertices.insert(vertex);
         });
@@ -26,25 +26,25 @@ std::unordered_set<VertexPtr> Patch::GetVertices() const
     return vertices;
 }
 
-void Patch::ForEachFace(std::function<void(const FacePtr& facePtr)> func) const
+void Patch::ForEachFace(std::function<void(const FaceRaw& facePtr)> func) const
 {
-    for (const FacePtr& face : m_faces)
+    for (const FaceRaw& face : m_faces)
     {
         func(face);
     }
 }
 
-void Patch::ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const
+void Patch::ForEachEdge(std::function<void(const EdgeRaw& edgePtr)> func) const
 {
-    ForEachFace([func](const FacePtr & facePtr)
+    ForEachFace([func](const FaceRaw & facePtr)
     {
         facePtr->ForEachEdge(func);
     });
 }
 
-void Patch::ForEachVertex(std::function<void(const VertexPtr& vertexPtr)> func) const
+void Patch::ForEachVertex(std::function<void(const VertexRaw& vertexPtr)> func) const
 {
-    for (const VertexPtr& vertex : GetVertices())
+    for (const VertexRaw& vertex : GetVertices())
     {
         func(vertex);
     }

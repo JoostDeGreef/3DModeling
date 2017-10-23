@@ -19,14 +19,14 @@
 
 #include "boost/format.hpp"
 
+#include "SmallObjectAllocator.h"
+
 #include "Aliases.h"
 
 #include "SQLiteDB.h"
 #include "Operations.h"
 #include "Numerics.h"
 #include "MiniBall.h"
-
-#include "SmallObjectAllocator.h"
 
 #include "Vector.h"
 #include "Line.h"

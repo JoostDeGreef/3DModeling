@@ -5,19 +5,19 @@ namespace Geometry
 {
     /* Face : full edge indexed winged face
      */
-    class Face
+    class Face : public std::enable_shared_from_this<Face>
     {
     public:
         typedef Face this_type;
         typedef std::unordered_set<EdgePtr> container_type;        
     private:
-        Patch& m_patch;
+        PatchRaw m_patch;
         container_type m_edges;
         NormalPtr m_normal;
         ColorPtr m_color;
 
     protected:
-        Face(Patch& patch)
+        Face(const PatchRaw& patch)
             : m_edges()
             , m_normal()
             , m_patch(patch)
@@ -31,20 +31,15 @@ namespace Geometry
 
         ~Face();
 
-        void AddEdge(EdgePtr& edge)
-        {
-            m_edges.emplace(edge);
-        }
-        void RemoveEdge(EdgePtr& edge)
-        {
-            m_edges.erase(edge);
-        }
+        const EdgePtr& AddEdge(EdgePtr& edge) { return *m_edges.emplace(edge).first; }
+        const EdgePtr& AddEdge(EdgeRaw& edge) { return AddEdge(edge.lock()); }
+        void RemoveEdge(EdgePtr& edge) { m_edges.erase(edge); }
+        void RemoveEdge(EdgeRaw& edge) { RemoveEdge(edge.lock()); }
         template<typename... Args>
-        static EdgePtr ConstructAndAddEdge(FacePtr& newFace, Args&&... args)
+        const EdgePtr& ConstructAndAddEdge(Args&&... args)
         {
-            EdgePtr edge = Construct<Edge>(newFace, std::forward<Args>(args)...);
-            newFace->AddEdge(edge);
-            return edge;
+            EdgePtr edge = Construct<Edge>(this, std::forward<Args>(args)...);
+            return AddEdge(edge);
         }
 
         decltype(auto) GetNormal() const { return m_normal; }
@@ -53,19 +48,19 @@ namespace Geometry
 
         const EdgePtr& GetStartEdge() const { return *m_edges.begin(); }
         const container_type& GetEdgesUnordered() const { return m_edges; }
-        const std::vector<EdgePtr> GetEdgesOrdered() const;
+        const std::vector<EdgeRaw> GetEdgesOrdered() const;
 
         const ColorPtr& GetColor() const { return m_color; }
         void SetColor(const ColorPtr& color) { m_color = color; }
 
-        const Patch& GetPatch() const { return m_patch; }
-        Patch& GetPatch() { return m_patch; }
-        //void SetPatch(const PatchPtr& patch) { m_patch = patch; }
+        const PatchRaw& GetPatch() const { return m_patch; }
+        PatchRaw& GetPatch() { return m_patch; }
+        //void SetPatch(const PatchRaw& patch) { m_patch = patch; }
 
         size_t GetEdgeCount() const { return m_edges.size(); }
 
-        void ForEachEdge(std::function<void(const EdgePtr& edge)> func) const;
-        void ForEachVertex(std::function<void(const VertexPtr& vertex)> func) const;
+        void ForEachEdge(std::function<void(const EdgeRaw& edge)> func) const;
+        void ForEachVertex(std::function<void(const VertexRaw& vertex)> func) const;
 
         // Split the face in 2; may add vertices
         std::pair<FacePtr, FacePtr> Split();

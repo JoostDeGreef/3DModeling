@@ -15,7 +15,7 @@ protected:
     int FaceCount(ShapePtr shape)
     {
         int count = 0;
-        shape->ForEachFace([&count](const FacePtr& face)
+        shape->ForEachFace([&count](const FaceRaw& face)
         {
             count++;
         });

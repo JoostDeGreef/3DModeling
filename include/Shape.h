@@ -3,7 +3,7 @@
 
 namespace Geometry
 {
-    class Shape 
+    class Shape : std::enable_shared_from_this<Shape>
     {
     public:
         typedef std::unordered_set<HullPtr> container_type;
@@ -25,29 +25,36 @@ namespace Geometry
 
         virtual ~Shape();
 
-        void AddHull(HullPtr& hull)
+        const HullPtr& AddHull(const HullPtr& hull)
         {
-            m_hulls.emplace(hull);
+            return *m_hulls.emplace(hull).first;
         }
-        void RemoveHull(HullPtr& hull)
+        const HullPtr& AddHull(const HullRaw& hull)
+        {
+            return AddHull(hull.lock());
+        }
+        void RemoveHull(const HullPtr& hull)
         {
             m_hulls.erase(hull);
         }
-        template<typename... Args>
-        HullPtr ConstructAndAddHull(Args&&... args)
+        void RemoveHull(const HullRaw& hull)
         {
-            HullPtr hull = Construct<Hull>(*this,std::forward<Args>(args)...);
-            AddHull(hull);
-            return hull;
+            RemoveHull(hull.lock());
+        }
+        template<typename... Args>
+        const HullPtr& ConstructAndAddHull(Args&&... args)
+        {
+            HullPtr hull = Construct<Hull>(this,std::forward<Args>(args)...);
+            return AddHull(hull);
         }
 
         const container_type& GetHulls() const { return m_hulls; }
 
-        void ForEachHull(std::function<void(const HullPtr& hull)> func) const;
-        void ForEachPatch(std::function<void(const PatchPtr& patch)> func) const;
-        void ForEachFace(std::function<void(const FacePtr& facePtr)> func) const;
-        void ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const;
-        void ForEachVertex(std::function<void(const VertexPtr& vertexPtr)> func) const;
+        void ForEachHull(std::function<void(const HullRaw& hull)> func) const;
+        void ForEachPatch(std::function<void(const PatchRaw& patch)> func) const;
+        void ForEachFace(std::function<void(const FaceRaw& facePtr)> func) const;
+        void ForEachEdge(std::function<void(const EdgeRaw& edgePtr)> func) const;
+        void ForEachVertex(std::function<void(const VertexRaw& vertexPtr)> func) const;
 
         // Split all edges in the shape and connect them; divide all triangles into 4 triangles.
         void SplitTrianglesIn4();

@@ -36,7 +36,7 @@ Shape::~Shape()
     Clear();
 }
 
-void Shape::ForEachHull(std::function<void(const HullPtr& hull)> func) const
+void Shape::ForEachHull(std::function<void(const HullRaw& hull)> func) const
 {
     for (const HullPtr& hull : GetHulls()) 
     { 
@@ -44,41 +44,41 @@ void Shape::ForEachHull(std::function<void(const HullPtr& hull)> func) const
     }
 }
 
-void Shape::ForEachPatch(std::function<void(const PatchPtr& patch)> func) const
+void Shape::ForEachPatch(std::function<void(const PatchRaw& patch)> func) const
 {
-    ForEachHull([func](const HullPtr& hull) 
+    ForEachHull([func](const HullRaw& hull) 
     { 
         hull->ForEachPatch(func); 
     });
 }
 
-void Shape::ForEachFace(std::function<void(const FacePtr& facePtr)> func) const
+void Shape::ForEachFace(std::function<void(const FaceRaw& facePtr)> func) const
 {
-    ForEachHull([func](const HullPtr& hull) 
+    ForEachHull([func](const HullRaw& hull) 
     { 
         hull->ForEachFace(func); 
     });
 }
 
-void Shape::ForEachEdge(std::function<void(const EdgePtr& edgePtr)> func) const
+void Shape::ForEachEdge(std::function<void(const EdgeRaw& edgePtr)> func) const
 {
-    ForEachHull([func](const HullPtr& hull) 
+    ForEachHull([func](const HullRaw& hull) 
     { 
         hull->ForEachEdge(func); 
     });
 }
 
-void Shape::ForEachVertex(std::function<void(const VertexPtr& vertexPtr)> func) const
+void Shape::ForEachVertex(std::function<void(const VertexRaw& vertexPtr)> func) const
 {
-    std::unordered_set<VertexPtr> vertices;
-    ForEachFace([&vertices](const FacePtr& face)
+    std::unordered_set<VertexRaw> vertices;
+    ForEachFace([&vertices](const FaceRaw& face)
     {
-        face->ForEachVertex([&vertices](const VertexPtr& vertex)
+        face->ForEachVertex([&vertices](const VertexRaw& vertex)
         {
             vertices.insert(vertex);
         });
     });
-    for (const VertexPtr& vertex : vertices)
+    for (const VertexRaw& vertex : vertices)
     {
         func(vertex);
     }
@@ -86,7 +86,7 @@ void Shape::ForEachVertex(std::function<void(const VertexPtr& vertexPtr)> func) 
 
 void Shape::SplitTrianglesIn4()
 {
-    ForEachHull([](const HullPtr& hull) 
+    ForEachHull([](const HullRaw& hull) 
     {
         hull->SplitTrianglesIn4(); 
     });
@@ -94,7 +94,7 @@ void Shape::SplitTrianglesIn4()
 
 void Shape::Triangulate()
 {
-    ForEachHull([](const HullPtr& hull) 
+    ForEachHull([](const HullRaw& hull) 
     {
         hull->Triangulate(); 
     });
@@ -107,7 +107,7 @@ void Shape::Clear()
 
 void Shape::Scale(const double factor)
 {
-    ForEachVertex([factor](const VertexPtr& vertex)
+    ForEachVertex([factor](const VertexRaw& vertex)
     {
         (*vertex) *= factor;
     });
@@ -115,7 +115,7 @@ void Shape::Scale(const double factor)
 
 void Shape::Translate(const Vector3d& translation)
 {
-    ForEachVertex([translation](const VertexPtr& vertex)
+    ForEachVertex([translation](const VertexRaw& vertex)
     {
         (*vertex) += translation;
     });
@@ -240,18 +240,15 @@ namespace
 
 void Shape::Store(SQLite::DB& db) const
 {
-    ForEachFace([](const FacePtr& face) {face->CheckPointering(); });
+    ForEachFace([](const FaceRaw& face) {face->CheckPointering(); });
 
-    std::unordered_map<HullPtr, size_t> hulls;
-    std::unordered_map<EdgePtr, size_t> edges;
-    std::unordered_map<VertexPtr, size_t> vertices;
-    std::unordered_map<NormalPtr, size_t> normals;
-    std::unordered_map<TextureCoordPtr, size_t> textureCoords;
-    std::unordered_map<FacePtr, size_t> faces;
-    std::unordered_map<PatchPtr, size_t> patches;
-
-    std::unordered_map<const Hull*, size_t> hullsRaw;
-    std::unordered_map<const Patch*, size_t> patchesRaw;
+    std::unordered_map<HullRaw, size_t> hulls;
+    std::unordered_map<EdgeRaw, size_t> edges;
+    std::unordered_map<VertexRaw, size_t> vertices;
+    std::unordered_map<NormalRaw, size_t> normals;
+    std::unordered_map<TextureCoordRaw, size_t> textureCoords;
+    std::unordered_map<FaceRaw, size_t> faces;
+    std::unordered_map<PatchRaw, size_t> patches;
 
     // start with 'null' values
     hulls.emplace(nullptr, 0);
@@ -262,17 +259,17 @@ void Shape::Store(SQLite::DB& db) const
     vertices.emplace(nullptr, 0);
     textureCoords.emplace(nullptr, 0);
 
-    ForEachHull([&](const HullPtr& hull)
+    ForEachHull([&](const HullRaw& hull)
     {
         hulls.emplace(hull, hulls.size());
-        hull->ForEachPatch([&](const PatchPtr& patch)
+        hull->ForEachPatch([&](const PatchRaw& patch)
         {
             patches.emplace(patch, patches.size());
-            patch->ForEachFace([&](const FacePtr& face)
+            patch->ForEachFace([&](const FaceRaw& face)
             {
                 normals.emplace(face->GetNormal(), normals.size());
                 faces.emplace(face, faces.size());
-                face->ForEachEdge([&](const EdgePtr& edge)
+                face->ForEachEdge([&](const EdgeRaw& edge)
                 {
                     edges.emplace(edge, edges.size());
                     vertices.emplace(edge->GetStartVertex(), vertices.size());
@@ -282,16 +279,6 @@ void Shape::Store(SQLite::DB& db) const
             });
         });
     });
-
-    // get raw ptr maps
-    for (auto& item : patches)
-    {
-        patchesRaw.emplace(item.first ? item.first.get() : nullptr, item.second);
-    }
-    for (auto& item : hulls)
-    {
-        hullsRaw.emplace(item.first ? item.first.get() : nullptr, item.second);
-    }
 
     // All work within one transaction
     db.BeginTransaction();
@@ -384,7 +371,7 @@ void Shape::Store(SQLite::DB& db) const
         {
             s.Reset();
             s.Bind(1, (int64_t)face.second);
-            s.Bind(2, (int64_t)patchesRaw[&face.first->GetPatch()]);
+            s.Bind(2, (int64_t)patches[face.first->GetPatch()]);
             s.Bind(3, (int64_t)normals[face.first->GetNormal()]);
             s.Bind(4, (int64_t)(face.first->GetColor()?face.first->GetColor()->GetInt():-1));
             s.ExecDML();
@@ -402,7 +389,7 @@ void Shape::Store(SQLite::DB& db) const
         {
             s.Reset();
             s.Bind(1, (int64_t)patch.second);
-            s.Bind(2, (int64_t)hullsRaw[&patch.first->GetHull()]);
+            s.Bind(2, (int64_t)hulls[patch.first->GetHull()]);
             s.Bind(3, (int64_t)(patch.first->GetColor()?patch.first->GetColor()->GetInt():-1));
             s.Bind(4, StoreBoundingShape(patch.first->GetBoundingShape()));
             s.ExecDML();
@@ -554,7 +541,7 @@ void Shape::Retrieve(SQLite::DB& db)
         auto& vertex = vertices[query.GetInt64Field(1)];
         auto& normal = normals[query.GetInt64Field(2)];
         int64_t faceId = query.GetInt64Field(3);
-        auto edge = Face::ConstructAndAddEdge(faces[faceId],vertex,normal);
+        auto edge = faces[faceId]->ConstructAndAddEdge(vertex,normal);
         edges.emplace(Id, edge);
     }
     query = db.ExecQuery("SELECT Id,Twin,Next,Prev,Color,TextureCoord FROM Edges");
@@ -575,5 +562,5 @@ void Shape::Retrieve(SQLite::DB& db)
     db.CommitTransaction();
 
     // check the result
-    ForEachFace([](const FacePtr& face) {face->CheckPointering(); });
+    ForEachFace([](const FaceRaw& face) {face->CheckPointering(); });
 }

@@ -11,12 +11,10 @@
 using namespace std;
 using namespace std::chrono_literals;
 
-#include "GLAD/glad.h"
-#include "GLFW/glfw3.h"
-
 #include "Geometry.h"
 #include "GLWrappers.h"
 #include "UserInterface.h"
+#include "RenderObjects.h"
 using namespace Geometry;
 
 namespace Viewer
@@ -257,10 +255,14 @@ namespace Viewer
             lock.unlock();
 
             glfwSwapBuffers(m_window);
+
+            HandleDisposedRenderObjects();
         }
 
         void State::DrawShapes()
         {
+            static unsigned int renderTick = 0;
+
             auto EdgeDummy = [](const EdgeRaw& edge) {};
             auto EdgeNormal = [](const EdgeRaw& edge)
             {
@@ -362,7 +364,8 @@ namespace Viewer
             //front.Normalize();
             auto DrawPatch = [&](const PatchRaw& patch)
             {
-                unsigned int displayList = patch->GetDisplayList();
+                PatchRenderObject& renderObject = GetRenderObject(patch);
+                unsigned int displayList = renderObject.GetDisplayList();
                 if (0 == displayList)
                 {
                     displayList = glGenLists(1);
@@ -371,7 +374,7 @@ namespace Viewer
                     glBindTexture(GL_TEXTURE_2D, patch->GetTextureId());
                     DrawFaces(patch);
                     glEndList();
-                    patch->SetDisplayList(displayList);
+                    renderObject.SetDisplayList(displayList);
                 }
                 glCallList(displayList);
             };
@@ -385,10 +388,17 @@ namespace Viewer
 
             glMultMatrix(CalculateRotation());
 
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDisable(GL_CULL_FACE);
+
+            ++renderTick;
             for (const Geometry::ShapeRaw& shape : m_shapes)
             {
                 shape->ForEachPatch(DrawPatch);
             }
+
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glEnable(GL_CULL_FACE);
 
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();

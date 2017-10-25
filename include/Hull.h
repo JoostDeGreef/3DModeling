@@ -41,22 +41,10 @@ namespace Geometry
         // copies the hull into newShape
         HullPtr Hull::Copy(Shape& newShape) const;
 
-        const PatchPtr& AddPatch(const PatchPtr& patch)
-        {
-            return *m_patches.emplace(patch).first;
-        }
-        const PatchPtr& AddPatch(const PatchRaw& patch)
-        {
-            return AddPatch(patch.lock());
-        }
-        void RemovePatch(const PatchPtr& patch)
-        {
-            m_patches.erase(patch);
-        }
-        void RemovePatch(const PatchRaw& patch)
-        {
-            RemovePatch(patch.lock());
-        }
+        const PatchPtr& AddPatch(const PatchPtr& patch) { return *m_patches.emplace(patch).first; }
+        const PatchPtr& AddPatch(const PatchRaw& patch) { return AddPatch(patch.lock()); }
+        void RemovePatch(const PatchPtr& patch) { m_patches.erase(patch); }
+        void RemovePatch(const PatchRaw& patch) { RemovePatch(patch.lock()); }
         template<typename... Args>
         const PatchPtr& ConstructAndAddPatch(Args&&... args)
         {

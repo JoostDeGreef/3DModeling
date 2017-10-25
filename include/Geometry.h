@@ -20,6 +20,7 @@
 #include "boost/format.hpp"
 
 #include "SmallObjectAllocator.h"
+#include "IRenderObject.h"
 
 #include "Aliases.h"
 

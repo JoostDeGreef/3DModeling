@@ -161,11 +161,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Viewer\GLWrappers.cpp" />
+    <ClCompile Include="..\src\Viewer\RenderObjects.cpp" />
     <ClCompile Include="..\src\Viewer\UserInterface.cpp" />
     <ClCompile Include="..\src\Viewer\ViewerMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Viewer\GLWrappers.h" />
+    <ClInclude Include="..\src\Viewer\RenderObjects.h" />
     <ClInclude Include="..\src\Viewer\UserInterface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -104,6 +104,9 @@
     <ClInclude Include="..\src\SQLiteDB\SQLiteSupport.h">
       <Filter>Header Files\SQLiteDB\internal</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\IRenderObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Edge.cpp">

@@ -1,6 +1,9 @@
 #ifndef VIEWER_GLWRAPPERS_H
 #define VIEWER_GLWRAPPERS_H 1
 
+#include "GLAD/glad.h"
+#include "GLFW/glfw3.h"
+
 namespace Viewer
 {
     void glColor(const Geometry::RGBAColorf& color);

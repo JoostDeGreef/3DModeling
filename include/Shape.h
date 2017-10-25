@@ -25,22 +25,10 @@ namespace Geometry
 
         virtual ~Shape();
 
-        const HullPtr& AddHull(const HullPtr& hull)
-        {
-            return *m_hulls.emplace(hull).first;
-        }
-        const HullPtr& AddHull(const HullRaw& hull)
-        {
-            return AddHull(hull.lock());
-        }
-        void RemoveHull(const HullPtr& hull)
-        {
-            m_hulls.erase(hull);
-        }
-        void RemoveHull(const HullRaw& hull)
-        {
-            RemoveHull(hull.lock());
-        }
+        const HullPtr& AddHull(const HullPtr& hull) { return *m_hulls.emplace(hull).first; }
+        const HullPtr& AddHull(const HullRaw& hull) { return AddHull(hull.lock()); }
+        void RemoveHull(const HullPtr& hull) { m_hulls.erase(hull); }
+        void RemoveHull(const HullRaw& hull) { RemoveHull(hull.lock()); }
         template<typename... Args>
         const HullPtr& ConstructAndAddHull(Args&&... args)
         {

@@ -42,8 +42,8 @@ namespace Geometry
             return AddEdge(edge);
         }
 
-        decltype(auto) GetNormal() const { return m_normal; }
-        void SetNormal(const decltype(m_normal)& normal) { m_normal = normal; }
+        const NormalPtr& GetNormal() const { return m_normal; }
+        void SetNormal(const NormalPtr& normal) { m_normal = normal; }
         void CalcNormal();
 
         const EdgePtr& GetStartEdge() const { return *m_edges.begin(); }

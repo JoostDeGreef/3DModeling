@@ -13,9 +13,9 @@ namespace Geometry
         HullRaw m_hull;
         container_type m_faces;
         ColorPtr m_color;
-        unsigned int m_displayList;
         unsigned int m_textureId;
         BoundingShape3d m_boundingShape;
+        std::unique_ptr<IRenderObject> m_renderObject;
 
     protected:
         Patch(const HullRaw& hull)
@@ -24,9 +24,9 @@ namespace Geometry
         Patch(const HullRaw& hull, const ColorPtr& color)
             : m_hull(hull)
             , m_color(color)
-            , m_displayList(0)
             , m_textureId(0)
             , m_boundingShape()
+            , m_renderObject(std::make_unique<NOPRenderObject>())
         {}
 
         Patch(const this_type &other) = default;
@@ -35,22 +35,10 @@ namespace Geometry
         Patch& operator = (const this_type &other) = delete;
         Patch& operator = (this_type &&other) = delete;
 
-        const FacePtr& AddFace(const FacePtr& face)
-        {
-            return *m_faces.emplace(face).first;
-        }
-        const FacePtr& AddFace(const FaceRaw& face)
-        {
-            return AddFace(face.lock());
-        }
-        void RemoveFace(const FacePtr& face)
-        {
-            m_faces.erase(face);
-        }
-        void RemoveFace(const FaceRaw& face)
-        {
-            RemoveFace(face.lock());
-        }
+        const FacePtr& AddFace(const FacePtr& face) { return *m_faces.emplace(face).first; }
+        const FacePtr& AddFace(const FaceRaw& face) { return AddFace(face.lock()); }
+        void RemoveFace(const FacePtr& face) { m_faces.erase(face); }
+        void RemoveFace(const FaceRaw& face) { RemoveFace(face.lock()); }
         template<typename... Args>
         const FacePtr& ConstructAndAddFace(Args&& ... args)
         {
@@ -58,18 +46,20 @@ namespace Geometry
             return AddFace(face);
         }
 
+        // used for rendering or other state observation.
+        void Invalidate() { m_renderObject->Invalidate(); }
+        IRenderObject* GetRenderObject() const { return m_renderObject.get(); }
+        void SetRenderObject(std::unique_ptr<IRenderObject>&& renderObject) { m_renderObject = std::move(renderObject); }
+
         const ColorPtr& GetColor() const { return m_color; }
-        void SetColor(const ColorPtr& color) { m_color = color; }
+        void SetColor(const ColorPtr& color) { m_color = color; Invalidate(); }
 
         const BoundingShape3d& GetBoundingShape() const { return m_boundingShape; }
-        void SetBoundingShape(const BoundingShape3d& boundingShape) { m_boundingShape = boundingShape; }
+        void SetBoundingShape(const BoundingShape3d& boundingShape) { m_boundingShape = boundingShape; Invalidate(); }
         void CalculateBoundingShape();
 
         unsigned int GetTextureId() const { return m_textureId; }
-        void SetTextureId(const unsigned int textureId) { m_textureId = textureId; }
-
-        unsigned int GetDisplayList() const { return m_displayList; }
-        void SetDisplayList(const unsigned int displayList) { m_displayList = displayList; }
+        void SetTextureId(const unsigned int textureId) { m_textureId = textureId; Invalidate(); }
 
         const container_type& GetFaces() const { return m_faces; }
         std::unordered_set<VertexRaw> GetVertices() const;

@@ -21,7 +21,7 @@ Cube::Cube()
     auto CreateFace = [&](VertexPtr& a, VertexPtr& b, VertexPtr& c, VertexPtr& d,
                           EdgePtr& ab, EdgePtr& bc, EdgePtr& cd, EdgePtr& da)
     {
-        FacePtr face = hull->ConstructAndAddPatch()->ConstructAndAddFace();
+        FacePtr face = hull->ConstructAndAddFace();
         ab = face->ConstructAndAddEdge(a);
         bc = face->ConstructAndAddEdge(b);
         cd = face->ConstructAndAddEdge(c);

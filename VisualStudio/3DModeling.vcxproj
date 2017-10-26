@@ -148,8 +148,8 @@
     <ClInclude Include="..\include\Hull.h" />
     <ClInclude Include="..\include\MiniBall.h" />
     <ClInclude Include="..\include\Operations.h" />
-    <ClInclude Include="..\include\Patch.h" />
     <ClInclude Include="..\include\Quaternion.h" />
+    <ClInclude Include="..\include\RenderInfo.h" />
     <ClInclude Include="..\include\RGBAColor.h" />
     <ClInclude Include="..\include\RGBColor.h" />
     <ClInclude Include="..\include\RotationMatrix.h" />
@@ -179,11 +179,13 @@
     <ClCompile Include="..\src\Edge.cpp" />
     <ClCompile Include="..\src\Face.cpp" />
     <ClCompile Include="..\src\Hull.cpp" />
-    <ClCompile Include="..\src\Patch.cpp" />
     <ClCompile Include="..\src\Shape.cpp" />
     <ClCompile Include="..\src\SQLiteDB\SQLiteDB.cpp" />
     <ClCompile Include="..\src\SQLiteDB\SQLiteQuery.cpp" />
     <ClCompile Include="..\src\SQLiteDB\SQLiteStatement.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

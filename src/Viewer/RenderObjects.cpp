@@ -1,16 +1,22 @@
+#include <functional>
+
+using namespace std;
+
 #include "Geometry.h"
 #include "GLWrappers.h"
 #include "RenderObjects.h"
 
+using namespace Geometry;
+
 namespace Viewer
 {
 
-    PatchRenderObject::~PatchRenderObject()
+    HullRenderObject::~HullRenderObject()
     {
         DisposeRenderObject(m_displayList);
     }
 
-    void PatchRenderObject::Check()
+    void HullRenderObject::Check()
     {
         if (m_needsUpdate > 0)
         {
@@ -20,13 +26,13 @@ namespace Viewer
         }
     }
 
-    PatchRenderObject& GetRenderObject(const Geometry::PatchRaw& patch)
+    HullRenderObject& GetRenderObject(const Geometry::HullRaw& hull)
     {
-        PatchRenderObject* res = dynamic_cast<PatchRenderObject*>(patch->GetRenderObject());
+        HullRenderObject* res = dynamic_cast<HullRenderObject*>(hull->GetRenderObject());
         if (!res)
         {
-            patch->SetRenderObject(std::make_unique<PatchRenderObject>());
-            res = dynamic_cast<PatchRenderObject*>(patch->GetRenderObject());
+            hull->SetRenderObject(std::make_unique<HullRenderObject>());
+            res = dynamic_cast<HullRenderObject*>(hull->GetRenderObject());
             assert(res);
         }
         res->Check();
@@ -76,6 +82,54 @@ namespace Viewer
     {
         glDeleteLists(m_displayList, 1);
         m_displayList = 0;
+    }
+
+
+    // todo: 
+    // - separate file
+    // - store old values for pop to work.
+    // - Getting objects properties is racy!!
+
+    RenderInfo::RenderInfo()
+    {
+        static Color color(1, 1, 1, 1);
+        glColor(color);
+        m_color = &color;
+    }
+
+    void RenderInfo::Push(const Geometry::ShapeRaw & shape)
+    {
+        m_stack.emplace([]() {});
+    }
+
+    void RenderInfo::Push(const Geometry::HullRaw & hull)
+    {
+        const ColorPtr & color = hull->GetColor();
+        if (color)
+        {
+            m_stack.emplace([]() {});
+            glColor(color);
+        }
+        else
+        {
+            m_stack.emplace([]() {});
+        }
+    }
+
+    void RenderInfo::Push(const Geometry::FaceRaw & face)
+    {
+        m_stack.emplace([]() {});
+    }
+
+    void RenderInfo::Push(const Geometry::EdgeRaw & edge)
+    {
+        m_stack.emplace([]() {});
+    }
+
+    void RenderInfo::Pop()
+    {
+        m_stack.top()();
+        m_stack.pop();
     }
 
 } // Viewer

@@ -38,6 +38,11 @@ namespace Geometry
             Set(center, radius, optimal);
         }
 
+        void Clear()
+        {
+            m_type = Type::Unknown;
+        }
+
         void Set(const vector_type &min_point, const vector_type &max_point, const bool optimal = true)
         {
             box.m_min = min_point;

@@ -7,6 +7,7 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <functional>
 
 using namespace std;
 using namespace std::chrono_literals;
@@ -261,58 +262,36 @@ namespace Viewer
 
         void State::DrawShapes()
         {
-            static unsigned int renderTick = 0;
+            RenderInfo renderInfo;
 
             auto EdgeDummy = [](const EdgeRaw& edge) {};
             auto EdgeNormal = [](const EdgeRaw& edge)
             {
                 glNormal(edge->GetStartNormal());
             };
-            auto EdgeColor = [](const EdgeRaw& edge)
-            {
-                glColor(edge->GetStartColor());
-            };
             auto EdgeTextureCoord = [](const EdgeRaw& edge)
             {
                 glTextureCoord(edge->GetStartTextureCoord());
             };
 
-            auto DrawFace3 = [&](const FaceRaw& face, 
+            auto DrawFace2 = [&](const FaceRaw& face, 
                                  std::function<void(const EdgeRaw& edge)> edgeNormal, 
-                                 std::function<void(const EdgeRaw& edge)> edgeColor, 
                                  std::function<void(const EdgeRaw& edge)> edgeTextureCoord)
             {
                 face->ForEachEdge([&](const EdgeRaw& edge)
                 {
+                    renderInfo.Push(edge);
                     edgeNormal(edge);
-                    edgeColor(edge);
                     edgeTextureCoord(edge);
                     glVertex(*edge->GetStartVertex());
+                    renderInfo.Pop();
                 });
-            };
-            auto DrawFace2 = [&](const FaceRaw& face, 
-                                 std::function<void(const EdgeRaw& edge)> edgeNormal, 
-                                 std::function<void(const EdgeRaw& edge)> edgeColor)
-            {
-                if (face->GetStartEdge()->GetStartTextureCoord())
-                {
-                    DrawFace3(face, edgeNormal, edgeColor, EdgeTextureCoord);
-                }
-                else
-                {
-                    DrawFace3(face, edgeNormal, edgeColor, EdgeDummy);
-                }
             };
             auto DrawFace1 = [&](const FaceRaw& face, std::function<void(const EdgeRaw& edge)> edgeNormal)
             {
-                if (face->GetStartEdge()->GetStartColor())
+                if (face->GetStartEdge()->GetStartTextureCoord())
                 {
-                    DrawFace2(face, edgeNormal, EdgeColor);
-                }
-                else if (face->GetColor())
-                {
-                    glColor(*face->GetColor());
-                    DrawFace2(face, edgeNormal, EdgeDummy);
+                    DrawFace2(face, edgeNormal, EdgeTextureCoord);
                 }
                 else
                 {
@@ -335,9 +314,9 @@ namespace Viewer
                     DrawFace1(face, EdgeDummy);
                 }
             };
-            auto DrawFaces = [&](const PatchRaw& patch)
+            auto DrawFaces = [&](const HullRaw& hull)
             {
-                const auto& faces = patch->GetFaces();
+                const auto& faces = hull->GetFaces();
                 for (auto face : faces)
                 {
                     switch (face->GetEdgeCount())
@@ -354,7 +333,9 @@ namespace Viewer
                         glBegin(GL_TRIANGLES);
                         break;
                     }
+                    renderInfo.Push(face);
                     DrawFace0(face);
+                    renderInfo.Pop();
                     glEnd();
                 }
             };
@@ -362,19 +343,20 @@ namespace Viewer
             //Projection<double> projection;
             //Vertex front = projection.Project(Vector2d(projection.GetWidth()/2, projection.GetHeight()/2), -100);
             //front.Normalize();
-            auto DrawPatch = [&](const PatchRaw& patch)
+            auto DrawHull = [&](const HullRaw& hull)
             {
-                PatchRenderObject& renderObject = GetRenderObject(patch);
+                HullRenderObject& renderObject = GetRenderObject(hull);
                 unsigned int displayList = renderObject.GetDisplayList();
                 if (0 == displayList)
                 {
+                    renderInfo.Push(hull);
                     displayList = glGenLists(1);
                     glNewList(displayList, GL_COMPILE);
-                    glColor(patch->GetColor());
-                    glBindTexture(GL_TEXTURE_2D, patch->GetTextureId());
-                    DrawFaces(patch);
+//                    glBindTexture(GL_TEXTURE_2D, hull->GetTextureId());
+                    DrawFaces(hull);
                     glEndList();
                     renderObject.SetDisplayList(displayList);
+                    renderInfo.Pop();
                 }
                 glCallList(displayList);
             };
@@ -391,10 +373,11 @@ namespace Viewer
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDisable(GL_CULL_FACE);
 
-            ++renderTick;
             for (const Geometry::ShapeRaw& shape : m_shapes)
             {
-                shape->ForEachPatch(DrawPatch);
+                renderInfo.Push(shape);
+                shape->ForEachHull(DrawHull);
+                renderInfo.Pop();
             }
 
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

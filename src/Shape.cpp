@@ -1,5 +1,8 @@
-#include "Geometry.h"
+#include <future>
+#include <chrono>
 using namespace std;
+
+#include "Geometry.h"
 using namespace Geometry;
 
 namespace
@@ -38,18 +41,10 @@ Shape::~Shape()
 
 void Shape::ForEachHull(std::function<void(const HullRaw& hull)> func) const
 {
-    for (const HullPtr& hull : GetHulls()) 
-    { 
-        func(hull); 
+    for (const HullPtr& hull : GetHulls())
+    {
+        func(hull);
     }
-}
-
-void Shape::ForEachPatch(std::function<void(const PatchRaw& patch)> func) const
-{
-    ForEachHull([func](const HullRaw& hull) 
-    { 
-        hull->ForEachPatch(func); 
-    });
 }
 
 void Shape::ForEachFace(std::function<void(const FaceRaw& facePtr)> func) const
@@ -70,23 +65,53 @@ void Shape::ForEachEdge(std::function<void(const EdgeRaw& edgePtr)> func) const
 
 void Shape::ForEachVertex(std::function<void(const VertexRaw& vertexPtr)> func) const
 {
-    std::unordered_set<VertexRaw> vertices;
-    ForEachFace([&vertices](const FaceRaw& face)
+    ForEachHull([func](const HullRaw& hull)
     {
-        face->ForEachVertex([&vertices](const VertexRaw& vertex)
-        {
-            vertices.insert(vertex);
-        });
+        hull->ForEachVertex(func);
     });
-    for (const VertexRaw& vertex : vertices)
+}
+
+void Shape::ParallelForEachHull(std::function<void(const HullRaw& hull)> func) const
+{
+    // run the command on the first hull deferred, on all following hulls async.
+    std::vector<std::future<void>> futures;
+    for (const HullPtr& hull : GetHulls())
     {
-        func(vertex);
+        futures.emplace_back(std::async(futures.empty() ? (std::launch::deferred) : (std::launch::async), func, hull));
     }
+    for (const auto& future : futures)
+    {
+        future.wait();
+    }
+}
+
+void Shape::ParallelForEachFace(std::function<void(const FaceRaw& facePtr)> func) const
+{
+    ParallelForEachHull([func](const HullRaw& hull)
+    {
+        hull->ForEachFace(func);
+    });
+}
+
+void Shape::ParallelForEachEdge(std::function<void(const EdgeRaw& edgePtr)> func) const
+{
+    ParallelForEachHull([func](const HullRaw& hull)
+    {
+        hull->ForEachEdge(func);
+    });
+}
+
+void Shape::ParallelForEachVertex(std::function<void(const VertexRaw& vertexPtr)> func) const
+{
+    ParallelForEachHull([func](const HullRaw& hull)
+    {
+        hull->ForEachVertex(func);
+    });
 }
 
 void Shape::SplitTrianglesIn4()
 {
-    ForEachHull([](const HullRaw& hull) 
+    ParallelForEachHull([](const HullRaw& hull)
     {
         hull->SplitTrianglesIn4(); 
     });
@@ -94,31 +119,32 @@ void Shape::SplitTrianglesIn4()
 
 void Shape::Triangulate()
 {
-    ForEachHull([](const HullRaw& hull) 
+    ParallelForEachHull([](const HullRaw& hull)
     {
         hull->Triangulate(); 
+    });
+}
+
+void Shape::Scale(const double factor)
+{
+    ParallelForEachHull([factor](const HullRaw& hull)
+    {
+        hull->Scale(factor);
+    });
+}
+
+void Shape::Translate(const Vector3d& translation)
+{
+    ParallelForEachHull([translation](const HullRaw& hull)
+    {
+        hull->Translate(translation);
     });
 }
 
 void Shape::Clear()
 {
     m_hulls.clear();
-}
-
-void Shape::Scale(const double factor)
-{
-    ForEachVertex([factor](const VertexRaw& vertex)
-    {
-        (*vertex) *= factor;
-    });
-}
-
-void Shape::Translate(const Vector3d& translation)
-{
-    ForEachVertex([translation](const VertexRaw& vertex)
-    {
-        (*vertex) += translation;
-    });
+    m_boundingShape.Clear();
 }
 
 // Helper for Store
@@ -248,11 +274,9 @@ void Shape::Store(SQLite::DB& db) const
     std::unordered_map<NormalRaw, size_t> normals;
     std::unordered_map<TextureCoordRaw, size_t> textureCoords;
     std::unordered_map<FaceRaw, size_t> faces;
-    std::unordered_map<PatchRaw, size_t> patches;
 
     // start with 'null' values
     hulls.emplace(nullptr, 0);
-    patches.emplace(nullptr, 0);
     normals.emplace(nullptr, 0);
     faces.emplace(nullptr, 0);
     edges.emplace(nullptr, 0);
@@ -262,20 +286,16 @@ void Shape::Store(SQLite::DB& db) const
     ForEachHull([&](const HullRaw& hull)
     {
         hulls.emplace(hull, hulls.size());
-        hull->ForEachPatch([&](const PatchRaw& patch)
+        hull->ForEachFace([&](const FaceRaw& face)
         {
-            patches.emplace(patch, patches.size());
-            patch->ForEachFace([&](const FaceRaw& face)
+            normals.emplace(face->GetNormal(), normals.size());
+            faces.emplace(face, faces.size());
+            face->ForEachEdge([&](const EdgeRaw& edge)
             {
-                normals.emplace(face->GetNormal(), normals.size());
-                faces.emplace(face, faces.size());
-                face->ForEachEdge([&](const EdgeRaw& edge)
-                {
-                    edges.emplace(edge, edges.size());
-                    vertices.emplace(edge->GetStartVertex(), vertices.size());
-                    normals.emplace(edge->GetStartNormal(), normals.size());
-                    textureCoords.emplace(edge->GetStartTextureCoord(), textureCoords.size());
-                });
+                edges.emplace(edge, edges.size());
+                vertices.emplace(edge->GetStartVertex(), vertices.size());
+                normals.emplace(edge->GetStartNormal(), normals.size());
+                textureCoords.emplace(edge->GetStartTextureCoord(), textureCoords.size());
             });
         });
     });
@@ -363,43 +383,25 @@ void Shape::Store(SQLite::DB& db) const
 
     // Faces
     db.ExecDML("DROP TABLE IF EXISTS Faces");
-    db.ExecDML("CREATE TABLE Faces(Id INTEGER PRIMARY KEY,Patch INTEGER,Normal INTEGER,Color INTEGER) WITHOUT ROWID");
-    s = db.CompileStatement("INSERT INTO Faces(Id,Patch,Normal,Color) VALUES(?1,?2,?3,?4)");
+    db.ExecDML("CREATE TABLE Faces(Id INTEGER PRIMARY KEY,Hull INTEGER,Normal INTEGER,Color INTEGER) WITHOUT ROWID");
+    s = db.CompileStatement("INSERT INTO Faces(Id,Hull,Normal,Color) VALUES(?1,?2,?3,?4)");
     for (auto& face : faces)
     {
         if (face.first)
         {
             s.Reset();
             s.Bind(1, (int64_t)face.second);
-            s.Bind(2, (int64_t)patches[face.first->GetPatch()]);
+            s.Bind(2, (int64_t)hulls[face.first->GetHull()]);
             s.Bind(3, (int64_t)normals[face.first->GetNormal()]);
             s.Bind(4, (int64_t)(face.first->GetColor()?face.first->GetColor()->GetInt():-1));
             s.ExecDML();
         }
     }
 
-    // Patches
-    // TODO: textureId?
-    db.ExecDML("DROP TABLE IF EXISTS Patches");
-    db.ExecDML("CREATE TABLE Patches(Id INTEGER PRIMARY KEY,Hull INTEGER,Color INTEGER,BoundingShape INTEGER) WITHOUT ROWID");
-    s = db.CompileStatement("INSERT INTO Patches(Id,Hull,Color,BoundingShape) VALUES(?1,?2,?3,?4)");
-    for (auto& patch : patches)
-    {
-        if (patch.first)
-        {
-            s.Reset();
-            s.Bind(1, (int64_t)patch.second);
-            s.Bind(2, (int64_t)hulls[patch.first->GetHull()]);
-            s.Bind(3, (int64_t)(patch.first->GetColor()?patch.first->GetColor()->GetInt():-1));
-            s.Bind(4, StoreBoundingShape(patch.first->GetBoundingShape()));
-            s.ExecDML();
-        }
-    }
-
     // Hulls
     db.ExecDML("DROP TABLE IF EXISTS Hulls");
-    db.ExecDML("CREATE TABLE Hulls(Id INTEGER PRIMARY KEY,Shape INTEGER,Orientation INTEGER,BoundingShape INTEGER) WITHOUT ROWID");
-    s = db.CompileStatement("INSERT INTO Hulls(Id,Shape,Orientation,BoundingShape) VALUES(?1,0,?2,?3)");
+    db.ExecDML("CREATE TABLE Hulls(Id INTEGER PRIMARY KEY,Shape INTEGER,Orientation INTEGER,Color INTEGER,BoundingShape INTEGER) WITHOUT ROWID");
+    s = db.CompileStatement("INSERT INTO Hulls(Id,Shape,Orientation,Color,BoundingShape) VALUES(?1,0,?2,?3,?4)");
     for (auto& hull : hulls)
     {
         if (hull.first)
@@ -407,7 +409,8 @@ void Shape::Store(SQLite::DB& db) const
             s.Reset();
             s.Bind(1, (int64_t)hull.second);
             s.Bind(2, Orientation::Convert(hull.first->GetOrientation()));
-            s.Bind(3, StoreBoundingShape(hull.first->GetBoundingShape()));
+            s.Bind(3, (int64_t)(hull.first->GetColor() ? hull.first->GetColor()->GetInt() : -1));
+            s.Bind(4, StoreBoundingShape(hull.first->GetBoundingShape()));
             s.ExecDML();
         }
     }
@@ -433,7 +436,6 @@ void Shape::Retrieve(SQLite::DB& db)
     std::unordered_map<size_t,NormalPtr> normals;
     std::unordered_map<size_t,TextureCoordPtr> textureCoords;
     std::unordered_map<size_t,FacePtr> faces;
-    std::unordered_map<size_t,PatchPtr> patches;
     std::unordered_map<size_t,BoundingShape3d> boundingShapes;
 
     Clear();
@@ -498,35 +500,24 @@ void Shape::Retrieve(SQLite::DB& db)
     SetBoundingShape(boundingShapes[query.GetInt64Field(1)]);
 
     // Hulls
-    query = db.ExecQuery("SELECT Id,Orientation,BoundingShape FROM Hulls");
+    query = db.ExecQuery("SELECT Id,Orientation,Color,BoundingShape FROM Hulls");
     for (; !query.IsEOF(); query.NextRow())
     {
         int64_t Id = query.GetInt64Field(0);
         auto hull = ConstructAndAddHull();
         hull->SetOrientation(Orientation::Convert(query.GetIntField(1)));
-        hull->SetBoundingShape(boundingShapes[query.GetInt64Field(2)]);
+        hull->SetColor(ColorFromId(query.GetInt64Field(2)));
+        hull->SetBoundingShape(boundingShapes[query.GetInt64Field(3)]);
         hulls.emplace(Id, hull);
     }
 
-    // Patches
-    query = db.ExecQuery("SELECT Id,Hull,Color,BoundingShape FROM Patches");
+    // Faces
+    query = db.ExecQuery("SELECT Id,Hull,Normal,Color FROM Faces");
     for (; !query.IsEOF(); query.NextRow())
     {
         int64_t Id = query.GetInt64Field(0);
         int64_t hullId = query.GetInt64Field(1);
-        auto patch = hulls[hullId]->ConstructAndAddPatch();
-        patch->SetColor(ColorFromId(query.GetInt64Field(2)));
-        patch->SetBoundingShape(boundingShapes[query.GetInt64Field(3)]);
-        patches.emplace(Id, patch);
-    }
-
-    // Faces
-    query = db.ExecQuery("SELECT Id,Patch,Normal,Color FROM Faces");
-    for (; !query.IsEOF(); query.NextRow())
-    {
-        int64_t Id = query.GetInt64Field(0);
-        int64_t patchId = query.GetInt64Field(1);
-        auto face = patches[patchId]->ConstructAndAddFace();
+        auto face = hulls[hullId]->ConstructAndAddFace();
         face->SetNormal(normals[query.GetInt64Field(2)]);
         face->SetColor(ColorFromId(query.GetInt64Field(3)));
         faces.emplace(Id, face);

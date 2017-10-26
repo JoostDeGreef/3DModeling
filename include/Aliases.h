@@ -39,10 +39,6 @@ namespace Geometry
     using FacePtr = std::shared_ptr<Face>;
     using FaceRaw = raw_ptr<Face>;
 
-    class Patch;
-    using PatchPtr = std::shared_ptr<Patch>;
-    using PatchRaw = raw_ptr<Patch>;
-
     class Hull;
     using HullPtr = std::shared_ptr<Hull>;
     using HullRaw = raw_ptr<Hull>;

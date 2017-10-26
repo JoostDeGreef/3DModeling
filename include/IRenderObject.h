@@ -18,7 +18,7 @@ namespace Geometry
         virtual ~NOPRenderObject() {}
         virtual void Invalidate() override {}
     };
-}; // Viewer
+}; // Geometry
 
 #endif // GEOMETRY_RENDEROBJECT_H
 

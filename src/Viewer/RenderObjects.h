@@ -15,14 +15,14 @@ namespace Viewer
         unsigned int m_displayList;
     };
 
-    class PatchRenderObject : public Geometry::IRenderObject
+    class HullRenderObject : public Geometry::IRenderObject
     {
     public:
-        PatchRenderObject()
+        HullRenderObject()
             : m_needsUpdate(0)
             , m_displayList(0)
         {}
-        virtual ~PatchRenderObject();
+        virtual ~HullRenderObject();
         virtual void Invalidate() override 
         {
             ++m_needsUpdate;
@@ -47,7 +47,28 @@ namespace Viewer
     void DisposeRenderObject(DisposedRenderObject &&disposedRenderObject);
     void HandleDisposedRenderObjects();
 
-    PatchRenderObject& GetRenderObject(const Geometry::PatchRaw& patch);
+    HullRenderObject& GetRenderObject(const Geometry::HullRaw& hull);
+
+    class RenderInfo
+    {
+    public:
+        RenderInfo();
+
+        void Push(const Geometry::ShapeRaw& shape);
+
+        void Push(const Geometry::HullRaw& hull);
+
+        void Push(const Geometry::FaceRaw& face);
+
+        void Push(const Geometry::EdgeRaw& edge);
+
+        void Pop();
+
+    private:
+        std::stack<std::function<void()>> m_stack;
+
+        Geometry::Color* m_color;
+    };
 
 }; // Viewer
 

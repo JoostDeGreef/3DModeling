@@ -26,8 +26,7 @@ TEST_F(FaceTest, CalcNormal)
 {
     Shape shape;
     HullPtr hull = shape.ConstructAndAddHull();
-    PatchPtr patch = hull->ConstructAndAddPatch();
-    FacePtr face = patch->ConstructAndAddFace();
+    FacePtr face = hull->ConstructAndAddFace();
     auto e0 = face->ConstructAndAddEdge(Construct<Vertex>(0, 0, 0));
     auto e1 = face->ConstructAndAddEdge(Construct<Vertex>(1, 0, 0));
     auto e2 = face->ConstructAndAddEdge(Construct<Vertex>(0, 1, 0));
@@ -47,7 +46,7 @@ TEST_F(FaceTest, CalcNormal)
 TEST_F(FaceTest, SplitSquare) 
 {
     ShapePtr shape = Construct<Cube>();
-    FacePtr face = *(*(*shape->GetHulls().begin())->GetPatches().begin())->GetFaces().begin();
+    FacePtr face = *(*shape->GetHulls().begin())->GetFaces().begin();
     face->CheckPointering();
     EXPECT_EQ(6, FaceCount(shape));
     face->Split();
@@ -58,7 +57,7 @@ TEST_F(FaceTest, SplitTriangle)
 {
     ShapePtr shape = Construct<Cube>();
     shape->Triangulate();
-    FacePtr face = *(*(*shape->GetHulls().begin())->GetPatches().begin())->GetFaces().begin();
+    FacePtr face = *(*shape->GetHulls().begin())->GetFaces().begin();
     face->CheckPointering();
     EXPECT_EQ(12, FaceCount(shape));
     face->Split();

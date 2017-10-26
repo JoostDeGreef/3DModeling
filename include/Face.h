@@ -11,16 +11,16 @@ namespace Geometry
         typedef Face this_type;
         typedef std::unordered_set<EdgePtr> container_type;        
     private:
-        PatchRaw m_patch;
+        HullRaw m_hull;
         container_type m_edges;
         NormalPtr m_normal;
         ColorPtr m_color;
 
     protected:
-        Face(const PatchRaw& patch)
+        Face(const HullRaw& hull)
             : m_edges()
             , m_normal()
-            , m_patch(patch)
+            , m_hull(hull)
         {}
         Face(const this_type &other) = default;
         Face(this_type &&other) = default;
@@ -53,9 +53,7 @@ namespace Geometry
         const ColorPtr& GetColor() const { return m_color; }
         void SetColor(const ColorPtr& color) { m_color = color; }
 
-        const PatchRaw& GetPatch() const { return m_patch; }
-        PatchRaw& GetPatch() { return m_patch; }
-        //void SetPatch(const PatchRaw& patch) { m_patch = patch; }
+        const HullRaw& GetHull() const { return m_hull; }
 
         size_t GetEdgeCount() const { return m_edges.size(); }
 

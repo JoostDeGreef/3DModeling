@@ -16,9 +16,8 @@ TEST_F(EdgeTest, Split)
 {
     Shape shape;
     HullPtr hull = shape.ConstructAndAddHull();
-    PatchPtr patch = hull->ConstructAndAddPatch();
-    FacePtr f_top = patch->ConstructAndAddFace();
-    FacePtr f_bottom = patch->ConstructAndAddFace();
+    FacePtr f_top = hull->ConstructAndAddFace();
+    FacePtr f_bottom = hull->ConstructAndAddFace();
     VertexPtr v0 = Construct<Vertex>(0, 0, 0);
     VertexPtr v1 = Construct<Vertex>(1, 0, 0);
     VertexPtr v2 = Construct<Vertex>(0, 1, 0);

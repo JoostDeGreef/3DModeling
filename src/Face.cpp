@@ -79,7 +79,7 @@ private:
         // check the input face is valid
         assert(m_face->GetEdgeCount() >= (size_t)(AddVertices?3:4));
         // parent objects
-        PatchRaw patch = m_face->GetPatch();
+        HullRaw hull = m_face->GetHull();
         // find the two extreme vertices
         auto extremes = FindExtremeVertices(AddVertices);
         // split edges if needed
@@ -105,8 +105,8 @@ private:
             split1 = split1->GetNext();
         }
         // create new face and connecting edges
-        FacePtr newFace0 = patch->ConstructAndAddFace();
-        FacePtr newFace1 = patch->ConstructAndAddFace();
+        FacePtr newFace0 = hull->ConstructAndAddFace();
+        FacePtr newFace1 = hull->ConstructAndAddFace();
 
         EdgePtr edge0 = newFace0->ConstructAndAddEdge(split0->GetEndVertex());
         EdgePtr edge1 = newFace1->ConstructAndAddEdge(split1->GetEndVertex());
@@ -144,7 +144,7 @@ private:
         newFace0->SetColor(m_face->GetColor());
         newFace1->SetColor(m_face->GetColor());
         // remove the original face
-        patch->RemoveFace(m_face);
+        hull->RemoveFace(m_face);
         // update and check
         newFace0->CalcNormal();
         newFace1->CalcNormal();

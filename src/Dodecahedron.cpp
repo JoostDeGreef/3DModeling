@@ -52,7 +52,7 @@ Dodecahedron::Dodecahedron(const int initialFaceCount)
     auto CreateFace = [&](VertexPtr& a, VertexPtr& b, VertexPtr& c, VertexPtr& d, VertexPtr& e,
                           EdgePtr& ab, EdgePtr& bc, EdgePtr& cd, EdgePtr& de, EdgePtr& ea)
     {
-        FacePtr face = hull->ConstructAndAddPatch()->ConstructAndAddFace();
+        FacePtr face = hull->ConstructAndAddFace();
         ab = face->ConstructAndAddEdge(a);
         bc = face->ConstructAndAddEdge(b);
         cd = face->ConstructAndAddEdge(c);
@@ -140,7 +140,7 @@ void Dodecahedron::InitialRefinement()
     for (int i = 0; i < 12; ++i)
     {
         FaceRaw face = faces[i];
-        PatchRaw patch = face->GetPatch();
+        HullRaw hull = face->GetHull();
         Vertex center(0, 0, 0);
         vector<VertexPtr> vertices;
         vector<EdgeRaw> edges;
@@ -156,7 +156,7 @@ void Dodecahedron::InitialRefinement()
         edges.push_back(edges.front());
 
         VertexPtr centerPtr = Construct<Vertex>(center);
-        std::vector<FacePtr> newFaces({ patch->ConstructAndAddFace(), patch->ConstructAndAddFace(), patch->ConstructAndAddFace(), patch->ConstructAndAddFace(), patch->ConstructAndAddFace() });
+        std::vector<FacePtr> newFaces({ hull->ConstructAndAddFace(), hull->ConstructAndAddFace(), hull->ConstructAndAddFace(), hull->ConstructAndAddFace(), hull->ConstructAndAddFace() });
         for (size_t i = 0; i < 5; ++i)
         {
             EdgeRaw edge0 = edges[i]; edge0->SetFace(newFaces[i]);
@@ -174,7 +174,7 @@ void Dodecahedron::InitialRefinement()
             edge0->SetTwin(edge1);
             edge1->SetTwin(edge0);
         }
-        patch->RemoveFace(face);
+        hull->RemoveFace(face);
     }
     ForEachFace([](const FaceRaw& face) {face->CalcNormal(); });
     ForEachFace([](const FaceRaw& face) {face->CheckPointering(); });
@@ -214,9 +214,9 @@ void Dodecahedron::Refine(int initialFaceCount)
         //}
 
         // give all patches a boundingsphere
-        ForEachPatch([](const PatchRaw& patch)
+        ForEachHull([](const HullRaw& hull)
         {
-            patch->CalculateBoundingShape();
+            hull->CalculateBoundingShape();
         });
 
         // divide all triangles in 4

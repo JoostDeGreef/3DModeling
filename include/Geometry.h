@@ -20,10 +20,11 @@
 #include "boost/format.hpp"
 
 #include "SmallObjectAllocator.h"
-#include "IRenderObject.h"
 
 #include "Aliases.h"
 
+#include "IRenderObject.h"
+#include "RenderInfo.h"
 #include "SQLiteDB.h"
 #include "Operations.h"
 #include "Numerics.h"
@@ -40,7 +41,6 @@
 
 #include "Edge.h"
 #include "Face.h"
-#include "Patch.h"
 #include "Hull.h"
 #include "Shape.h"
 #include "Dodecahedron.h"

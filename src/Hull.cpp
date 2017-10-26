@@ -9,8 +9,9 @@ HullPtr Hull::Copy(Shape& newShape) const
     HullPtr newHull = newShape.ConstructAndAddHull();
     newHull->SetOrientation(GetOrientation());
     newHull->SetBoundingShape(GetBoundingShape());
-      
-    std::unordered_map<PatchRaw, PatchPtr> patches;
+    newHull->SetColor(GetColor());
+    newHull->SetRenderMode(GetRenderMode());
+
     std::unordered_map<FaceRaw, FacePtr> faces;
     std::unordered_map<EdgeRaw, EdgePtr> edges;
     std::unordered_map<VertexRaw, VertexPtr> vertices;
@@ -19,23 +20,19 @@ HullPtr Hull::Copy(Shape& newShape) const
     std::unordered_map<TextureCoordRaw, TextureCoordPtr> textureCoordinates;
 
     // create a new instance for each existing patch, face, edge, vertex, normal, color and texturecoordinate
-    ForEachPatch([&](const PatchRaw& patch)
+    colors.emplace(GetColor(), nullptr);
+    ForEachFace([&](const FaceRaw& face)
     {
-        colors.emplace(patch->GetColor(), nullptr);
-        patches.emplace(patch, nullptr);
-        patch->ForEachFace([&](const FaceRaw& face)
+        normals.emplace(face->GetNormal(), nullptr);
+        colors.emplace(face->GetColor(), nullptr);
+        faces.emplace(face, nullptr);
+        face->ForEachEdge([&](const EdgeRaw& edge)
         {
-            normals.emplace(face->GetNormal(), nullptr);
-            colors.emplace(face->GetColor(), nullptr);
-            faces.emplace(face, nullptr);
-            face->ForEachEdge([&](const EdgeRaw& edge)
-            {
-                edges.emplace(edge, nullptr);
-                vertices.emplace(edge->GetStartVertex(), nullptr);
-                normals.emplace(edge->GetStartNormal(), nullptr);
-                colors.emplace(edge->GetStartColor(), nullptr);
-                textureCoordinates.emplace(edge->GetStartTextureCoord(), nullptr);
-            });
+            edges.emplace(edge, nullptr);
+            vertices.emplace(edge->GetStartVertex(), nullptr);
+            normals.emplace(edge->GetStartNormal(), nullptr);
+            colors.emplace(edge->GetStartColor(), nullptr);
+            textureCoordinates.emplace(edge->GetStartTextureCoord(), nullptr);
         });
     });
     // duplicate shallow structures
@@ -56,19 +53,9 @@ HullPtr Hull::Copy(Shape& newShape) const
         textureCoordinateMap.second = textureCoordinateMap.first == nullptr ? nullptr : Construct<TextureCoord>(*textureCoordinateMap.first);
     }
     // recreate complex structures
-    for (auto& patchMap : patches)
-    {
-        patchMap.second = newHull->ConstructAndAddPatch();
-        newHull->AddPatch(patchMap.second);
-        patchMap.second->SetBoundingShape(patchMap.first->GetBoundingShape());
-        patchMap.second->SetColor(colors[patchMap.first->GetColor()]);
-    }
     for (auto& faceMap : faces)
     {
-        PatchPtr patch = patches[faceMap.first->GetPatch()];
-        assert(patch != nullptr);
-        faceMap.second = patch->ConstructAndAddFace();
-        patch->AddFace(faceMap.second);
+        faceMap.second = newHull->ConstructAndAddFace();
     }
     for (auto& edgeMap : edges)
     {
@@ -128,12 +115,11 @@ void Hull::SplitTrianglesIn4()
     }
     for (FaceRaw& face : faces)
     {
-        PatchRaw patch = face->GetPatch();
         // new faces
-        FacePtr f0 = patch->ConstructAndAddFace();
-        FacePtr f1 = patch->ConstructAndAddFace();
-        FacePtr f2 = patch->ConstructAndAddFace();
-        FacePtr f3 = patch->ConstructAndAddFace();
+        FacePtr f0 = ConstructAndAddFace();
+        FacePtr f1 = ConstructAndAddFace();
+        FacePtr f2 = ConstructAndAddFace();
+        FacePtr f3 = ConstructAndAddFace();
         // edges, with e01 pre-existing
         EdgeRaw e01 = face->GetStartEdge();
         if (edges.find(e01) == edges.end())
@@ -192,7 +178,7 @@ void Hull::SplitTrianglesIn4()
         f2->CheckPointering();
         f3->CheckPointering();
         // remove old face
-        patch->RemoveFace(face);
+        RemoveFace(face);
     }
 }
 
@@ -210,24 +196,61 @@ void Hull::Triangulate()
     }
 }
 
-void Hull::ForEachPatch(std::function<void(const PatchRaw& patch)> func) const
+void Hull::CalculateBoundingShape()
 {
-    for (const PatchRaw& patch : m_patches) 
-    { 
-        func(patch); 
-    }
+    const auto& vertices = GetVertices();
+    m_boundingShape.Set(BoundingShape3d::Type::Ball, vertices.begin(), vertices.end());
 }
+
+std::unordered_set<VertexRaw> Hull::GetVertices() const
+{
+    std::unordered_set<VertexRaw> vertices;
+    ForEachFace([&vertices](const FaceRaw& face)
+    {
+        face->ForEachVertex([&vertices](const VertexRaw& vertex)
+        {
+            vertices.emplace(vertex);
+        });
+    });
+    return vertices;
+}
+
 void Hull::ForEachFace(std::function<void(const FaceRaw& facePtr)> func) const
 {
-    ForEachPatch([func](const PatchRaw& patch) 
-    { 
-        patch->ForEachFace(func); 
-    });
+    for (const FaceRaw& face : m_faces)
+    {
+        func(face);
+    }
 }
+
 void Hull::ForEachEdge(std::function<void(const EdgeRaw& edgePtr)> func) const
 {
-    ForEachFace([func](const FaceRaw& face) 
-    { 
-        face->ForEachEdge(func); 
+    ForEachFace([func](const FaceRaw & facePtr)
+    {
+        facePtr->ForEachEdge(func);
+    });
+}
+
+void Hull::ForEachVertex(std::function<void(const VertexRaw& vertexPtr)> func) const
+{
+    for (const VertexRaw& vertex : GetVertices())
+    {
+        func(vertex);
+    }
+}
+
+void Hull::Scale(const double factor)
+{
+    ForEachVertex([factor](const VertexRaw& vertex)
+    {
+        (*vertex) *= factor;
+    });
+}
+
+void Hull::Translate(const Vector3d& translation)
+{
+    ForEachVertex([translation](const VertexRaw& vertex)
+    {
+        (*vertex) += translation;
     });
 }

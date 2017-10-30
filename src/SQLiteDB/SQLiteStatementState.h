@@ -1,5 +1,4 @@
-#ifndef SQLITESTATEMENTSTATE_H
-#define SQLITESTATEMENTSTATE_H 1
+#pragma once
 
 class Statement::State
 {
@@ -58,5 +57,4 @@ public:
     int m_columnCount;
 };
 
-#endif // SQLITESTATEMENTSTATE_H
 

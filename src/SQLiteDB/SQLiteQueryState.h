@@ -1,5 +1,4 @@
-#ifndef SQLITEQUERYSTATE_H
-#define SQLITEQUERYSTATE_H 1
+#pragma once
 
 class Query::State
 {
@@ -54,5 +53,4 @@ public:
     std::vector<std::string> m_fieldNames;
 };
 
-#endif // SQLITEQUERYSTATE_H
 

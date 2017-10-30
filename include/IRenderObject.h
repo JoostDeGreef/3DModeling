@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_RENDEROBJECT_H
-#define GEOMETRY_RENDEROBJECT_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -20,5 +19,4 @@ namespace Geometry
     };
 }; // Geometry
 
-#endif // GEOMETRY_RENDEROBJECT_H
 

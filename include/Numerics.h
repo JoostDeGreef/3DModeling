@@ -1,18 +1,18 @@
-#ifndef GEOMETRY_NUMERICS_H
-#define GEOMETRY_NUMERICS_H 1
+#pragma once
 
 namespace Geometry
 {
     namespace Numerics
     {
         // random number [0.0, max)
-        template<typename T> inline T NormalizedRandomNumber()
+        template<typename T> inline T NormalizedRandomNumber(T max = 1)
         {
             static std::random_device rd;
             static std::mt19937 gen(rd());
-            static std::uniform_real_distribution<T> dis(0, 1);
-            return dis(gen);
+            static std::uniform_real_distribution<double> dis(0, 1);
+            return (T)(max*dis(gen));
         }
+
 
         template<typename T> inline T Sqr(const T& value)
         {
@@ -118,4 +118,3 @@ namespace Geometry
     }
 }
 
-#endif // GEOMETRY_NUMERICS_H

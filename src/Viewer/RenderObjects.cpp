@@ -1,4 +1,5 @@
 #include <functional>
+#include <unordered_map>
 
 using namespace std;
 
@@ -13,123 +14,46 @@ namespace Viewer
 
     HullRenderObject::~HullRenderObject()
     {
-        DisposeRenderObject(m_displayList);
+        SetDisplayList(0);
     }
 
-    void HullRenderObject::Check()
+    std::unordered_map<Geometry::HullRaw, std::shared_ptr<HullRenderObject>>& GetRenderObjects()
     {
-        if (m_needsUpdate > 0)
-        {
-            m_needsUpdate = 0;
-            glDeleteLists(m_displayList, 1);
-            m_displayList = 0;
-        }
+        static std::unordered_map<Geometry::HullRaw, std::shared_ptr<HullRenderObject>> objects;
+        return objects;
+    }
+
+    void HullRenderObject::SetDisplayList(unsigned int displayList)
+    {
+        glDeleteLists(m_displayList, 1);
+        m_needsUpdate = 0;
+        m_displayList = displayList;
     }
 
     HullRenderObject& GetRenderObject(const Geometry::HullRaw& hull)
     {
-        HullRenderObject* res = dynamic_cast<HullRenderObject*>(hull->GetRenderObject());
-        if (!res)
+        auto& objects = GetRenderObjects();
+        auto iter = objects.find(hull);
+        if (iter == objects.end())
         {
-            hull->SetRenderObject(std::make_unique<HullRenderObject>());
-            res = dynamic_cast<HullRenderObject*>(hull->GetRenderObject());
-            assert(res);
+            auto lock = hull->GetLock();
+            auto p = Construct<HullRenderObject>();
+            hull->SetRenderObject(p);
+            iter = objects.emplace(hull, p).first;
         }
-        res->Check();
-        return *res;
+        return *iter->second;
     }
 
-    namespace
-    {
-        class GarbageMan
-        {
-        public:
-            void Add(DisposedRenderObject &&disposedRenderObject)
-            {
-                std::lock_guard<std::mutex> lock(m_mutex);
-                m_disposedRenderObjects.emplace_back(std::move(disposedRenderObject));
-            }
-            void Clean()
-            {
-                std::lock_guard<std::mutex> lock(m_mutex);
-                for (DisposedRenderObject& disposedRenderObject : m_disposedRenderObjects)
-                {
-                    disposedRenderObject.Dispose();
-                }
-                m_disposedRenderObjects.clear();
-            }
-        private:
-            std::vector<DisposedRenderObject> m_disposedRenderObjects;
-            std::mutex m_mutex;
-        };
-        GarbageMan& GetGarbageMan()
-        {
-            static GarbageMan gm;
-            return gm;
-        }
-    }
-
-    void DisposeRenderObject(DisposedRenderObject &&disposedRenderObject)
-    {
-        GetGarbageMan().Add(std::move(disposedRenderObject));
-    }
     void HandleDisposedRenderObjects()
     {
-        GetGarbageMan().Clean();
-    }
-
-    void DisposedRenderObject::Dispose()
-    {
-        glDeleteLists(m_displayList, 1);
-        m_displayList = 0;
-    }
-
-
-    // todo: 
-    // - separate file
-    // - store old values for pop to work.
-    // - Getting objects properties is racy!!
-
-    RenderInfo::RenderInfo()
-    {
-        static Color color(1, 1, 1, 1);
-        glColor(color);
-        m_color = &color;
-    }
-
-    void RenderInfo::Push(const Geometry::ShapeRaw & shape)
-    {
-        m_stack.emplace([]() {});
-    }
-
-    void RenderInfo::Push(const Geometry::HullRaw & hull)
-    {
-        const ColorPtr & color = hull->GetColor();
-        if (color)
+        auto& objects = GetRenderObjects();
+        for (size_t i=0;i<objects.size() && i<5;++i)
         {
-            m_stack.emplace([]() {});
-            glColor(color);
-        }
-        else
-        {
-            m_stack.emplace([]() {});
+            auto iter = std::next(std::begin(objects), Geometry::Numerics::NormalizedRandomNumber(objects.size()-1));
+            if (iter->second.use_count() < 1)
+            {
+                objects.erase(iter);
+            }
         }
     }
-
-    void RenderInfo::Push(const Geometry::FaceRaw & face)
-    {
-        m_stack.emplace([]() {});
-    }
-
-    void RenderInfo::Push(const Geometry::EdgeRaw & edge)
-    {
-        m_stack.emplace([]() {});
-    }
-
-    void RenderInfo::Pop()
-    {
-        m_stack.top()();
-        m_stack.pop();
-    }
-
 } // Viewer

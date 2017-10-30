@@ -1,5 +1,4 @@
-#ifndef LINE_H
-#define LINE_H 1
+#pragma once
 
 #include <utility>
 
@@ -117,4 +116,3 @@ namespace Geometry
 };
 
 
-#endif // LINE_H

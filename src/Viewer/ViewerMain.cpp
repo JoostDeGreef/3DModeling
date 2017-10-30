@@ -16,6 +16,7 @@ int main(int argc, char* argv[])
     }
 
     ShapePtr s = Construct<Dodecahedron>(12);
+    s->SetColor(Construct<Color>(1.0f,1.0f,1.0f,1.0f));
     ui.AddShape(s);
 
     ui.Run();

@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_DODECAHEDRON_H
-#define GEOMETRY_DODECAHEDRON_H 1
+#pragma once
 
 #include "Shape.h"
 
@@ -16,5 +15,4 @@ namespace Geometry
     };
 };
 
-#endif // GEOMETRY_DODECAHEDRON_H
 

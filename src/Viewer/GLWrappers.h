@@ -1,5 +1,4 @@
-#ifndef VIEWER_GLWRAPPERS_H
-#define VIEWER_GLWRAPPERS_H 1
+#pragma once
 
 #include "GLAD/glad.h"
 #include "GLFW/glfw3.h"
@@ -31,4 +30,4 @@ namespace Viewer
     void glLoadMatrix(const Geometry::Quat& quat);
 };
 
-#endif // VIEWER_GLWRAPPERS_H
+

@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_QUATERNION_H
-#define GEOMETRY_QUATERNION_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -311,4 +310,3 @@ namespace Geometry
     }
 };
 
-#endif // GEOMETRY_QUATERNION_H

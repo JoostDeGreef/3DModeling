@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_OPERATIONS_H
-#define GEOMETRY_OPERATIONS_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -49,4 +48,3 @@ namespace Geometry
     }
 }
 
-#endif // GEOMETRY_OPERATIONS_H

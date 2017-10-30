@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_HULL_H
-#define GEOMETRY_HULL_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -25,7 +24,9 @@ namespace Geometry
 
         ColorPtr m_color;
         RenderMode m_renderMode;
-        std::unique_ptr<IRenderObject> m_renderObject;
+        std::shared_ptr<IRenderObject> m_renderObject;
+
+        std::mutex m_mutex;
 
     protected:
         Hull(const ShapeRaw& shape)
@@ -72,8 +73,8 @@ namespace Geometry
         void Invalidate() { m_renderObject->Invalidate(); }
 
         // RenderObject is a device dependent object state (for instance OpenGL displaylists).
-        IRenderObject* GetRenderObject() const { return m_renderObject.get(); }
-        void SetRenderObject(std::unique_ptr<IRenderObject>&& renderObject) { m_renderObject = std::move(renderObject); }
+        std::shared_ptr<IRenderObject> GetRenderObject() const { return m_renderObject; }
+        void SetRenderObject(const std::shared_ptr<IRenderObject>& renderObject) { m_renderObject = renderObject; }
 
         // Color for the hull
         const ColorPtr& GetColor() const { return m_color; }
@@ -112,7 +113,21 @@ namespace Geometry
         // Make sure the hull exist solely out of triangles
         void Triangulate();
 
+        // Make locking on this hull easy
+        // examples:
+        //    auto lock = hull.GetLock();
+        // or
+        //    auto lock = hull.TryGetLock();
+        //    if( lock ) { ... }
+        auto GetLock()
+        { 
+            return std::unique_lock<std::mutex>(m_mutex);
+        }
+        auto TryGetLock()
+        {
+            return std::unique_lock<std::mutex>(m_mutex,std::try_to_lock);
+        }
+
     };
 }
 
-#endif // GEOMETRY_HULL_H

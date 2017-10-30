@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_RGBACOLOR_H
-#define GEOMETRY_RGBACOLOR_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -144,4 +143,3 @@ namespace Geometry
 
 }
 
-#endif // GEOMETRY_RGBACOLOR_H

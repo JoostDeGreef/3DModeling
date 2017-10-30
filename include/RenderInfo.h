@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_RENDERINFO_H
-#define GEOMETRY_RENDERINFO_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -20,5 +19,4 @@ namespace Geometry
 
 }; // Geometry
 
-#endif // GEOMETRY_RENDERINFO_H
 

@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_ALIASES_H
-#define GEOMETRY_ALIASES_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -78,4 +77,3 @@ namespace Geometry
 
 };
 
-#endif // GEOMETRY_ALIASES_H

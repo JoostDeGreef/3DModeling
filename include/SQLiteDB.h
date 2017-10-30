@@ -1,5 +1,4 @@
-#ifndef SQLITEDB_H
-#define SQLITEDB_H 1
+#pragma once
 
 namespace SQLite
 {
@@ -147,4 +146,3 @@ namespace SQLite
     };
 } // namespace SQLite
 
-#endif // SQLITEDB_H

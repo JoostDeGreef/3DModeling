@@ -16,6 +16,8 @@ using namespace std::chrono_literals;
 #include "GLWrappers.h"
 #include "UserInterface.h"
 #include "RenderObjects.h"
+#include "RenderInfo.h"
+#include "Menu.h"
 using namespace Geometry;
 
 namespace Viewer
@@ -44,6 +46,7 @@ namespace Viewer
             void Draw();
             void DrawMouse();
             void DrawShapes();
+            void DrawMenu();
 
             void AddShape(Geometry::ShapePtr& shape)
             {
@@ -74,6 +77,9 @@ namespace Viewer
 
             // drawable objects
             std::vector<Geometry::ShapePtr> m_shapes;
+
+            // menu
+            Menu m_menu;
         };
     } // namespace Internal
 
@@ -155,7 +161,7 @@ namespace Viewer
             glfwDestroyWindow(m_window);
             m_window = nullptr;
             glfwTerminate();
-            //m_shapes.clear();
+            m_shapes.clear();
             return true;
         }
 
@@ -243,15 +249,26 @@ namespace Viewer
             glStencilMask(0x00);
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
-            glOrtho(-m_ratio, m_ratio, -1., 1., -1.1, 1.1);
+            glOrtho(-m_ratio, m_ratio, -1.0, 1.0, -1.1, 1.1);
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
 
-            // TODO menus etc.
-
             DrawShapes();
 
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_LIGHTING);
+            glDepthMask(GL_FALSE);
+
+            GLint viewport[4];
+            glGetIntegerv(GL_VIEWPORT, viewport);
+
+            DrawMenu();
+
             DrawMouse();
+
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_LIGHTING);
+            glDepthMask(GL_TRUE);
 
             lock.unlock();
 
@@ -346,17 +363,33 @@ namespace Viewer
             auto DrawHull = [&](const HullRaw& hull)
             {
                 HullRenderObject& renderObject = GetRenderObject(hull);
+                unsigned int updateNeeded = renderObject.NeedsUpdate();
                 unsigned int displayList = renderObject.GetDisplayList();
-                if (0 == displayList)
+                auto UpdateDisplayList = [&](std::unique_lock<std::mutex>&& lock)
                 {
-                    renderInfo.Push(hull);
-                    displayList = glGenLists(1);
-                    glNewList(displayList, GL_COMPILE);
-//                    glBindTexture(GL_TEXTURE_2D, hull->GetTextureId());
-                    DrawFaces(hull);
-                    glEndList();
-                    renderObject.SetDisplayList(displayList);
-                    renderInfo.Pop();
+                    if (lock)
+                    {
+                        displayList = glGenLists(1);
+                        glNewList(displayList, GL_COMPILE);
+                        renderInfo.Push(hull);
+                        //glBindTexture(GL_TEXTURE_2D, hull->GetTextureId());
+                        DrawFaces(hull);
+                        glEndList();
+                        renderObject.SetDisplayList(displayList);
+                        renderInfo.Pop();
+                    }
+                    else
+                    {
+                        renderObject.Invalidate();
+                    }
+                };
+                if (updateNeeded > 5 || displayList == 0)
+                {
+                    UpdateDisplayList(hull->GetLock());
+                }
+                else if (updateNeeded > 0)
+                {
+                    UpdateDisplayList(hull->TryGetLock());
                 }
                 glCallList(displayList);
             };
@@ -370,18 +403,12 @@ namespace Viewer
 
             glMultMatrix(CalculateRotation());
 
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            glDisable(GL_CULL_FACE);
-
             for (const Geometry::ShapeRaw& shape : m_shapes)
             {
                 renderInfo.Push(shape);
                 shape->ForEachHull(DrawHull);
                 renderInfo.Pop();
             }
-
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            glEnable(GL_CULL_FACE);
 
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
@@ -394,6 +421,11 @@ namespace Viewer
         void State::DrawMouse()
         {
             // TODO
+        }
+
+        void State::DrawMenu()
+        {
+            m_menu.Draw();
         }
 
         Quat State::CalculateRotation()
@@ -437,20 +469,23 @@ namespace Viewer
         void State::MouseButtonCallback(const int button, const int action, const int mods)
         {
             std::lock_guard<std::mutex> lock(m_mutex);
-            if (GLFW_MOUSE_BUTTON_LEFT == button && 0 == mods)
+            if (!m_menu.HandleMouse(button, action, mods))
             {
-                if (GLFW_PRESS == action)
+                if (GLFW_MOUSE_BUTTON_LEFT == button && 0 == mods)
                 {
-                    m_rotation = CalculateRotation();
-                    m_rotation.Normalize();
-                    m_mouseDragging = true;
-                    m_mouseDownPos = m_mousePos;
-                }
-                else if (GLFW_RELEASE == action)
-                {
-                    m_rotation = CalculateRotation();
-                    m_rotation.Normalize();
-                    m_mouseDragging = false;
+                    if (GLFW_PRESS == action)
+                    {
+                        m_rotation = CalculateRotation();
+                        m_rotation.Normalize();
+                        m_mouseDragging = true;
+                        m_mouseDownPos = m_mousePos;
+                    }
+                    else if (GLFW_RELEASE == action)
+                    {
+                        m_rotation = CalculateRotation();
+                        m_rotation.Normalize();
+                        m_mouseDragging = false;
+                    }
                 }
             }
         }

@@ -1,5 +1,4 @@
-#ifndef SQLITEDBSTATE_H
-#define SQLITEDBSTATE_H 1
+#pragma once
 
 class DB::State
 {
@@ -44,4 +43,3 @@ public:
     int m_busyTimeoutMs;
 };
 
-#endif // SQLITEDBSTATE_H

@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_VECTOR_H
-#define GEOMETRY_VECTOR_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -255,4 +254,3 @@ namespace Geometry
 
 };
 
-#endif // GEOMETRY_VECTOR_H

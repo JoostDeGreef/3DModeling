@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_ROTATIONMATRIX_H
-#define GEOMETRY_ROTATIONMATRIX_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -79,4 +78,3 @@ namespace Geometry
     };
 };
 
-#endif // GEOMETRY_ROTATIONMATRIX_H

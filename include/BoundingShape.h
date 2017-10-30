@@ -1,5 +1,4 @@
-#ifndef BOUNDINGSHAPE_H
-#define BOUNDINGSHAPE_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -390,4 +389,3 @@ namespace Geometry
 
 };
 
-#endif // BOUNDINGSHAPE_H

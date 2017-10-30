@@ -1,5 +1,4 @@
-#ifndef SMALL_OBJECT_POOL_ALLOCATOR_H
-#define SMALL_OBJECT_POOL_ALLOCATOR_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -240,4 +239,3 @@ namespace std
     };
 } // namespace std
 
-#endif // SMALL_OBJECT_POOL_ALLOCATOR_H

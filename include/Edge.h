@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_EDGE_H
-#define GEOMETRY_EDGE_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -107,5 +106,4 @@ namespace Geometry
 
 }
 
-#endif // GEOMETRY_EDGE_H
 

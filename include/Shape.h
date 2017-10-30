@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_SHAPE_H
-#define GEOMETRY_SHAPE_H 1
+#pragma once
 
 namespace Geometry
 {
@@ -77,4 +76,3 @@ namespace Geometry
     };
 }
 
-#endif // GEOMETRY_SHAPE_H

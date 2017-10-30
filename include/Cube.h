@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_CUBE_H
-#define GEOMETRY_CUBE_H 1
+#pragma once
 
 #include "Shape.h"
 
@@ -12,5 +11,4 @@ namespace Geometry
     };
 };
 
-#endif // GEOMETRY_CUBE_H
 

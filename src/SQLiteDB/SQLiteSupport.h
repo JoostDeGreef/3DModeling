@@ -1,5 +1,4 @@
-#ifndef SQLITESUPPORT_H
-#define SQLITESUPPORT_H 1
+#pragma once
 
 namespace SQLite
 {
@@ -31,5 +30,4 @@ namespace SQLite
     }   
 };
 
-#endif // SQLITESUPPORT_H
 

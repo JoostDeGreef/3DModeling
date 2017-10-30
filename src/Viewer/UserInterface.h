@@ -1,5 +1,4 @@
-#ifndef USERINTERFACE_H
-#define USERINTERFACE_H 1
+#pragma once
 
 namespace Viewer
 {
@@ -25,5 +24,4 @@ namespace Viewer
     };
 }
 
-#endif // USERINTERFACE_H
 

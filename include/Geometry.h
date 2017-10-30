@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_H
-#define GEOMETRY_H 1
+#pragma once
 
 #include <algorithm>
 #include <array>
@@ -11,6 +10,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <random>
 #include <stack>
 #include <string>
 #include <unordered_map>
@@ -46,4 +46,3 @@
 #include "Dodecahedron.h"
 #include "Cube.h"
 
-#endif // GEOMETRY_H

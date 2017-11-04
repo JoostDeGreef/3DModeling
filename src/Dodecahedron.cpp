@@ -193,26 +193,6 @@ void Dodecahedron::Refine(int initialFaceCount)
         faceCount = 0;
         ForEachFace([&faceCount](const FaceRaw& face) {faceCount++; });
 
-// TODO
-        // the number of patches should be larger; turn every face into a patch (60)
-        //std::vector<PatchPtr> patches;
-        //ForEachPatch([&patches](const PatchPtr& patch)
-        //{
-        //    patches.emplace_back(patch);
-        //});
-        //for (auto& patch : patches)
-        //{
-        //    auto& hull = patch->GetHull();
-        //    auto& faces = patch->GetFaces();
-        //    while (faces.size() > 1)
-        //    {
-        //        const PatchPtr& p = hull->ConstructAndAddPatch(patch->GetColor());
-        //        faces.back()->SetPatch(p);
-        //        p->GetFaces().emplace_back(faces.back());
-        //        faces.pop_back();
-        //    }
-        //}
-
         // give all patches a boundingsphere
         ForEachHull([](const HullRaw& hull)
         {
@@ -231,16 +211,17 @@ void Dodecahedron::Refine(int initialFaceCount)
     // move all vertices to the sphere (dist 1.0 from origin) and correct the face normals
     ForEachVertex([](const VertexRaw& vertex) {vertex->Normalize(); });
     ForEachFace([](const FaceRaw& face) {face->CalcNormal(); });
+
     // create perfect sphere edge normals
-    ForEachEdge([&](const EdgeRaw& edge)
-    {
-        // give all edges at this vertex the same normal
-        if (!edge->GetStartNormal())
-        {
-            NormalPtr normal = Construct<Normal>(*edge->GetStartVertex());
-            edge->ForEachEdgeAtStartVertex([normal](const EdgeRaw& edge) {edge->SetStartNormal(normal); });
-        }
-    });
+    //ForEachEdge([&](const EdgeRaw& edge)
+    //{
+    //    // give all edges at this vertex the same normal
+    //    if (!edge->GetStartNormal())
+    //    {
+    //        NormalPtr normal = Construct<Normal>(*edge->GetStartVertex());
+    //        edge->ForEachEdgeAtStartVertex([normal](const EdgeRaw& edge) {edge->SetStartNormal(normal); });
+    //    }
+    //});
 }
 
 

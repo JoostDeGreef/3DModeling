@@ -21,6 +21,7 @@ namespace Viewer
         unsigned int m_displayList;
     };
 
+    void DisposeAllRenderObjects();
     void HandleDisposedRenderObjects();
 
     HullRenderObject& GetRenderObject(const Geometry::HullRaw& hull);

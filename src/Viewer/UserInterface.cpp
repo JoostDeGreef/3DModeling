@@ -14,10 +14,10 @@ using namespace std::chrono_literals;
 
 #include "Geometry.h"
 #include "GLWrappers.h"
+#include "Menu.h"
 #include "UserInterface.h"
 #include "RenderObjects.h"
 #include "RenderInfo.h"
-#include "Menu.h"
 using namespace Geometry;
 
 namespace Viewer
@@ -53,6 +53,8 @@ namespace Viewer
                 m_shapes.emplace_back(std::move(shape));
             }
             Quat State::CalculateRotation();
+
+            Menu& GetMenu() { return m_menu; }
 
         private:
             // state protection
@@ -161,6 +163,7 @@ namespace Viewer
             glfwDestroyWindow(m_window);
             m_window = nullptr;
             glfwTerminate();
+            DisposeAllRenderObjects();
             m_shapes.clear();
             return true;
         }
@@ -258,9 +261,6 @@ namespace Viewer
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_LIGHTING);
             glDepthMask(GL_FALSE);
-
-            GLint viewport[4];
-            glGetIntegerv(GL_VIEWPORT, viewport);
 
             DrawMenu();
 
@@ -425,7 +425,7 @@ namespace Viewer
 
         void State::DrawMenu()
         {
-            m_menu.Draw();
+            m_menu.Draw(m_width,m_height,m_x,m_y);
         }
 
         Quat State::CalculateRotation()
@@ -449,11 +449,17 @@ namespace Viewer
         void State::KeyCallback(const int key, const int scancode, const int action, const int mods)
         {
             std::lock_guard<std::mutex> lock(m_mutex);
+            if(!m_menu.HandleKey(key,scancode,action,mods))
+            { 
+            }
         }
 
         void State::CharCallback(const unsigned int c)
         {
             std::lock_guard<std::mutex> lock(m_mutex);
+            if (!m_menu.HandleChar(c))
+            {
+            }
         }
 
         void State::CursorPosCallback(const double& xpos, const double& ypos)
@@ -464,12 +470,16 @@ namespace Viewer
             double y = (2 * ypos / m_height - 1) * m_y;
             m_mousePos.Set(x, -y);
 
+            if (!m_menu.HandleCursorPos(xpos,ypos))
+            {
+            }
+
         }
 
         void State::MouseButtonCallback(const int button, const int action, const int mods)
         {
             std::lock_guard<std::mutex> lock(m_mutex);
-            if (!m_menu.HandleMouse(button, action, mods))
+            if (!m_menu.HandleMouseButton(button, action, mods))
             {
                 if (GLFW_MOUSE_BUTTON_LEFT == button && 0 == mods)
                 {
@@ -506,6 +516,9 @@ namespace Viewer
             {
                 m_y = 1 / m_ratio;
             }
+            if (!m_menu.HandleWindowSize(width, height))
+            {
+            }
         }
 
         void State::ScrollCallback(const double x, const double y)
@@ -513,6 +526,9 @@ namespace Viewer
             std::lock_guard<std::mutex> lock(m_mutex);
             double factor = 1 + y / 10;
             m_zoom = Numerics::Clamp(m_zoom*factor, m_zoomMin, m_zoomMax);
+            if (!m_menu.HandleScroll(x,y))
+            {
+            }
         }
     } // namespace Internal
 
@@ -548,6 +564,11 @@ namespace Viewer
     void UserInterface::AddShape(Geometry::ShapePtr& shape)
     {
         return m_state->AddShape(std::move(shape));
+    }
+
+    Menu& UserInterface::GetMenu()
+    {
+        return m_state->GetMenu();
     }
 
 

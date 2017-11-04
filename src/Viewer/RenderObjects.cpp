@@ -44,6 +44,12 @@ namespace Viewer
         return *iter->second;
     }
 
+    void DisposeAllRenderObjects()
+    {
+        auto& objects = GetRenderObjects();
+        objects.clear();
+    }
+
     void HandleDisposedRenderObjects()
     {
         auto& objects = GetRenderObjects();

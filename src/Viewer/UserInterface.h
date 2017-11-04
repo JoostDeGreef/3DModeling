@@ -19,6 +19,8 @@ namespace Viewer
         void Draw();
         void AddShape(Geometry::ShapePtr& shape);
 
+        Menu& GetMenu();
+
     private:
         std::shared_ptr<Internal::State> m_state;
     };

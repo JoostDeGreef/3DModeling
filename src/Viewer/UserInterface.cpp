@@ -14,10 +14,12 @@ using namespace std::chrono_literals;
 
 #include "Geometry.h"
 #include "GLWrappers.h"
+#include "Text.h"
 #include "Menu.h"
 #include "UserInterface.h"
 #include "RenderObjects.h"
 #include "RenderInfo.h"
+#include "Shaders.h"
 using namespace Geometry;
 
 namespace Viewer
@@ -213,7 +215,9 @@ namespace Viewer
                 glEnable(GL_LIGHTING);
                 glEnable(GL_CULL_FACE);
                 glEnable(GL_DEPTH_TEST);
-                glEnable(GL_TEXTURE_2D);
+                glActiveTexture(GL_TEXTURE0);
+//                glEnable(GL_TEXTURE_2D);
+                glEnable(GL_TEXTURE);
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 glBlendEquation(GL_FUNC_ADD);
@@ -256,14 +260,17 @@ namespace Viewer
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
 
+            Shaders::Select(Shaders::Type::None);
             DrawShapes();
 
             glDisable(GL_DEPTH_TEST);
             glDisable(GL_LIGHTING);
             glDepthMask(GL_FALSE);
 
+            Shaders::Select(Shaders::Type::None);
             DrawMenu();
 
+            Shaders::Select(Shaders::Type::None);
             DrawMouse();
 
             glEnable(GL_DEPTH_TEST);
@@ -426,6 +433,7 @@ namespace Viewer
         void State::DrawMenu()
         {
             m_menu.Draw(m_width,m_height,m_x,m_y);
+            Text("test 123").Size(40).Draw(0, 0);
         }
 
         Quat State::CalculateRotation()

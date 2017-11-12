@@ -164,6 +164,7 @@
     <ClCompile Include="..\src\Viewer\Menu.cpp" />
     <ClCompile Include="..\src\Viewer\RenderInfo.cpp" />
     <ClCompile Include="..\src\Viewer\RenderObjects.cpp" />
+    <ClCompile Include="..\src\Viewer\Shaders.cpp" />
     <ClCompile Include="..\src\Viewer\Text.cpp" />
     <ClCompile Include="..\src\Viewer\UserInterface.cpp" />
     <ClCompile Include="..\src\Viewer\ViewerMain.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="..\src\Viewer\Menu.h" />
     <ClInclude Include="..\src\Viewer\RenderInfo.h" />
     <ClInclude Include="..\src\Viewer\RenderObjects.h" />
+    <ClInclude Include="..\src\Viewer\Shaders.h" />
     <ClInclude Include="..\src\Viewer\Text.h" />
     <ClInclude Include="..\src\Viewer\UserInterface.h" />
   </ItemGroup>

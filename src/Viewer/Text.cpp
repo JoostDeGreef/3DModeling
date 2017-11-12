@@ -9,6 +9,7 @@ using namespace std;
 #include "Geometry.h"
 #include "GLWrappers.h"
 #include "Text.h"
+#include "Shaders.h"
 using namespace Viewer;
 
 class FreeType
@@ -78,10 +79,18 @@ public:
         , m_advance_y(advance_y)
     {}
 
-    operator char() { return m_char; }
+    operator char() const { return m_char; }
 
     int GetHeight() const { return m_height; }
     int GetWidth() const { return m_width; }
+
+    int GetTextureX() const { return m_texture_x; }
+    int GetTextureY() const { return m_texture_y; }
+
+    int GetAdvanceX() const { return m_advance_x; }
+    int GetAdvanceY() const { return m_advance_y; }
+
+    void SetTexturePos(const int x, const int y) { m_texture_x = x; m_texture_y = y; }
 private:
     char m_char;
     int m_width;
@@ -94,32 +103,92 @@ private:
     int m_texture_y;
 };
 
-class Atlas
+class CharacterMap
 {
 public:
-    Atlas(const std::string& fontfile,const unsigned int size)
-        : m_font(fontfile,size)
+    CharacterMap(const std::string& fontfile,const unsigned int size)
+        : m_characters()
+        , m_textureId(0)
     {
-        LoadCharacters(" "
+        Font font(fontfile, size);
+        LoadCharacters(font,
+                       " "
                        "0123456789"
                        "abcdefghijklmnopqrstuvwxyz"
                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                        "!@#$%^&*()-_=+`~[]{};:'\"\\|,.<>/?");
     }
 
-protected:
-    void LoadCharacters(const std::string& chars)
+    void RenderText(const std::string& text, double x, double y, double scale_x, double scale_y)
     {
-        FT_Face face = m_font;
+        Shaders::Type prevShader = Shaders::Select(Shaders::Type::Text);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_textureId); 
+
+        int inputColorLocation = Shaders::GetUniformLocation("inputColor");
+        int textureLocation = Shaders::GetUniformLocation("texture");
+
+        glUniform1i(textureLocation, 0); // sampler, not texture!
+        GLfloat color[4] = { 0, 0, 1, 1 }; 
+        glUniform4fv(inputColorLocation, 1, color);
+        //glColor4d(1.0, 1.0, 0.0, 1.0);
+
+        glBegin(GL_TRIANGLES);
+        for (const char c: text)
+        {
+            const Character& character = GetCharacter(c);
+
+            //double tx0 = character.GetTextureX() * m_scale;
+            //double tx1 = (character.GetTextureX() + character.GetWidth()) * m_scale;
+            //double ty0 = character.GetTextureY() * m_scale;
+            //double ty1 = (character.GetTextureY() + character.GetHeight()) * m_scale;
+
+            double tx0 = 0;
+            double tx1 = 1;
+            double ty0 = 0;
+            double ty1 = 1;
+
+            double w = character.GetWidth() * scale_x;
+            double h = character.GetHeight() * scale_y;
+
+            /* Skip glyphs that have no pixels */
+            if (w && h)
+            {
+                glTexCoord2d(tx1, ty0);
+                glVertex2d(x + w, y);
+                glTexCoord2d(tx0, ty1);
+                glVertex2d(x, y + h);
+                glTexCoord2d(tx0, ty0);
+                glVertex2d(x, y);
+
+                glTexCoord2d(tx1, ty0);
+                glVertex2d(x + w, y);
+                glTexCoord2d(tx1, ty1);
+                glVertex2d(x + w, y + h);
+                glTexCoord2d(tx0, ty1);
+                glVertex2d(x, y + h);
+            }
+
+            /* Advance the cursor to the start of the next character */
+            x += character.GetAdvanceX() * scale_x / 64;
+            y += character.GetAdvanceY() * scale_y / 64;
+        }
+        glEnd();
+        glBindTexture(GL_TEXTURE_2D, 0);
+        Shaders::Select(prevShader);
+    }
+
+protected:
+    void LoadCharacters(Font& font, const std::string& chars)
+    {
+        FT_Face face = font;
         FT_GlyphSlot g = face->glyph;
-        int w = 0;
-        int h = 0;
         int64_t surface = 0;
         std::vector<Character> characters;
 
         for (char c: chars) 
         {
-            if (FT_Load_Char(face, c, FT_LOAD_RENDER)) 
+            if (0 != FT_Load_Char(face, c, FT_LOAD_RENDER)) 
             {
 //                fprintf(stderr, "Loading character %c failed!\n", i);
                 continue;
@@ -128,14 +197,68 @@ protected:
             characters.emplace_back(c, g->bitmap.width, g->bitmap.rows, g->bitmap_left, g->bitmap_top, g->advance.x, g->advance.y);
         }
 
-        sort(characters.begin(), characters.end(), [](Character& a, Character& b) { return a.GetHeight() > b.GetHeight(); });
+        // sort the glyps with the tallest ones in front
+        sort(characters.begin(), characters.end(), [](Character& a, Character& b) 
+        { 
+            return a.GetHeight() == b.GetHeight() ? a.GetWidth() > b.GetWidth() : a.GetHeight() > b.GetHeight();
+        });
 
-        // todo: fit on m*m texture
+        // see how big the (square) texture should be to contain all glyphs.
+        int side = (int)pow(2, ceil(log2(sqrt(surface)/2)));
+        int height;
+        do
+        {
+            side *= 2;
+            height = 0;
+            int x = 0;
+            int y = 0;
+            for (Character& c : characters)
+            {
+                if (c.GetWidth() + x > side)
+                {
+                    x = 0;                    
+                }
+                if (x == 0)
+                {
+                    y = height;
+                    height += c.GetHeight();
+                }
+                c.SetTexturePos(x,y);
+                x += c.GetWidth();
+            }
+        }
+        while (height>side);
 
+        // create the texture
+        glActiveTexture(GL_TEXTURE0);
+        glGenTextures(1, &m_textureId);
+        glBindTexture(GL_TEXTURE_2D, m_textureId);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, side, side, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+
+        for (const Character& c : characters)
+        {
+            if (0 == FT_Load_Char(face, c, FT_LOAD_RENDER))
+            {
+                glTexSubImage2D(GL_TEXTURE_2D, 0, c.GetTextureX(), c.GetTextureY(), 
+                    g->bitmap.width, g->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, g->bitmap.buffer);
+            }
+            else
+            {
+                int dummy = 0;
+            }
+        }
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // store the characters
         for (Character& c : characters)
         {
             m_characters.emplace(c, c);
         }
+
+        // store 1/side for texture coord normalization
+        m_scale = 1.0 / side;
     }
 
     Character& GetCharacter(char c)
@@ -150,20 +273,21 @@ protected:
     }
 
 private:
-    Font m_font;
     std::unordered_map<char, Character> m_characters;
+    unsigned int m_textureId;
+    double m_scale;
 };
 
 
 // todo: store data somewhere logical...
-Atlas& GetAtlas(const std::string& fontfile, const unsigned int size = 48)
+CharacterMap& GetCharacterMap(const std::string& fontfile, const unsigned int size = 48)
 {
-    static std::unordered_map<std::string,Atlas> atlasses;
+    static std::unordered_map<std::string, CharacterMap> characterMaps;
     std::string id = std::to_string(size) + ";" + fontfile;
-    auto iter = atlasses.find(id);
-    if (iter == atlasses.end())
+    auto iter = characterMaps.find(id);
+    if (iter == characterMaps.end())
     {
-        iter = atlasses.emplace(id, Atlas(fontfile, size)).first;
+        iter = characterMaps.emplace(id, CharacterMap(fontfile, size)).first;
     }
     return iter->second;
 }
@@ -182,6 +306,7 @@ Text& Text::Size(const double size)
 
 void Text::Draw(const double x, const double y)
 {
-    Atlas& atlas = GetAtlas(R"TEXT(C:\Src\3DModeling\src\Viewer\fonts\Prida65.otf)TEXT");
+    CharacterMap& characterMap = GetCharacterMap(R"TEXT(C:\Src\3DModeling\src\Viewer\fonts\Prida65.otf)TEXT");
+    characterMap.RenderText(m_text, x, y, 1.0/300, 1.0/300);
 }
 

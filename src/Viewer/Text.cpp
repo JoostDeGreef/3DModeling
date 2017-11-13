@@ -69,7 +69,8 @@ public:
     Character(const char c,
               const int width, const int height,
               const int left, const int top,
-              const int advance_x, const int advance_y)
+              const int advance_x, const int advance_y,
+              const int bearing_x, const int bearing_y)
         : m_char(c)
         , m_width(width)
         , m_height(height)
@@ -77,6 +78,8 @@ public:
         , m_top(top)
         , m_advance_x(advance_x)
         , m_advance_y(advance_y)
+        , m_bearing_x(bearing_x)
+        , m_bearing_y(bearing_y)
     {}
 
     operator char() const { return m_char; }
@@ -90,6 +93,9 @@ public:
     int GetAdvanceX() const { return m_advance_x; }
     int GetAdvanceY() const { return m_advance_y; }
 
+    int GetBearingX() const { return m_bearing_x; }
+    int GetBearingY() const { return m_bearing_y; }
+
     void SetTexturePos(const int x, const int y) { m_texture_x = x; m_texture_y = y; }
 private:
     char m_char;
@@ -99,6 +105,8 @@ private:
     int m_top;
     int m_advance_x;
     int m_advance_y;
+    int m_bearing_x;
+    int m_bearing_y;
     int m_texture_x;
     int m_texture_y;
 };
@@ -125,6 +133,12 @@ public:
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_textureId); 
 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
         int inputColorLocation = Shaders::GetUniformLocation("inputColor");
         int textureLocation = Shaders::GetUniformLocation("texture");
 
@@ -138,35 +152,32 @@ public:
         {
             const Character& character = GetCharacter(c);
 
-            //double tx0 = character.GetTextureX() * m_scale;
-            //double tx1 = (character.GetTextureX() + character.GetWidth()) * m_scale;
-            //double ty0 = character.GetTextureY() * m_scale;
-            //double ty1 = (character.GetTextureY() + character.GetHeight()) * m_scale;
-
-            double tx0 = 0;
-            double tx1 = 1;
-            double ty0 = 0;
-            double ty1 = 1;
+            double tx0 = character.GetTextureX() * m_scale;
+            double tx1 = (character.GetTextureX() + character.GetWidth()) * m_scale;
+            double ty0 = character.GetTextureY() * m_scale;
+            double ty1 = (character.GetTextureY() + character.GetHeight()) * m_scale;
 
             double w = character.GetWidth() * scale_x;
             double h = character.GetHeight() * scale_y;
+            double bx = character.GetBearingX() * scale_x / 64;
+            double by = character.GetBearingY() * scale_y / 64;
 
             /* Skip glyphs that have no pixels */
             if (w && h)
             {
-                glTexCoord2d(tx1, ty0);
-                glVertex2d(x + w, y);
                 glTexCoord2d(tx0, ty1);
-                glVertex2d(x, y + h);
+                glVertex2d(x + bx, y - h + by);
+                glTexCoord2d(tx1, ty0);
+                glVertex2d(x + w + bx, y + by);
                 glTexCoord2d(tx0, ty0);
-                glVertex2d(x, y);
+                glVertex2d(x + bx, y + by);
 
-                glTexCoord2d(tx1, ty0);
-                glVertex2d(x + w, y);
                 glTexCoord2d(tx1, ty1);
-                glVertex2d(x + w, y + h);
+                glVertex2d(x + w + bx, y - h + by);
+                glTexCoord2d(tx1, ty0);
+                glVertex2d(x + w + bx, y + by);
                 glTexCoord2d(tx0, ty1);
-                glVertex2d(x, y + h);
+                glVertex2d(x + bx, y - h + by);
             }
 
             /* Advance the cursor to the start of the next character */
@@ -194,7 +205,7 @@ protected:
                 continue;
             }
             surface += g->bitmap.width * g->bitmap.rows;
-            characters.emplace_back(c, g->bitmap.width, g->bitmap.rows, g->bitmap_left, g->bitmap_top, g->advance.x, g->advance.y);
+            characters.emplace_back(c, g->bitmap.width, g->bitmap.rows, g->bitmap_left, g->bitmap_top, g->advance.x, g->advance.y, g->metrics.horiBearingX, g->metrics.horiBearingY);
         }
 
         // sort the glyps with the tallest ones in front
@@ -235,13 +246,13 @@ protected:
         glBindTexture(GL_TEXTURE_2D, m_textureId);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, side, side, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, side, side, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
         for (const Character& c : characters)
         {
             if (0 == FT_Load_Char(face, c, FT_LOAD_RENDER))
             {
-                glTexSubImage2D(GL_TEXTURE_2D, 0, c.GetTextureX(), c.GetTextureY(), 
+                glTexSubImage2D(GL_TEXTURE_2D, 0, c.GetTextureX(), c.GetTextureY(),
                     g->bitmap.width, g->bitmap.rows, GL_RED, GL_UNSIGNED_BYTE, g->bitmap.buffer);
             }
             else
@@ -280,7 +291,7 @@ private:
 
 
 // todo: store data somewhere logical...
-CharacterMap& GetCharacterMap(const std::string& fontfile, const unsigned int size = 48)
+CharacterMap& GetCharacterMap(const std::string& fontfile, const unsigned int size)
 {
     static std::unordered_map<std::string, CharacterMap> characterMaps;
     std::string id = std::to_string(size) + ";" + fontfile;
@@ -293,20 +304,29 @@ CharacterMap& GetCharacterMap(const std::string& fontfile, const unsigned int si
 }
 
 
-Text::Text(std::string&& text,const double size)
+Text::Text(std::string&& text,const int size)
     : m_text(std::move(text))
     , m_size(size)
+    , m_pixelSize(1/800)
 {}
 
-Text& Text::Size(const double size)
+Text& Text::Size(const int size, const double pixelSize)
 {
     m_size = size;
+    m_pixelSize = pixelSize;
     return *this;
 }
 
 void Text::Draw(const double x, const double y)
 {
-    CharacterMap& characterMap = GetCharacterMap(R"TEXT(C:\Src\3DModeling\src\Viewer\fonts\Prida65.otf)TEXT");
-    characterMap.RenderText(m_text, x, y, 1.0/300, 1.0/300);
+    CharacterMap& characterMap = GetCharacterMap(R"TEXT(C:\Src\3DModeling\src\Viewer\fonts\Prida65.otf)TEXT", m_size);
+    //CharacterMap& characterMap = GetCharacterMap(R"TEXT(C:\Src\3DModeling\src\Viewer\fonts\Odin Rounded - Regular.otf)TEXT");
+    characterMap.RenderText(m_text, x, y, m_pixelSize, m_pixelSize);
 }
 
+Geometry::Vector2i Text::GetSize()
+{
+    Geometry::Vector2i res;
+    // todo
+    return res;
+}

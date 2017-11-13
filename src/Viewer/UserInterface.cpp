@@ -69,6 +69,7 @@ namespace Viewer
             GLfloat m_ratio;
             double m_x;
             double m_y;
+            double m_pixelSize;
 
             // mouse related
             Quat m_rotation;
@@ -216,8 +217,7 @@ namespace Viewer
                 glEnable(GL_CULL_FACE);
                 glEnable(GL_DEPTH_TEST);
                 glActiveTexture(GL_TEXTURE0);
-//                glEnable(GL_TEXTURE_2D);
-                glEnable(GL_TEXTURE);
+                glEnable(GL_TEXTURE_2D);
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 glBlendEquation(GL_FUNC_ADD);
@@ -433,7 +433,7 @@ namespace Viewer
         void State::DrawMenu()
         {
             m_menu.Draw(m_width,m_height,m_x,m_y);
-            Text("test 123").Size(40).Draw(0, 0);
+            Text("test 123").Size(40,m_pixelSize).Draw(0, 0);
         }
 
         Quat State::CalculateRotation()
@@ -524,6 +524,7 @@ namespace Viewer
             {
                 m_y = 1 / m_ratio;
             }
+            m_pixelSize = 2.0/m_height;
             if (!m_menu.HandleWindowSize(width, height))
             {
             }

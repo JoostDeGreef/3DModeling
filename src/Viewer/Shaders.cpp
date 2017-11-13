@@ -13,30 +13,27 @@ namespace
     static const char * const textVertexShader = R"VertexShader(
 #version 440
 
-in vec4 pos_uv;
-out vec2 uv;
-
 void main()
 {
-    gl_Position = vec4(pos_uv.xy, 0, 1);
-    uv = pos_uv.zw;
+    gl_Position = ftransform();
+    gl_TexCoord[0] = gl_MultiTexCoord0;
 }
 )VertexShader";
 
     static const char * const textFragmentShader = R"FragmentShader(
 #version 440
 
-in vec2 uv;
 uniform sampler2D texture;
 uniform vec4 inputColor;
 
-out vec4 color;
-
 void main()
 {
-    color = vec4(inputColor.rgb, uv.y); /*texture2D(texture, uv).a);*/
+    gl_FragColor = vec4(inputColor.rgb, texture2D(texture, gl_TexCoord[0].st).r); 
 }
 )FragmentShader";
+
+
+
 
     GLuint LoadShaders(const char * const vertex, const char * const fragment) {
 

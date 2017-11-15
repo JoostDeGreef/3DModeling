@@ -74,12 +74,13 @@ namespace Viewer
         std::string m_text;
         std::function<void()> m_command;
         MenuState m_state;
+        Geometry::BoundingShape2d m_bbox;
     };
 
     class Menu : public MenuItem
     {
     public:
-        Menu();
+        Menu(const Font& font);
 
         // Draw the menu. 
         void Draw(int width,int height,double x,double y);
@@ -96,5 +97,13 @@ namespace Viewer
         int m_prevWidth;
         int m_prevHeight;
         int m_displayList;
+        double m_prevOpacity;
+
+        Font m_font;
+        Geometry::BoundingShape2d m_bboxHamburger;
+        Geometry::Vector2d m_mousePos;
+
+        void DrawHamburger(int width, int height, double X, double Y);
+        void DrawExpanded(int width, int height, double X, double Y);
     };
 } // namespace Viewer

@@ -8,7 +8,7 @@ using namespace std;
 
 #include "Geometry.h"
 #include "GLWrappers.h"
-#include "Text.h"
+#include "Font.h"
 #include "Shaders.h"
 using namespace Viewer;
 
@@ -36,10 +36,10 @@ private:
     FT_Library m_ft;
 };
 
-class Font
+class FreeTypeFont
 {
 public:
-    Font(const std::string& fontfile,const unsigned int size)
+    FreeTypeFont(const std::string& fontfile,const unsigned int size)
     {
         if (FT_New_Face(m_ft, fontfile.c_str(), 0, &m_face) != 0) 
         {
@@ -49,7 +49,7 @@ public:
         }
         FT_Set_Pixel_Sizes(m_face, 0, size);
     }
-    ~Font()
+    ~FreeTypeFont()
     {
         FT_Done_Face(m_face);
     }
@@ -61,7 +61,7 @@ private:
     FT_Face m_face;
 };
 
-FreeType Font::m_ft;
+FreeType FreeTypeFont::m_ft;
 
 class Character
 {
@@ -118,7 +118,7 @@ public:
         : m_characters()
         , m_textureId(0)
     {
-        Font font(fontfile, size);
+        FreeTypeFont font(fontfile, size);
         LoadCharacters(font,
                        " "
                        "0123456789"
@@ -127,7 +127,7 @@ public:
                        "!@#$%^&*()-_=+`~[]{};:'\"\\|,.<>/?");
     }
 
-    void RenderText(const std::string& text, double x, double y, double scale_x, double scale_y)
+    void RenderText(const std::string& text, double x, double y, double scale_x, double scale_y, Geometry::Color& color)
     {
         Shaders::Type prevShader = Shaders::Select(Shaders::Type::Text);
         glActiveTexture(GL_TEXTURE0);
@@ -143,9 +143,7 @@ public:
         int textureLocation = Shaders::GetUniformLocation("texture");
 
         glUniform1i(textureLocation, 0); // sampler, not texture!
-        GLfloat color[4] = { 0, 0, 1, 1 }; 
-        glUniform4fv(inputColorLocation, 1, color);
-        //glColor4d(1.0, 1.0, 0.0, 1.0);
+        glUniform4fv(inputColorLocation, 1, color.GetRGBA());
 
         glBegin(GL_TRIANGLES);
         for (const char c: text)
@@ -189,8 +187,26 @@ public:
         Shaders::Select(prevShader);
     }
 
+    // this ignores whatever falls below the baseline of the glyph
+    Geometry::Vector2d MeasureText(const std::string& text, double scale_x, double scale_y)
+    {
+        double x = 0;
+        double y = 0;
+        for (const char c : text)
+        {
+            const Character& character = GetCharacter(c);
+
+            double h = character.GetHeight() * scale_y;
+            x += character.GetAdvanceX() * scale_x / 64;
+
+            y = std::max(y, h);
+        }
+        Geometry::Vector2d res(x,y);
+        return res;
+    }
+
 protected:
-    void LoadCharacters(Font& font, const std::string& chars)
+    void LoadCharacters(FreeTypeFont& font, const std::string& chars)
     {
         FT_Face face = font;
         FT_GlyphSlot g = face->glyph;
@@ -225,17 +241,17 @@ protected:
             int y = 0;
             for (Character& c : characters)
             {
-                if (c.GetWidth() + x > side)
+                if (c.GetWidth() + x + 2> side)
                 {
-                    x = 0;                    
+                    x = 0;
                 }
                 if (x == 0)
                 {
                     y = height;
-                    height += c.GetHeight();
+                    height += c.GetHeight() + 2;
                 }
-                c.SetTexturePos(x,y);
-                x += c.GetWidth();
+                c.SetTexturePos(x+1,y+1);
+                x += c.GetWidth() + 2;
             }
         }
         while (height>side);
@@ -304,29 +320,33 @@ CharacterMap& GetCharacterMap(const std::string& fontfile, const unsigned int si
 }
 
 
-Text::Text(std::string&& text,const int size)
-    : m_text(std::move(text))
+Font::Font(std::string&& fontFile, const int size)
+    : m_fontFile(std::move(fontFile))
     , m_size(size)
     , m_pixelSize(1/800)
+    , m_color(1,1,1,1)
 {}
 
-Text& Text::Size(const int size, const double pixelSize)
+Font& Font::PixelSize(const double pixelSize)
 {
-    m_size = size;
     m_pixelSize = pixelSize;
     return *this;
 }
 
-void Text::Draw(const double x, const double y)
+Font& Font::Color(const Geometry::Color& color)
 {
-    CharacterMap& characterMap = GetCharacterMap(R"TEXT(C:\Src\3DModeling\src\Viewer\fonts\Prida65.otf)TEXT", m_size);
-    //CharacterMap& characterMap = GetCharacterMap(R"TEXT(C:\Src\3DModeling\src\Viewer\fonts\Odin Rounded - Regular.otf)TEXT");
-    characterMap.RenderText(m_text, x, y, m_pixelSize, m_pixelSize);
+    m_color = color;
+    return *this;
 }
 
-Geometry::Vector2i Text::GetSize()
+void Font::Draw(const double x, const double y, std::string&& text)
 {
-    Geometry::Vector2i res;
-    // todo
-    return res;
+    CharacterMap& characterMap = GetCharacterMap(m_fontFile, m_size);
+    characterMap.RenderText(std::move(text), x, y, m_pixelSize, m_pixelSize, m_color);
+}
+
+Geometry::Vector2d Font::GetSize(std::string&& text)
+{
+    CharacterMap& characterMap = GetCharacterMap(m_fontFile, m_size);
+    return characterMap.MeasureText(std::move(text), m_pixelSize, m_pixelSize);
 }

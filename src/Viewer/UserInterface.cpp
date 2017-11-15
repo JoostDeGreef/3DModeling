@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 
 #include "Geometry.h"
 #include "GLWrappers.h"
-#include "Text.h"
+#include "Font.h"
 #include "Menu.h"
 #include "UserInterface.h"
 #include "RenderObjects.h"
@@ -30,6 +30,8 @@ namespace Viewer
         {
         public:
             State()
+                : m_font(R"TEXT(C:\Src\3DModeling\src\Viewer\fonts\Prida65.otf)TEXT", 40)
+                , m_menu(m_font)
             {}
             ~State()
             {
@@ -82,6 +84,7 @@ namespace Viewer
 
             // drawable objects
             std::vector<Geometry::ShapePtr> m_shapes;
+            Font m_font;
 
             // menu
             Menu m_menu;
@@ -433,7 +436,7 @@ namespace Viewer
         void State::DrawMenu()
         {
             m_menu.Draw(m_width,m_height,m_x,m_y);
-            Text("test 123").Size(40,m_pixelSize).Draw(0, 0);
+//            m_font.Color(Geometry::Color::Red()).Draw(0, 0, "test 123");
         }
 
         Quat State::CalculateRotation()
@@ -525,6 +528,7 @@ namespace Viewer
                 m_y = 1 / m_ratio;
             }
             m_pixelSize = 2.0/m_height;
+            m_font.PixelSize(m_pixelSize);
             if (!m_menu.HandleWindowSize(width, height))
             {
             }

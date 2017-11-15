@@ -3,6 +3,7 @@
 #include "Geometry.h"
 using namespace Geometry;
 
+#include "Font.h"
 #include "Menu.h"
 #include "UserInterface.h"
 using namespace Viewer;

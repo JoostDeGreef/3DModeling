@@ -48,6 +48,13 @@ namespace Geometry
             box.m_max = max_point;
             m_optimal = optimal;
             m_type = Type::Box;
+            for (Vertex::index_type i = 0; i < vector_type::dimension; ++i)
+            {
+                if (box.m_min[i] > box.m_max[i])
+                {
+                    std::swap(box.m_min[i],box.m_max[i]);
+                }
+            }
         }
 
         void Set(const vector_type &center, const value_type &radius, const bool optimal = true)
@@ -98,7 +105,7 @@ namespace Geometry
                             if (v[i] > vmax[i]) vmax[i] = v[i];
                         }
                     }
-                    Set(vmin, vmax);
+                    Set(vmin, vmax, m_optimal);
                 }
                 break;
             }

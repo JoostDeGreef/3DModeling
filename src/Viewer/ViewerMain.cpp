@@ -8,9 +8,13 @@ using namespace Geometry;
 #include "UserInterface.h"
 using namespace Viewer;
 
-void menu_exit()
+void menu_exit(UserInterface& ui)
 {
+    ui.Exit();
+}
 
+void menu_settings_fps()
+{
 }
 
 int main(int argc, char* argv[])
@@ -23,7 +27,9 @@ int main(int argc, char* argv[])
     }
 
     Menu& menu = ui.GetMenu();
-    menu.Add(MenuItem("Exit",menu_exit));
+    auto& settings = menu.Add(MenuItem(menu, "Settings"));
+    settings.Add(MenuItem(menu, "FPS", menu_settings_fps));
+    menu.Add(MenuItem(menu, "Exit", std::bind(menu_exit, ui)));
 
     ShapePtr s = Construct<Dodecahedron>(12);
     s->SetColor(Construct<Color>(1.0f,1.0f,1.0f,1.0f));

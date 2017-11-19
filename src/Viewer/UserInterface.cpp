@@ -51,6 +51,7 @@ namespace Viewer
             void DrawMouse();
             void DrawShapes();
             void DrawMenu();
+            void Exit();
 
             void AddShape(Geometry::ShapePtr& shape)
             {
@@ -543,6 +544,11 @@ namespace Viewer
             {
             }
         }
+
+        void State::Exit()
+        {
+            glfwSetWindowShouldClose(m_window, GLFW_TRUE);
+        }
     } // namespace Internal
 
 
@@ -577,6 +583,11 @@ namespace Viewer
     void UserInterface::AddShape(Geometry::ShapePtr& shape)
     {
         return m_state->AddShape(std::move(shape));
+    }
+
+    void UserInterface::Exit()
+    {
+        return m_state->Exit();
     }
 
     Menu& UserInterface::GetMenu()

@@ -18,6 +18,7 @@ namespace Viewer
         bool Cleanup();
         void Draw();
         void AddShape(Geometry::ShapePtr& shape);
+        void Exit();
 
         Menu& GetMenu();
 

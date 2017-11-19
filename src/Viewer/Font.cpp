@@ -339,13 +339,13 @@ Font& Font::Color(const Geometry::Color& color)
     return *this;
 }
 
-void Font::Draw(const double x, const double y, std::string&& text)
+void Font::Draw(const double x, const double y, const std::string& text)
 {
     CharacterMap& characterMap = GetCharacterMap(m_fontFile, m_size);
     characterMap.RenderText(std::move(text), x, y, m_pixelSize, m_pixelSize, m_color);
 }
 
-Geometry::Vector2d Font::GetSize(std::string&& text)
+Geometry::Vector2d Font::GetSize(const std::string& text)
 {
     CharacterMap& characterMap = GetCharacterMap(m_fontFile, m_size);
     return characterMap.MeasureText(std::move(text), m_pixelSize, m_pixelSize);

@@ -281,7 +281,7 @@ namespace Geometry
             switch (m_type)
             {
             default:
-                //assert(false);
+                return false;
             case Type::Box:
                 return Encapsulates(box, value);
             case Type::Ball:

@@ -33,9 +33,6 @@ namespace Viewer
     }
     void Menu::DrawHamburger(double x, double y, double pixel)
     {
-
-        m_font.Color(Geometry::Color::Red()).Draw(0, 0, std::to_string(m_mousePos[0]) + " x " + std::to_string(m_mousePos[1]));
-
         int bh = 15; // one bar heigth
         int gh = 8;  // gap height
 

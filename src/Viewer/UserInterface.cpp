@@ -20,6 +20,7 @@ using namespace std::chrono_literals;
 #include "RenderObjects.h"
 #include "RenderInfo.h"
 #include "Shaders.h"
+#include "Settings.h"
 using namespace Geometry;
 
 namespace Viewer
@@ -51,6 +52,7 @@ namespace Viewer
             void DrawMouse();
             void DrawShapes();
             void DrawMenu();
+            void DrawFPS();
             void Exit();
 
             void AddShape(Geometry::ShapePtr& shape)
@@ -275,6 +277,9 @@ namespace Viewer
             DrawMenu();
 
             Shaders::Select(Shaders::Type::None);
+            DrawFPS();
+
+            Shaders::Select(Shaders::Type::None);
             DrawMouse();
 
             glEnable(GL_DEPTH_TEST);
@@ -437,7 +442,16 @@ namespace Viewer
         void State::DrawMenu()
         {
             m_menu.Draw(m_width,m_height,m_x,m_y);
-//            m_font.Color(Geometry::Color::Red()).Draw(0, 0, "test 123");
+        }
+
+        void State::DrawFPS()
+        {
+            if (Settings::GetBool("ShowFPS"))
+            {
+                std::string fps = "FPS 123";
+                auto size = m_font.GetSize(fps);
+                m_font.Color(Geometry::Color::Red()).Draw(m_x - size[0] - 2 * m_pixelSize, 2 * m_pixelSize - m_y, fps);
+            }
         }
 
         Quat State::CalculateRotation()

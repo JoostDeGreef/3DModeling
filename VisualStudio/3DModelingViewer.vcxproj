@@ -95,7 +95,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLFW_INCLUDE_GLU;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_INCLUDE_GLU;_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(solutiondir)..\..\3rdParty\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -110,6 +110,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(solutiondir)..\..\3rdParty\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -126,6 +127,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -144,6 +146,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -164,6 +167,7 @@
     <ClCompile Include="..\src\Viewer\Menu.cpp" />
     <ClCompile Include="..\src\Viewer\RenderInfo.cpp" />
     <ClCompile Include="..\src\Viewer\RenderObjects.cpp" />
+    <ClCompile Include="..\src\Viewer\Settings.cpp" />
     <ClCompile Include="..\src\Viewer\Shaders.cpp" />
     <ClCompile Include="..\src\Viewer\Font.cpp" />
     <ClCompile Include="..\src\Viewer\UserInterface.cpp" />
@@ -174,6 +178,7 @@
     <ClInclude Include="..\src\Viewer\Menu.h" />
     <ClInclude Include="..\src\Viewer\RenderInfo.h" />
     <ClInclude Include="..\src\Viewer\RenderObjects.h" />
+    <ClInclude Include="..\src\Viewer\Settings.h" />
     <ClInclude Include="..\src\Viewer\Shaders.h" />
     <ClInclude Include="..\src\Viewer\Font.h" />
     <ClInclude Include="..\src\Viewer\UserInterface.h" />

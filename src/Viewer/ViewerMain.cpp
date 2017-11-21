@@ -1,4 +1,5 @@
 #include <cstdlib>
+using namespace std;
 
 #include "Geometry.h"
 using namespace Geometry;
@@ -6,7 +7,23 @@ using namespace Geometry;
 #include "Font.h"
 #include "Menu.h"
 #include "UserInterface.h"
+#include "Settings.h"
 using namespace Viewer;
+
+std::string GetUserPath() 
+{
+    char const* home = getenv("HOME");
+    if (home || (home = getenv("USERPROFILE")))
+    {
+        return home;
+    }
+    else 
+    {
+        char const *hdrive = getenv("HOMEDRIVE");
+        char const *hpath = getenv("HOMEPATH");
+        return std::string(hdrive) + hpath;
+    }
+}
 
 void menu_exit(UserInterface& ui)
 {
@@ -15,11 +32,16 @@ void menu_exit(UserInterface& ui)
 
 void menu_settings_fps()
 {
+    bool showFPS = Settings::GetBool("ShowFPS");
+    Settings::SetBool("ShowFPS", !showFPS);
 }
 
 int main(int argc, char* argv[])
 {
     UserInterface ui;
+
+    std::string settingsDb = GetUserPath() + "/3DModelingViewer.settings";
+    Settings::AttachDB(settingsDb);
 
     if (!ui.Init())
     {

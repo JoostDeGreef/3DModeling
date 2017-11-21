@@ -17,6 +17,7 @@ namespace Viewer
         MenuItem(Menu& menu)
             : m_items()
             , m_text() 
+            , m_textFunction()
             , m_command([]() {})
             , m_state(MenuState::None)
             , m_menu(menu)
@@ -24,6 +25,7 @@ namespace Viewer
         MenuItem(MenuItem&& other) 
             : m_items(std::move(other.m_items))
             , m_text(std::move(other.m_text)) 
+            , m_textFunction()
             , m_command(std::move(other.m_command))
             , m_state(MenuState::None)
             , m_menu(other.m_menu)
@@ -31,6 +33,7 @@ namespace Viewer
         MenuItem(const MenuItem& other) 
             : m_items(other.m_items)
             , m_text(other.m_text) 
+            , m_textFunction()
             , m_command(other.m_command)
             , m_state(MenuState::None)
             , m_menu(other.m_menu)
@@ -38,6 +41,7 @@ namespace Viewer
         MenuItem(Menu& menu,char * text)
             : m_items() 
             , m_text(text) 
+            , m_textFunction()
             , m_command([]() {})
             , m_state(MenuState::None)
             , m_menu(menu)
@@ -45,6 +49,7 @@ namespace Viewer
         MenuItem(Menu& menu,char * text,std::function<void()>&& command)
             : m_items()
             , m_text(text)
+            , m_textFunction()
             , m_command(std::move(command))
             , m_state(MenuState::None)
             , m_menu(menu)
@@ -52,6 +57,7 @@ namespace Viewer
         MenuItem(Menu& menu,std::string&& text)
             : m_items()
             , m_text(std::move(text))
+            , m_textFunction()
             , m_command([]() {})
             , m_state(MenuState::None)
             , m_menu(menu)
@@ -59,6 +65,15 @@ namespace Viewer
         MenuItem(Menu& menu,std::string&& text, std::function<void()>&& command)
             : m_items()
             , m_text(std::move(text)) 
+            , m_textFunction()
+            , m_command(std::move(command))
+            , m_state(MenuState::None)
+            , m_menu(menu)
+        {}
+        MenuItem(Menu& menu, std::function<std::string()>&& textFunction, std::function<void()>&& command)
+            : m_items()
+            , m_text()
+            , m_textFunction(std::move(textFunction))
             , m_command(std::move(command))
             , m_state(MenuState::None)
             , m_menu(menu)
@@ -83,6 +98,11 @@ namespace Viewer
         }
         const std::string& GetText() const
         {
+            if (m_textFunction)
+            {
+                std::string text = m_textFunction();
+                return text;
+            }
             return m_text;
         }
         const Geometry::BoundingShape2d& GetBBox() const
@@ -109,6 +129,7 @@ namespace Viewer
         Menu & m_menu;
         std::vector<MenuItem> m_items;
         std::string m_text;
+        std::function<std::string()> m_textFunction;
         std::function<void()> m_command;
         MenuState m_state;
         Geometry::BoundingShape2d m_bboxText;

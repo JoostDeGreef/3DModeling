@@ -46,6 +46,7 @@ namespace Viewer
     {
         const State& state = m_stack.top();
         Update(state.m_color);
+        Update(state.m_renderMode);
         m_stack.pop();
     }
 
@@ -65,7 +66,7 @@ namespace Viewer
             switch (renderMode)
             {
             case RenderMode::Transparent:
-                assert(false); // Transparancy not implemented yet.
+                //assert(false); // Transparancy not implemented yet.
                 break;
             case RenderMode::Solid:
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

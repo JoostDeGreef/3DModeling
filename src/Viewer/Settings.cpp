@@ -184,7 +184,7 @@ protected:
             {
                 // Use existing slot
                 GetContainer<T>()[id_iter->second.second] = value;
-                m_db.ExecDML("UPDATE %1% SET Value = '%2%' WHERE Id = '%3%'", GetTable<T>(), key, value);
+                m_db.ExecDML("UPDATE %1% SET Value = '%2%' WHERE Id = '%3%'", GetTable<T>(), value, key);
                 return;
             }
             else
@@ -194,7 +194,7 @@ protected:
                 {
                 case StoredType::Double:
                     m_doubles.erase(id_iter->second.second);
-                    m_db.ExecDML("DELETE FROM Strings WHERE Id = '%1%'",key);
+                    m_db.ExecDML("DELETE FROM Strings WHERE Id = '%1%'", key);
                     break;
                 case StoredType::Int:
                     m_ints.erase(id_iter->second.second);

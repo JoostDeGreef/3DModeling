@@ -82,7 +82,7 @@ namespace Geometry
 
         // Render mode
         const RenderMode GetRenderMode() const { return m_renderMode; }
-        void SetRenderMode(const RenderMode renderMode) { m_renderMode = renderMode; }
+        void SetRenderMode(const RenderMode renderMode) { m_renderMode = renderMode; Invalidate(); }
 
         // get/set/calculate the bounding shape
         const BoundingShape3d& GetBoundingShape() const { return m_boundingShape; }

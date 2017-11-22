@@ -59,6 +59,13 @@ namespace Viewer
             {
                 m_shapes.emplace_back(std::move(shape));
             }
+            void SetRenderMode(const Geometry::RenderMode renderMode)
+            {
+                for (auto& shape : m_shapes)
+                {
+                    shape->SetRenderMode(renderMode);
+                }
+            }
             Quat State::CalculateRotation();
 
             Menu& GetMenu() { return m_menu; }
@@ -390,9 +397,9 @@ namespace Viewer
                         renderInfo.Push(hull);
                         //glBindTexture(GL_TEXTURE_2D, hull->GetTextureId());
                         DrawFaces(hull);
+                        renderInfo.Pop();
                         glEndList();
                         renderObject.SetDisplayList(displayList);
-                        renderInfo.Pop();
                     }
                     else
                     {
@@ -597,6 +604,11 @@ namespace Viewer
     void UserInterface::AddShape(Geometry::ShapePtr& shape)
     {
         return m_state->AddShape(std::move(shape));
+    }
+
+    void UserInterface::SetRenderMode(const Geometry::RenderMode renderMode)
+    {
+        return m_state->SetRenderMode(renderMode);
     }
 
     void UserInterface::Exit()

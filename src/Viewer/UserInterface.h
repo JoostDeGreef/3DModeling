@@ -17,8 +17,10 @@ namespace Viewer
         void Run();
         bool Cleanup();
         void Draw();
-        void AddShape(Geometry::ShapePtr& shape);
         void Exit();
+
+        void AddShape(Geometry::ShapePtr& shape);
+        void SetRenderMode(const Geometry::RenderMode renderMode);
 
         Menu& GetMenu();
 

@@ -63,7 +63,7 @@ namespace Viewer
         std::vector<Geometry::Vector2d> itemSizes;
         for (const auto& item : m_items)
         {
-            Geometry::Vector2d size = m_menu.m_font.GetSize(item.GetText());
+            Geometry::Vector2d size = m_menu.m_font.GetSize(item->GetText());
             total[0] = std::max(total[0], size[0]);
             total[1] += size[1];
             itemSizes.emplace_back(size);
@@ -119,11 +119,11 @@ namespace Viewer
         for (unsigned int i=0;i<m_items.size();++i)
         {
             y -= itemSizes[i][1] + ii*pixel;
-            m_items[i].m_bboxText.Set(Geometry::Vector2d(x,y), Geometry::Vector2d(x + itemSizes[i][0], y + itemSizes[i][1]));
-            m_menu.m_font.Color(m_items[i].m_bboxText.Encapsulates(m_menu.m_mousePos) ? Geometry::Color::Red() : Geometry::Color::White() ).Draw(x, y, m_items[i].GetText());
-            if (m_items[i].GetState() == MenuState::Opened)
+            m_items[i]->m_bboxText.Set(Geometry::Vector2d(x,y), Geometry::Vector2d(x + itemSizes[i][0], y + itemSizes[i][1]));
+            m_menu.m_font.Color(m_items[i]->m_bboxText.Encapsulates(m_menu.m_mousePos) ? Geometry::Color::Red() : Geometry::Color::White() ).Draw(x, y, m_items[i]->GetText());
+            if (m_items[i]->GetState() == MenuState::Opened)
             {
-                m_items[i].DrawItems(x+bw*2*pixel+ total[0],y + itemSizes[i][1] + ii*pixel,pixel);
+                m_items[i]->DrawItems(x+bw*2*pixel+ total[0],y + itemSizes[i][1] + ii*pixel,pixel);
             }
         }
     }
@@ -192,42 +192,42 @@ namespace Viewer
                 }
                 else
                 {
-                    std::function<bool(MenuItem&)> handleItem = [&](MenuItem& item)
+                    std::function<bool(MenuItem*)> handleItem = [&](MenuItem* item)
                     {
                         bool res = false;
-                        for (unsigned int i = 0; i<item.Size() && !res; ++i)
+                        for (unsigned int i = 0; i<item->Size() && !res; ++i)
                         {
-                            if (item[i].GetBBox().Encapsulates(m_menu.GetMousePos()))
+                            if ((*item)[i]->GetBBox().Encapsulates(m_menu.GetMousePos()))
                             {
-                                if (item[i].Size() > 0)
+                                if ((*item)[i]->Size() > 0)
                                 {
-                                    if (item[i].GetState() == MenuState::Opened)
+                                    if ((*item)[i]->GetState() == MenuState::Opened)
                                     {
-                                        item[i].SetState(MenuState::None);
+                                        (*item)[i]->SetState(MenuState::None);
                                     }
                                     else
                                     {
-                                        item[i].SetState(MenuState::Opened);
+                                        (*item)[i]->SetState(MenuState::Opened);
                                     }
                                 }
                                 else
                                 {
-                                    item[i].Execute();
+                                    (*item)[i]->Execute();
                                     m_menu.SetState(MenuState::None);
                                 }
                                 res = true;
                             }
                             else
                             {
-                                if (item[i].GetState() == MenuState::Opened)
+                                if ((*item)[i]->GetState() == MenuState::Opened)
                                 {
-                                    res = handleItem(item[i]);
+                                    res = handleItem((*item)[i].get());
                                 }
                             }
                         }
                         return res;
                     };
-                    res = handleItem(*this);
+                    res = handleItem(this);
                     if (!res)
                     {
                         m_state = MenuState::None;

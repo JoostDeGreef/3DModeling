@@ -1,10 +1,14 @@
 #include <string>
 #include <unordered_map>
 #include <algorithm>
+#include <memory>
 using namespace std;
 
 #include "ft2build.h"
 #include FT_FREETYPE_H
+
+#include "SQLiteDB.h"
+using namespace SQLite;
 
 #include "Geometry.h"
 #include "GLWrappers.h"
@@ -39,9 +43,15 @@ private:
 class FreeTypeFont
 {
 public:
-    FreeTypeFont(const std::string& fontfile,const unsigned int size)
+    FreeTypeFont(const std::string& fontName,const unsigned int size)
     {
-        if (FT_New_Face(m_ft, fontfile.c_str(), 0, &m_face) != 0) 
+        // todo: create a 'data' class.
+        SQLite::DB db;
+        db.Open(R"PATH(C:\Src\3DModeling\bin\3DModelingViewer.Debug.x64.data)PATH");
+        auto q = db.ExecQuery("SELECT Data FROM Fonts WHERE Name = '%1%'", fontName);
+        m_data = q.GetBlobField(0);
+        //if (FT_New_Face(m_ft, fontfile.c_str(), 0, &m_face) != 0) 
+        if (FT_New_Memory_Face(m_ft, m_data.data(), m_data.size(), 0, &m_face) != 0)
         {
 // todo: exception?
 //            fprintf(stderr, "Could not open font\n");
@@ -59,6 +69,7 @@ public:
 private:
     static FreeType m_ft;
     FT_Face m_face;
+    std::vector<unsigned char> m_data;
 };
 
 FreeType FreeTypeFont::m_ft;
@@ -114,11 +125,11 @@ private:
 class CharacterMap
 {
 public:
-    CharacterMap(const std::string& fontfile,const unsigned int size)
+    CharacterMap(const std::string& fontName,const unsigned int size)
         : m_characters()
         , m_textureId(0)
     {
-        FreeTypeFont font(fontfile, size);
+        FreeTypeFont font(fontName, size);
         LoadCharacters(font,
                        " "
                        "0123456789"
@@ -307,21 +318,21 @@ private:
 
 
 // todo: store data somewhere logical...
-CharacterMap& GetCharacterMap(const std::string& fontfile, const unsigned int size)
+CharacterMap& GetCharacterMap(const std::string& fontName, const unsigned int size)
 {
     static std::unordered_map<std::string, CharacterMap> characterMaps;
-    std::string id = std::to_string(size) + ";" + fontfile;
+    std::string id = std::to_string(size) + ";" + fontName;
     auto iter = characterMaps.find(id);
     if (iter == characterMaps.end())
     {
-        iter = characterMaps.emplace(id, CharacterMap(fontfile, size)).first;
+        iter = characterMaps.emplace(id, CharacterMap(fontName, size)).first;
     }
     return iter->second;
 }
 
 
-Font::Font(std::string&& fontFile, const int size)
-    : m_fontFile(std::move(fontFile))
+Font::Font(std::string&& fontName, const int size)
+    : m_fontName(std::move(fontName))
     , m_size(size)
     , m_pixelSize(1/800)
     , m_color(1,1,1,1)
@@ -341,12 +352,12 @@ Font& Font::Color(const Geometry::Color& color)
 
 void Font::Draw(const double x, const double y, const std::string& text)
 {
-    CharacterMap& characterMap = GetCharacterMap(m_fontFile, m_size);
+    CharacterMap& characterMap = GetCharacterMap(m_fontName, m_size);
     characterMap.RenderText(std::move(text), x, y, m_pixelSize, m_pixelSize, m_color);
 }
 
 Geometry::Vector2d Font::GetSize(const std::string& text)
 {
-    CharacterMap& characterMap = GetCharacterMap(m_fontFile, m_size);
+    CharacterMap& characterMap = GetCharacterMap(m_fontName, m_size);
     return characterMap.MeasureText(std::move(text), m_pixelSize, m_pixelSize);
 }

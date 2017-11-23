@@ -23,6 +23,7 @@ namespace Viewer
         // methods used for dynamic menus
         virtual const std::string GetText() const { return ""; }
         virtual void Execute() {}
+        virtual void Draw(const double& x, const double& y, const double& pixel, const bool mouseOver);
 
         // every menu can contain a submenu
         const std::shared_ptr<MenuItem>& Add(std::shared_ptr<MenuItem>&& menuItem) 

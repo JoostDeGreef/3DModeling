@@ -40,3 +40,4 @@
 *.pdb
 *.ilk
 bin
+/src/Viewer/Data/*.sh~

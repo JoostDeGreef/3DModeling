@@ -31,7 +31,7 @@ namespace Viewer
         {
         public:
             State()
-                : m_font(R"TEXT(C:\Src\3DModeling\src\Viewer\fonts\Prida65.otf)TEXT", 40)
+                : m_font("Prida", 50)
                 , m_menu(m_font)
             {}
             ~State()

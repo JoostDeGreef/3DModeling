@@ -73,21 +73,25 @@
     <OutDir>$(SolutionDir)..\bin\</OutDir>
     <IntDir>$(SolutionDir)..\tmp\$(Configuration).$(Platform).$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName).$(Configuration).$(Platform)</TargetName>
+    <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)..\bin\</OutDir>
     <IntDir>$(SolutionDir)..\tmp\$(Configuration).$(Platform).$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName).$(Configuration).$(Platform)</TargetName>
+    <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)..\bin\</OutDir>
     <IntDir>$(SolutionDir)..\tmp\$(Configuration).$(Platform).$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName).$(Configuration).$(Platform)</TargetName>
+    <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)..\bin\</OutDir>
     <IntDir>$(SolutionDir)..\tmp\$(Configuration).$(Platform).$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName).$(Configuration).$(Platform)</TargetName>
+    <CustomBuildBeforeTargets>Build</CustomBuildBeforeTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -103,6 +107,18 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
+    <CustomBuildStep>
+      <Command>copy /Y $(solutiondir)..\src\Viewer\Data\viewer.data $(OutDir)$(TargetName).data</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>$(OutDir)$(TargetName).data</Outputs>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Inputs>$(solutiondir)..\src\Viewer\Data\viewer.data</Inputs>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -118,6 +134,18 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
+    <CustomBuildStep>
+      <Command>copy /Y $(solutiondir)..\src\Viewer\Data\viewer.data $(OutDir)$(TargetName).data</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>$(OutDir)$(TargetName).data</Outputs>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Inputs>$(solutiondir)..\src\Viewer\Data\viewer.data</Inputs>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -137,6 +165,18 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
+    <CustomBuildStep>
+      <Command>copy /Y $(solutiondir)..\src\Viewer\Data\viewer.data $(OutDir)$(TargetName).data</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>$(OutDir)$(TargetName).data</Outputs>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Inputs>$(solutiondir)..\src\Viewer\Data\viewer.data</Inputs>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -156,6 +196,18 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
+    <CustomBuildStep>
+      <Command>copy /Y $(solutiondir)..\src\Viewer\Data\viewer.data $(OutDir)$(TargetName).data</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>$(OutDir)$(TargetName).data</Outputs>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Inputs>$(solutiondir)..\src\Viewer\Data\viewer.data</Inputs>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <TreatOutputAsContent>true</TreatOutputAsContent>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="3DModeling.vcxproj">

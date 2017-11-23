@@ -49,56 +49,42 @@ protected:
     bool m_showFPS;
 };
 
-class RenderModeMenuItem : public MenuItem
+class RenderModeMenuItem : public StaticMenuItem
 {
 public:
     RenderModeMenuItem(Menu& menu, UserInterface& ui)
-        : MenuItem(menu)
+        : StaticMenuItem(menu, "RenderMode")
         , m_ui(ui)
     {
-        SetRenderMode(Settings::GetInt("RenderMode",0));
+        using namespace std::placeholders;
+
+        m_renderMode = Settings::GetInt("RenderMode",0);
+
+        Add(make_shared<StaticCommandMenuItem>(menu, "Solid", std::bind(&RenderModeMenuItem::SetRenderMode, *this, _1, 0)));
+        Add(make_shared<StaticCommandMenuItem>(menu, "WireFrame", std::bind(&RenderModeMenuItem::SetRenderMode, *this, _1, 1)));
+        Add(make_shared<StaticCommandMenuItem>(menu, "Transparent", std::bind(&RenderModeMenuItem::SetRenderMode, *this, _1, 2)));
     }
 
-    virtual const std::string GetText() const override
+    RenderMode GetRenderMode() const
     {
         switch (m_renderMode)
         {
         default:
             assert(false);
-        case 0: return "Solid";
-        case 1: return "Wireframe";
-        case 2: return "Transparent";
+        case 0: return RenderMode::Solid;
+        case 1: return RenderMode::WireFrame;
+        case 2: return RenderMode::Transparent;
         }
-    }
-
-    virtual void Execute() override
-    {
-        SetRenderMode(m_renderMode + 1);
-        Settings::SetInt("RenderMode", m_renderMode);
     }
 protected:
     int m_renderMode;
     UserInterface& m_ui;
 
 private:
-    void SetRenderMode(int renderMode)
+    void SetRenderMode(MenuItem&, int renderMode)
     {
         m_renderMode = renderMode;
-        switch (m_renderMode)
-        {
-        default:
-            m_renderMode = 0;
-        case 0:
-            m_ui.SetRenderMode(RenderMode::Solid);
-            break;
-        case 1:
-            m_ui.SetRenderMode(RenderMode::WireFrame);
-            break;
-        // not supported yet
-        //case 2:
-        //    m_ui.SetRenderMode(RenderMode::Transparent);
-        //    break;
-        }
+        m_ui.SetRenderMode(GetRenderMode());
     }
 };
 
@@ -122,17 +108,20 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    // create menu
+    Menu& menu = ui.GetMenu();
+    auto& settings = menu.Add(make_shared<StaticMenuItem>(menu, "Settings"));
+    settings->Add(make_shared<FPSMenuItem>(menu));
+    auto& renderMode = settings->Add(make_shared<RenderModeMenuItem>(menu, ui));
+    menu.Add(make_shared<StaticCommandMenuItem>(menu, "Exit", std::bind(menu_exit, _1, ui)));
+
     // add something to draw
     ShapePtr s = Construct<Dodecahedron>(12);
     s->SetColor(Construct<Color>(1.0f, 1.0f, 1.0f, 1.0f));
     ui.AddShape(s);
 
-    // create menu
-    Menu& menu = ui.GetMenu();
-    auto& settings = menu.Add(make_shared<StaticMenuItem>(menu, "Settings"));
-    settings->Add(make_shared<FPSMenuItem>(menu));
-    settings->Add(make_shared<RenderModeMenuItem>(menu, ui));
-    menu.Add(make_shared<StaticCommandMenuItem>(menu, "Exit", std::bind(menu_exit, _1, ui)));
+    // apply initial settings
+    ui.SetRenderMode(dynamic_pointer_cast<RenderModeMenuItem>(renderMode)->GetRenderMode());
 
     // main loop
     ui.Run();

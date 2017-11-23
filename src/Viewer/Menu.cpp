@@ -120,12 +120,16 @@ namespace Viewer
         {
             y -= itemSizes[i][1] + ii*pixel;
             m_items[i]->m_bboxText.Set(Geometry::Vector2d(x,y), Geometry::Vector2d(x + itemSizes[i][0], y + itemSizes[i][1]));
-            m_menu.m_font.Color(m_items[i]->m_bboxText.Encapsulates(m_menu.m_mousePos) ? Geometry::Color::Red() : Geometry::Color::White() ).Draw(x, y, m_items[i]->GetText());
+            m_items[i]->Draw(x, y, pixel, m_items[i]->m_bboxText.Encapsulates(m_menu.m_mousePos));
             if (m_items[i]->GetState() == MenuState::Opened)
             {
                 m_items[i]->DrawItems(x+bw*2*pixel+ total[0],y + itemSizes[i][1] + ii*pixel,pixel);
             }
         }
+    }
+    void MenuItem::Draw(const double& x, const double& y, const double& pixel, const bool mouseOver)
+    {
+        m_menu.m_font.PixelSize(pixel).Color(mouseOver ? Geometry::Color::Red() : Geometry::Color::White()).Draw(x, y, GetText());
     }
 
     bool Menu::HandleKey(const int key, const int scancode, const int action, const int mods)
@@ -241,8 +245,6 @@ namespace Viewer
 
     bool Menu::HandleWindowSize(const int width, const int height)
     {
-        double pixelSize = 2.0 / height;
-        m_font.PixelSize(pixelSize);
         return false;
     }
 

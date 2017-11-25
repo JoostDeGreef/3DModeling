@@ -107,7 +107,7 @@ namespace Viewer
             glVertex2d(x + 1 * bw*pixel, y - 1 * bw * pixel - total[1]);
             glVertex2d(x + 0 * bw*pixel, y - 2 * bw * pixel - total[1]);
             // center
-            glColor4d(1, 1, 1, 0.2);
+            glColor4d(0, 0, 0, 0.6);
             glVertex2d(x + 1 * bw*pixel, y - 1 * bw * pixel);
             glVertex2d(x + 1 * bw*pixel, y - 1 * bw * pixel - total[1]);
             glVertex2d(x + 1 * bw*pixel + total[0], y - 1 * bw * pixel - total[1]);

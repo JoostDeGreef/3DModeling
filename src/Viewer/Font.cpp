@@ -14,6 +14,7 @@ using namespace SQLite;
 #include "GLWrappers.h"
 #include "Font.h"
 #include "Shaders.h"
+#include "Filesystem.h"
 using namespace Viewer;
 
 class FreeType
@@ -45,9 +46,9 @@ class FreeTypeFont
 public:
     FreeTypeFont(const std::string& fontName,const unsigned int size)
     {
-        // todo: create a 'data' class.
+        // todo: create a 'data' class?
         SQLite::DB db;
-        db.Open(R"PATH(C:\Src\3DModeling\bin\3DModelingViewer.Debug.x64.data)PATH");
+        db.Open(Filesystem::GetDataFilepath());
         auto q = db.ExecQuery("SELECT Data FROM Fonts WHERE Name = '%1%'", fontName);
         m_data = q.GetBlobField(0);
         //if (FT_New_Face(m_ft, fontfile.c_str(), 0, &m_face) != 0) 

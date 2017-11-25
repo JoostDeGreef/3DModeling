@@ -9,22 +9,8 @@ using namespace Geometry;
 #include "Menu.h"
 #include "UserInterface.h"
 #include "Settings.h"
+#include "Filesystem.h"
 using namespace Viewer;
-
-std::string GetUserPath() 
-{
-    char const* home = getenv("HOME");
-    if (home || (home = getenv("USERPROFILE")))
-    {
-        return home;
-    }
-    else 
-    {
-        char const *hdrive = getenv("HOMEDRIVE");
-        char const *hpath = getenv("HOMEPATH");
-        return std::string(hdrive) + hpath;
-    }
-}
 
 class FPSMenuItem : public MenuItem
 {
@@ -83,8 +69,9 @@ protected:
 private:
     void SetRenderMode(MenuItem&, int renderMode)
     {
-        m_renderMode = renderMode;
+        m_renderMode = Geometry::Numerics::Clamp(renderMode,0,2);
         m_ui.SetRenderMode(GetRenderMode());
+        Settings::SetInt("RenderMode", m_renderMode);
     }
 };
 
@@ -98,7 +85,7 @@ int main(int argc, char* argv[])
     using namespace std::placeholders;
 
     // initialize settings
-    std::string settingsDb = GetUserPath() + "/3DModelingViewer.settings";
+    std::string settingsDb = Filesystem::GetSettingsFilepath();
     Settings::AttachDB(settingsDb);
 
     // initialize UI

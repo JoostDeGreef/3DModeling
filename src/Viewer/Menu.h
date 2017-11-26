@@ -128,6 +128,10 @@ namespace Viewer
             return m_mousePos;
         }
 
+        Font& GetFont()
+        {
+            return m_font;
+        }
     protected:
         Font m_font;
         Geometry::Vector2d m_rawMousePos;

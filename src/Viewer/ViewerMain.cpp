@@ -37,6 +37,30 @@ protected:
 
 class RenderModeMenuItem : public StaticMenuItem
 {
+    class RenderModeMenuSubItem : public StaticMenuItem
+    {
+    public:
+        RenderModeMenuSubItem(RenderModeMenuItem& parent, std::string&& text, RenderMode renderMode)
+            : StaticMenuItem(parent.GetMenu(), std::move(text))
+            , m_parent(parent)
+            , m_renderMode(renderMode)
+        {}
+        void Execute() override
+        {
+            m_parent.SetRenderMode(m_renderMode);
+        }
+        void Draw(const double& x, const double& y, const double& pixel, const bool mouseOver) override
+        {
+            auto color = mouseOver ? Geometry::Color::Red() 
+                                   : (m_parent.GetRenderMode() == m_renderMode ? Geometry::Color::Green()
+                                                                               : Geometry::Color::White());
+            m_parent.GetMenu().GetFont().PixelSize(pixel).Color(color).Draw(x, y, GetText());
+        }
+
+    private:
+        RenderModeMenuItem &m_parent;
+        RenderMode m_renderMode;
+    };
 public:
     RenderModeMenuItem(Menu& menu, UserInterface& ui)
         : StaticMenuItem(menu, "RenderMode")
@@ -44,35 +68,28 @@ public:
     {
         using namespace std::placeholders;
 
-        m_renderMode = Settings::GetInt("RenderMode",0);
+        m_renderMode = (RenderMode)Geometry::Numerics::Clamp(Settings::GetInt("RenderMode",0),0,2);
 
-        Add(make_shared<StaticCommandMenuItem>(menu, "Solid", std::bind(&RenderModeMenuItem::SetRenderMode, *this, _1, 0)));
-        Add(make_shared<StaticCommandMenuItem>(menu, "WireFrame", std::bind(&RenderModeMenuItem::SetRenderMode, *this, _1, 1)));
-        Add(make_shared<StaticCommandMenuItem>(menu, "Transparent", std::bind(&RenderModeMenuItem::SetRenderMode, *this, _1, 2)));
+        Add(make_shared<RenderModeMenuSubItem>(*this, "Solid", RenderMode::Solid));
+        Add(make_shared<RenderModeMenuSubItem>(*this, "WireFrame", RenderMode::WireFrame));
+        Add(make_shared<RenderModeMenuSubItem>(*this, "Transparent", RenderMode::Transparent));
     }
 
     RenderMode GetRenderMode() const
     {
-        switch (m_renderMode)
-        {
-        default:
-            assert(false);
-        case 0: return RenderMode::Solid;
-        case 1: return RenderMode::WireFrame;
-        case 2: return RenderMode::Transparent;
-        }
+        return m_renderMode;
     }
+    void SetRenderMode(RenderMode renderMode)
+    {
+        m_renderMode = renderMode;
+        m_ui.SetRenderMode(GetRenderMode());
+        Settings::SetInt("RenderMode", (int)m_renderMode);
+    }
+    Menu& GetMenu() { return m_menu; }
 protected:
-    int m_renderMode;
+    RenderMode m_renderMode;
     UserInterface& m_ui;
 
-private:
-    void SetRenderMode(MenuItem&, int renderMode)
-    {
-        m_renderMode = Geometry::Numerics::Clamp(renderMode,0,2);
-        m_ui.SetRenderMode(GetRenderMode());
-        Settings::SetInt("RenderMode", m_renderMode);
-    }
 };
 
 void menu_exit(MenuItem& menuItem, UserInterface& ui)

@@ -31,9 +31,10 @@ namespace Viewer
         {
         public:
             State()
-                : m_font("Prida", 50)
-                , m_menu(m_font)
-            {}
+                : m_pixelSize(-1)
+            {
+                SetFontName("Prida");
+            }
             ~State()
             {
                 assert(m_window == nullptr); // forgot to call cleanup?
@@ -66,6 +67,12 @@ namespace Viewer
                     shape->SetRenderMode(renderMode);
                 }
             }
+            void SetFontName(const std::string& fontName)
+            {
+                m_font = std::make_shared<Font>(std::move(std::string(fontName)), Settings::GetInt("FontSize",40));
+                m_font->PixelSize(m_pixelSize);
+                m_menu.SetFont(m_font);
+            }
             Quat State::CalculateRotation();
 
             Menu& GetMenu() { return m_menu; }
@@ -94,7 +101,7 @@ namespace Viewer
 
             // drawable objects
             std::vector<Geometry::ShapePtr> m_shapes;
-            Font m_font;
+            std::shared_ptr<Font> m_font;
 
             // menu
             Menu m_menu;
@@ -448,6 +455,7 @@ namespace Viewer
 
         void State::DrawMenu()
         {
+            assert(m_font);
             m_menu.Draw(m_width,m_height,m_x,m_y);
         }
 
@@ -456,8 +464,8 @@ namespace Viewer
             if (Settings::GetBool("ShowFPS"))
             {
                 std::string fps = "FPS 123";
-                auto size = m_font.GetSize(fps);
-                m_font.Color(Geometry::Color::Red()).Draw(m_x - size[0] - 2 * m_pixelSize, 2 * m_pixelSize - m_y, fps);
+                auto size = m_font->GetSize(fps);
+                m_font->Color(Geometry::Color::Red()).Draw(m_x - size[0] - 2 * m_pixelSize, 2 * m_pixelSize - m_y, fps);
             }
         }
 
@@ -550,7 +558,8 @@ namespace Viewer
                 m_y = 1 / m_ratio;
             }
             m_pixelSize = 2.0/m_height;
-            m_font.PixelSize(m_pixelSize);
+            assert(m_font);
+            m_font->PixelSize(m_pixelSize);
             if (!m_menu.HandleWindowSize(width, height))
             {
             }
@@ -609,6 +618,11 @@ namespace Viewer
     void UserInterface::SetRenderMode(const Geometry::RenderMode renderMode)
     {
         return m_state->SetRenderMode(renderMode);
+    }
+
+    void UserInterface::SetFontName(const std::string& fontName)
+    {
+        return m_state->SetFontName(fontName);
     }
 
     void UserInterface::Exit()

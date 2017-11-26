@@ -10,6 +10,8 @@ namespace Viewer
         Font& PixelSize(const double pixelSize);
         Font& Color(const Geometry::Color& color);
 
+        const std::string& GetName() const { return m_fontName; }
+
         void Draw(const double x,const double y, const std::string& text);
         Geometry::Vector2d GetSize(const std::string& text);
 

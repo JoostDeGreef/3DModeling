@@ -61,7 +61,7 @@ TEST_F(ShapeTest, StoreRetrieve)
     ShapePtr shape0 = Construct<Cube>();
     shape0->SetBoundingShape(BoundingShape3d(Vertex(1, 2, 3), Vertex(4, 5, 6)));
     SQLite::DB db;
-    db.Open(":memory:");
+    db.Open(":memory:",false);
     shape0->Store(db);
     ShapePtr shape1 = Construct<Shape>();
     shape1->Retrieve(db);

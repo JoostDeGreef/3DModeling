@@ -44,7 +44,7 @@ public:
         m_ids.clear();
         m_strings.clear();
 
-        m_db.Open(filename);
+        m_db.Open(filename, false);
         m_db.ExecDML("CREATE TABLE IF NOT EXISTS Strings(Id TEXT,Value TEXT);");
         m_db.ExecDML("CREATE TABLE IF NOT EXISTS Integers(Id TEXT,Value INTEGER);");
         m_db.ExecDML("CREATE TABLE IF NOT EXISTS Doubles(Id TEXT,Value FLOAT);");

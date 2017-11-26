@@ -21,6 +21,7 @@ namespace Viewer
 
         void AddShape(Geometry::ShapePtr& shape);
         void SetRenderMode(const Geometry::RenderMode renderMode);
+        void SetFontName(const std::string& fontName);
 
         Menu& GetMenu();
 

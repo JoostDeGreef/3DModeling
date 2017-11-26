@@ -5,7 +5,6 @@ namespace Viewer
     enum class MenuState
     {
         None,
-        Selected,
         Opened,
     };
 
@@ -18,16 +17,19 @@ namespace Viewer
             : m_items()
             , m_state(MenuState::None)
             , m_menu(menu)
+            , m_parent(nullptr)
         {}
 
         // methods used for dynamic menus
         virtual const std::string GetText() const { return ""; }
         virtual void Execute() {}
         virtual void Draw(const double& x, const double& y, const double& pixel, const bool mouseOver);
+        virtual Geometry::Vector2d GetSize();
 
         // every menu can contain a submenu
         const std::shared_ptr<MenuItem>& Add(std::shared_ptr<MenuItem>&& menuItem) 
         { 
+            menuItem->SetParent(this);
             m_items.emplace_back(std::move(menuItem)); 
             return m_items.back(); 
         }
@@ -48,24 +50,22 @@ namespace Viewer
         {
             return m_state;
         }
-        void SetState(const MenuState state)
+        void SetState(const MenuState state);
+        void SetParent(MenuItem* parent)
         {
-            for (auto& item : m_items)
-            {
-                item->m_state = MenuState::None;
-            }
-            m_state = state;
+            m_parent = parent;
         }
-
+        void SelectNext();
+        void SelectPrev();
+        int FindIndex();
     protected:
         Menu & m_menu; // main menu
         std::vector<std::shared_ptr<MenuItem>> m_items; // sub menu items, if any
+        MenuItem* m_parent;
         MenuState m_state;
         Geometry::BoundingShape2d m_bboxText;
 
         void DrawItems(double x, double y, double pixel);
-
-
     };
 
     class StaticMenuItem : public MenuItem
@@ -83,6 +83,18 @@ namespace Viewer
 
     protected:
         std::string m_text;
+
+    };
+
+    class DelimiterMenuItem : public MenuItem
+    {
+    public:
+        DelimiterMenuItem(Menu& menu)
+            : MenuItem(menu)
+        {}
+
+        virtual Geometry::Vector2d GetSize() override;
+    protected:
 
     };
 
@@ -110,7 +122,7 @@ namespace Viewer
     {
         friend class MenuItem;
     public:
-        Menu(const Font& font);
+        Menu();
 
         // Draw the menu. 
         void Draw(int width,int height,double x,double y);
@@ -130,12 +142,26 @@ namespace Viewer
 
         Font& GetFont()
         {
-            return m_font;
+            return *m_font;
+        }
+        void SetFont(const std::shared_ptr<Font>& font)
+        {
+            m_font = font;
+        }
+        int GetBorder() const
+        {
+            return m_border;
+        }
+        void Select(MenuItem* selected)
+        {
+            m_selected = selected;
         }
     protected:
-        Font m_font;
+        MenuItem* m_selected;
+        std::shared_ptr<Font> m_font;
         Geometry::Vector2d m_rawMousePos;
         Geometry::Vector2d m_mousePos;
+        int m_border;
 
         void DrawHamburger(double x, double y, double pixel);
     };

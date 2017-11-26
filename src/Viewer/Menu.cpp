@@ -5,15 +5,16 @@
 
 namespace Viewer
 {
-    Menu::Menu(const Font& font)
+    Menu::Menu()
         : MenuItem(*this)
-        , m_font(font)
+        , m_font()
+        , m_border(5)
     {}
 
     void Menu::Draw(int width, int height, double X, double Y)
     {
         // size of one pixel
-        double pixel = X / width;
+        double pixel = 2.0 / height;
 
         // start position
         double x = -X + 5 * pixel;
@@ -57,21 +58,35 @@ namespace Viewer
             glEnd();
         }
     }
+    Geometry::Vector2d MenuItem::GetSize()
+    {
+        return m_menu.m_font->GetSize(GetText());
+    }
+    Geometry::Vector2d DelimiterMenuItem::GetSize()
+    {
+        return Geometry::Vector2d(-1, -1);
+    }
     void MenuItem::DrawItems(double x, double y, double pixel)
     {
+        const int bw = m_menu.m_border; // borderwidth
+        const int ii = 2; // gap between items
+        const int ib = 8; // gap below items
+
         Geometry::Vector2d total(0,0);
         std::vector<Geometry::Vector2d> itemSizes;
         for (const auto& item : m_items)
         {
-            Geometry::Vector2d size = m_menu.m_font.GetSize(item->GetText());
+            Geometry::Vector2d size = item->GetSize();
+            if (size[0] < 0)
+            {
+                size[1] = (ii + bw + ib)*pixel;
+            }
             total[0] = std::max(total[0], size[0]);
             total[1] += size[1];
             itemSizes.emplace_back(size);
         }
 
-        int bw = 5; // borderwidth
-        int ii = 1; // gap between items
-        int ib = 8; // gap below items
+        total[0] += 2 * ii * pixel;
         total[1] += ((m_items.size() - 1)*ii + ib)*pixel;
 
         Geometry::BoundingShape2d box(Geometry::Vector2d(x, y),Geometry::Vector2d(x + bw * 2 * pixel + total[0], y - bw * 2 * pixel - total[1]));
@@ -119,8 +134,22 @@ namespace Viewer
         for (unsigned int i=0;i<m_items.size();++i)
         {
             y -= itemSizes[i][1] + ii*pixel;
-            m_items[i]->m_bboxText.Set(Geometry::Vector2d(x,y), Geometry::Vector2d(x + itemSizes[i][0], y + itemSizes[i][1]));
-            m_items[i]->Draw(x, y, pixel, m_items[i]->m_bboxText.Encapsulates(m_menu.m_mousePos));
+            if (itemSizes[i][0] >= 0)
+            {
+                m_items[i]->m_bboxText.Set(Geometry::Vector2d(x + ii*pixel, y), Geometry::Vector2d(x + itemSizes[i][0], y + itemSizes[i][1]));
+                m_items[i]->Draw(x + ii*pixel, y, pixel, m_items[i].get() == m_menu.m_selected || m_items[i]->m_bboxText.Encapsulates(m_menu.m_mousePos));
+            }
+            else
+            {
+                glBegin(GL_QUADS);
+                    // line
+                    glColor4d(1, 1, 1, opacity);
+                    glVertex2d(x, y - (   - ii) * pixel);
+                    glVertex2d(x, y - (bw - ii) * pixel);
+                    glVertex2d(x + total[0] - 0 * bw*pixel, y - (bw - ii) * pixel);
+                    glVertex2d(x + total[0] - 0 * bw*pixel, y - (   - ii) * pixel);
+                glEnd();
+            }
             if (m_items[i]->GetState() == MenuState::Opened)
             {
                 m_items[i]->DrawItems(x+bw*2*pixel+ total[0],y + itemSizes[i][1] + ii*pixel,pixel);
@@ -129,7 +158,23 @@ namespace Viewer
     }
     void MenuItem::Draw(const double& x, const double& y, const double& pixel, const bool mouseOver)
     {
-        m_menu.m_font.PixelSize(pixel).Color(mouseOver ? Geometry::Color::Red() : Geometry::Color::White()).Draw(x, y, GetText());
+        m_menu.m_font->PixelSize(pixel).Color(mouseOver ? Geometry::Color::Red() : Geometry::Color::White()).Draw(x, y, GetText());
+    }
+    void MenuItem::SetState(const MenuState state)
+    {
+        for (auto& item : m_items)
+        {
+            item->m_state = MenuState::None;
+        }
+        if (m_parent)
+        {
+            for (auto& item : m_parent->m_items)
+            {
+                item->m_state = MenuState::None;
+            }
+        }
+        m_state = state;
+        m_menu.Select(nullptr);
     }
 
     bool Menu::HandleKey(const int key, const int scancode, const int action, const int mods)
@@ -139,23 +184,66 @@ namespace Viewer
         {
             if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
             {
-                m_state = MenuState::Opened;
+                SetState(MenuState::Opened);
+                m_menu.Select( !m_items.empty() ? m_items.front().get() : nullptr );
             }
         }
         else
         {
             if (action == GLFW_PRESS)
             {
+                if (!m_selected)
+                {
+                    // TODO: select item from mouse position
+                }
                 switch (key)
                 {
                 case GLFW_KEY_ESCAPE:
-                    m_state = MenuState::None;
+                    SetState(MenuState::None);
                     break;
                 case GLFW_KEY_ENTER:
+                    if (m_selected)
+                    {
+                        auto selected = m_selected;
+                        if (selected->Size() > 0)
+                        {
+                            if (selected->GetState() == MenuState::Opened)
+                            {
+                                selected->SetState(MenuState::None);
+                                m_menu.Select(selected);
+                            }
+                            else
+                            {
+                                selected->SetState(MenuState::Opened);
+                                m_menu.Select((*selected)[0].get());
+                            }
+                        }
+                        else
+                        {
+                            selected->Execute();
+                            m_menu.SetState(MenuState::None);
+                        }
+                    }
                     break;
                 case GLFW_KEY_DOWN:
+                    if (!m_selected)
+                    {
+                        // TODO: find last entry in open menu
+                    }
+                    if (m_selected)
+                    {
+                        m_selected->SelectNext();
+                    }
                     break;
                 case GLFW_KEY_UP:
+                    if (!m_selected)
+                    {
+                        // TODO: find first entry in open menu
+                    }
+                    if (m_selected)
+                    {
+                        m_selected->SelectPrev();
+                    }
                     break;
                 case GLFW_KEY_LEFT:
                     break;
@@ -175,6 +263,7 @@ namespace Viewer
     bool Menu::HandleCursorPos(const double& xpos, const double& ypos)
     {
         m_rawMousePos.Set(xpos, ypos);
+        m_selected = nullptr;
         return false;
     }
 
@@ -253,6 +342,58 @@ namespace Viewer
         return false;
     }
 
+    int MenuItem::FindIndex()
+    {
+        if (m_parent)
+        {
+            for (size_t i = 0; i < m_parent->Size(); ++i)
+            {
+                if ((*m_parent)[i].get() == this)
+                {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    void MenuItem::SelectNext()
+    {
+        int index = FindIndex();
+        if (index < 0)
+        {
+            assert(false); // broken menu structure
+            m_menu.Select(m_parent);
+        }
+        else
+        {
+            index++;
+            if (index >= m_parent->Size())
+            {
+                index = 0;
+            }
+            m_menu.Select((*m_parent)[index].get());
+        }
+    }
+
+    void MenuItem::SelectPrev()
+    {
+        int index = FindIndex();
+        if (index < 0)
+        {
+            assert(false); // broken menu structure
+            m_menu.Select(m_parent);
+        }
+        else
+        {
+            index--;
+            if (index < 0)
+            {
+                index = m_parent->Size()-1;
+            }
+            m_menu.Select((*m_parent)[index].get());
+        }
+    }
 
 }; // namespace Viewer
 

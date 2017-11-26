@@ -23,9 +23,9 @@ DB::DB()
 DB::~DB()
 {}
 
-void DB::Open(const std::string& fileName)
+void DB::Open(const std::string& fileName, bool readOnly)
 {
-    int ret = sqlite3_open(fileName.c_str(), &m_state->m_db);
+    int ret = sqlite3_open_v2(fileName.c_str(), &m_state->m_db, readOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE|SQLITE_OPEN_CREATE, nullptr);
     ThrowErrorIfNotOK(m_state->m_db, ret);
     SetBusyTimeout(m_state->m_busyTimeoutMs);
 }

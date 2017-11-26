@@ -7,14 +7,11 @@ using namespace std;
 #include "ft2build.h"
 #include FT_FREETYPE_H
 
-#include "SQLiteDB.h"
-using namespace SQLite;
-
 #include "Geometry.h"
 #include "GLWrappers.h"
 #include "Font.h"
 #include "Shaders.h"
-#include "Filesystem.h"
+#include "Data.h"
 using namespace Viewer;
 
 class FreeType
@@ -47,10 +44,7 @@ public:
     FreeTypeFont(const std::string& fontName,const unsigned int size)
     {
         // todo: create a 'data' class?
-        SQLite::DB db;
-        db.Open(Filesystem::GetDataFilepath());
-        auto q = db.ExecQuery("SELECT Data FROM Fonts WHERE Name = '%1%'", fontName);
-        m_data = q.GetBlobField(0);
+        m_data = Data::GetFont(fontName);
         //if (FT_New_Face(m_ft, fontfile.c_str(), 0, &m_face) != 0) 
         if (FT_New_Memory_Face(m_ft, m_data.data(), m_data.size(), 0, &m_face) != 0)
         {

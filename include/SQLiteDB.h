@@ -87,7 +87,7 @@ namespace SQLite
         DB();
         ~DB();
 
-        void Open(const std::string& fileName);
+        void Open(const std::string& fileName,bool readOnly);
         void Close();
         bool TableExists(const std::string& tableName);
 

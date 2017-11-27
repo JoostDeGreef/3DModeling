@@ -19,7 +19,9 @@ namespace Viewer
         void Draw();
         void Exit();
 
-        void AddShape(Geometry::ShapePtr& shape);
+        void AddShape(const Geometry::ShapePtr& shape);
+        void ClearShapes();
+
         void SetRenderMode(const Geometry::RenderMode renderMode);
         void SetFontName(const std::string& fontName);
 

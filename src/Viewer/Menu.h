@@ -33,7 +33,7 @@ namespace Viewer
             m_items.emplace_back(std::move(menuItem)); 
             return m_items.back(); 
         }
-        const std::shared_ptr<MenuItem>& operator [] (const int index) const
+        const std::shared_ptr<MenuItem>& operator [] (const size_t index) const
         { 
             return m_items.at(index); 
         }
@@ -54,6 +54,10 @@ namespace Viewer
         void SetParent(MenuItem* parent)
         {
             m_parent = parent;
+        }
+        MenuItem* GetParent()
+        {
+            return m_parent;
         }
         void SelectNext();
         void SelectPrev();

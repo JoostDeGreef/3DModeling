@@ -93,7 +93,7 @@ namespace Viewer
 
         // menu opacity changes on mousehover
         double opacity = 0.5;
-        if (box.Encapsulates(m_menu.m_mousePos))
+        if (!m_menu.m_selected && box.Encapsulates(m_menu.m_mousePos))
         {
             opacity = 1.0;
         }
@@ -136,8 +136,25 @@ namespace Viewer
             y -= itemSizes[i][1] + ii*pixel;
             if (itemSizes[i][0] >= 0)
             {
+                if (m_items[i]->Size())
+                {
+                    if (m_items[i]->GetState() == MenuState::Opened)
+                    {
+                        glColor4d(1, 1, 1, 1);
+                    }
+                    else
+                    {
+                        glColor4d(1, 1, 1, 0.5);
+                    }
+                    glBegin(GL_TRIANGLES);
+                        // block
+                        glVertex2d(x + total[0] + 1 * bw*pixel, y + itemSizes[i][1] / 2 + 2 * bw*pixel);
+                        glVertex2d(x + total[0] + 1 * bw*pixel, y + itemSizes[i][1] / 2 - 2 * bw*pixel);
+                        glVertex2d(x + total[0] + 3 * bw*pixel, y + itemSizes[i][1] / 2);
+                        glEnd();
+                }
                 m_items[i]->m_bboxText.Set(Geometry::Vector2d(x + ii*pixel, y), Geometry::Vector2d(x + itemSizes[i][0], y + itemSizes[i][1]));
-                m_items[i]->Draw(x + ii*pixel, y, pixel, m_items[i].get() == m_menu.m_selected || m_items[i]->m_bboxText.Encapsulates(m_menu.m_mousePos));
+                m_items[i]->Draw(x + ii*pixel, y, pixel, m_items[i].get() == m_menu.m_selected || (!m_menu.m_selected && m_items[i]->m_bboxText.Encapsulates(m_menu.m_mousePos)));
             }
             else
             {
@@ -190,6 +207,22 @@ namespace Viewer
         }
         else
         {
+            std::function<MenuItem*(MenuItem*, const bool)> FindOpenMenu = [&](MenuItem* menuItem,const bool first)
+            {
+                size_t count = menuItem->Size();
+                for (size_t i = 0; i < count; ++i)
+                {
+                    if ((*menuItem)[i]->GetState() == MenuState::Opened)
+                    {
+                        return FindOpenMenu((*menuItem)[i].get(),first);
+                    }
+                }
+                if (count > 0)
+                {
+                    return (*menuItem)[first ? 0 : count-1].get();
+                }
+                return menuItem;
+            };
             if (action == GLFW_PRESS)
             {
                 if (!m_selected)
@@ -228,7 +261,8 @@ namespace Viewer
                 case GLFW_KEY_DOWN:
                     if (!m_selected)
                     {
-                        // TODO: find last entry in open menu
+                        // find last entry in open menu
+                        m_selected = FindOpenMenu(&m_menu, false);
                     }
                     if (m_selected)
                     {
@@ -238,7 +272,8 @@ namespace Viewer
                 case GLFW_KEY_UP:
                     if (!m_selected)
                     {
-                        // TODO: find first entry in open menu
+                        // find first entry in open menu
+                        m_selected = FindOpenMenu(&m_menu, true);
                     }
                     if (m_selected)
                     {
@@ -246,8 +281,27 @@ namespace Viewer
                     }
                     break;
                 case GLFW_KEY_LEFT:
+                    if (!m_selected)
+                    {
+                        // find first entry in open menu
+                        m_selected = FindOpenMenu(&m_menu, true);
+                    }
+                    if (m_selected)
+                    {
+                        auto selected = m_selected->GetParent();
+                        if (selected)
+                        {
+                            selected->SetState(MenuState::None);
+                        }
+                        m_selected = selected;
+                    }
                     break;
                 case GLFW_KEY_RIGHT:
+                    if (m_selected && m_selected->Size())
+                    {
+                        m_selected->SetState(MenuState::Opened);
+                    }
+                    m_selected = FindOpenMenu(&m_menu, true);
                     break;
                 }
             }

@@ -38,6 +38,7 @@ namespace Viewer
             ~State()
             {
                 assert(m_window == nullptr); // forgot to call cleanup?
+                ClearShapes();
             }
             void KeyCallback(const int key, const int scancode, const int action, const int mods);
             void CharCallback(const unsigned int c);
@@ -56,7 +57,11 @@ namespace Viewer
             void DrawFPS();
             void Exit();
 
-            void AddShape(Geometry::ShapePtr& shape)
+            void ClearShapes()
+            {
+                m_shapes.clear();
+            }
+            void AddShape(const Geometry::ShapePtr& shape)
             {
                 m_shapes.emplace_back(std::move(shape));
             }
@@ -186,8 +191,8 @@ namespace Viewer
             glfwDestroyWindow(m_window);
             m_window = nullptr;
             glfwTerminate();
+            ClearShapes();
             DisposeAllRenderObjects();
-            m_shapes.clear();
             return true;
         }
 
@@ -610,9 +615,14 @@ namespace Viewer
         return m_state->Draw();
     }
 
-    void UserInterface::AddShape(Geometry::ShapePtr& shape)
+    void UserInterface::AddShape(const Geometry::ShapePtr& shape)
     {
-        return m_state->AddShape(std::move(shape));
+        return m_state->AddShape(shape);
+    }
+
+    void UserInterface::ClearShapes()
+    {
+        return m_state->ClearShapes();
     }
 
     void UserInterface::SetRenderMode(const Geometry::RenderMode renderMode)

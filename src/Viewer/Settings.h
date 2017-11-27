@@ -23,6 +23,9 @@ namespace Viewer
         static void SetDouble(const std::string& key, const double value);
         static void SetBool(const std::string& key, const bool value);
 
+        static Geometry::RenderMode GetRenderMode() { return (Geometry::RenderMode)Geometry::Numerics::Clamp(GetInt("RenderMode", 0), 0, 2); }
+        static void SetRenderMode(const Geometry::RenderMode renderMode) { Settings::SetInt("RenderMode", (int)renderMode); }
+
     };
 }; // Viewer
 

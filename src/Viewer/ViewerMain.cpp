@@ -199,7 +199,7 @@ void menu_exit(MenuItem& menuItem, UserInterface& ui)
 void menu_testcase_0(MenuItem& menuItem, UserInterface& ui)
 {
     ui.ClearShapes();
-    ShapePtr s = Construct<Dodecahedron>(12);
+    auto s = Construct<Dodecahedron>(12);
     s->SetColor(Construct<Color>(1.0f, 1.0f, 1.0f, 1.0f));
     ui.AddShape(s);
     ui.SetRenderMode(Settings::GetRenderMode());
@@ -209,6 +209,15 @@ void menu_testcase_1(MenuItem& menuItem, UserInterface& ui)
 {
     ui.ClearShapes();
     auto s = Construct<Dodecahedron>(60);
+    s->SetColor(Construct<Color>(1.0f, 1.0f, 1.0f, 1.0f));
+    ui.AddShape(s);
+    ui.SetRenderMode(Settings::GetRenderMode());
+}
+
+void menu_testcase_2(MenuItem& menuItem, UserInterface& ui)
+{
+    ui.ClearShapes();
+    auto s = Construct<Cube>();
     s->SetColor(Construct<Color>(1.0f, 1.0f, 1.0f, 1.0f));
     ui.AddShape(s);
     ui.SetRenderMode(Settings::GetRenderMode());
@@ -239,6 +248,7 @@ int main(int argc, char* argv[])
     auto testcases = menu.Add(make_shared<StaticMenuItem>(menu, "Testcases"));
     testcases->Add(make_shared<StaticCommandMenuItem>(menu, "Test case 0", std::bind(menu_testcase_0, _1, ui)));
     testcases->Add(make_shared<StaticCommandMenuItem>(menu, "Test case 1", std::bind(menu_testcase_1, _1, ui)));
+    testcases->Add(make_shared<StaticCommandMenuItem>(menu, "Test case 2", std::bind(menu_testcase_2, _1, ui)));
     menu.Add(make_shared<StaticCommandMenuItem>(menu, "Exit", std::bind(menu_exit, _1, ui)));
 
     // apply initial settings

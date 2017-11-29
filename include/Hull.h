@@ -49,7 +49,9 @@ namespace Geometry
         Hull& operator = (this_type &&other) = delete;
 
         ~Hull()
-        {}
+        {
+            ForcedInvalidate();
+        }
 
         // copies the hull into newShape
         HullPtr Hull::Copy(Shape& newShape) const;
@@ -71,6 +73,7 @@ namespace Geometry
 
         // Invalidate makes cached render state in render object invalid.
         void Invalidate() { m_renderObject->Invalidate(); }
+        void ForcedInvalidate() { m_renderObject->ForcedInvalidate(); }
 
         // RenderObject is a device dependent object state (for instance OpenGL displaylists).
         std::shared_ptr<IRenderObject> GetRenderObject() const { return m_renderObject; }

@@ -432,7 +432,7 @@ namespace Viewer
             // todo: adjust far clipping plane?
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
-            glOrtho(-m_ratio / m_zoom, m_ratio / m_zoom, -1. / m_zoom, 1. / m_zoom, -1.2, 1.2);
+            glOrtho(-m_ratio / m_zoom, m_ratio / m_zoom, -1. / m_zoom, 1. / m_zoom, -2, 2);
             glMatrixMode(GL_MODELVIEW);
             glLoadIdentity();
 
@@ -466,9 +466,16 @@ namespace Viewer
 
         void State::DrawFPS()
         {
-            if (Settings::GetBool("ShowFPS"))
+            static std::deque<double> times;
+            times.push_back(glfwGetTime());
+            if (times.size() > 41)
             {
-                std::string fps = "FPS 123";
+                times.pop_front();
+            }
+            if (Settings::GetBool("ShowFPS") && times.size()>13)
+            {
+                double f = times.size() / (times.back() - times.front());
+                std::string fps = (boost::format("FPS %1$.1f") % f).str();
                 auto size = m_font->GetSize(fps);
                 m_font->Color(Geometry::Color::Red()).Draw(m_x - size[0] - 2 * m_pixelSize, 2 * m_pixelSize - m_y, fps);
             }

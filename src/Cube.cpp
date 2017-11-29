@@ -65,7 +65,10 @@ Cube::Cube()
     Join(GH, HG);
     Join(GF, FG);
     Join(EF, FE);
-    
+
+    // create face normals
+    ForEachFace([](const FaceRaw& face) {face->CalcNormal(); });
+
     // check geometric integrity
     ForEachFace([](const FaceRaw& face) {face->CheckPointering(); });
 }

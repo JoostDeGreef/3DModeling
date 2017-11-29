@@ -34,7 +34,7 @@ namespace Viewer
     {
         auto& objects = GetRenderObjects();
         auto iter = objects.find(hull);
-        if (iter == objects.end())
+        if (iter == objects.end() || iter->second->ObjectDefunct())
         {
             auto lock = hull->GetLock();
             auto p = Construct<HullRenderObject>();
@@ -56,7 +56,7 @@ namespace Viewer
         for (size_t i=0;i<objects.size() && i<5;++i)
         {
             auto iter = std::next(std::begin(objects), Geometry::Numerics::NormalizedRandomNumber(objects.size()-1));
-            if (iter->second.use_count() < 1)
+            if (iter->second.use_count() < 1 || iter->second->ObjectDefunct())
             {
                 objects.erase(iter);
             }

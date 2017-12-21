@@ -10,6 +10,7 @@ using namespace std;
 #include "SQLiteDB.h"
 using namespace SQLite;
 
+#include "Geometry.h"
 #include "Settings.h"
 using namespace Viewer;
 

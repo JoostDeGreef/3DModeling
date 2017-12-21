@@ -99,7 +99,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GLFW_INCLUDE_GLU;_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;GLFW_INCLUDE_GLU;_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(solutiondir)..\..\3rdParty\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -126,7 +126,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(solutiondir)..\..\3rdParty\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -155,7 +155,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -186,7 +186,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(solutiondir)..\include;$(solutiondir)..\..\3rdParty\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE;_UNICODE;UNICODE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;BOOST_ALL_NO_LIB</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

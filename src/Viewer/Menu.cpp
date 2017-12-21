@@ -404,7 +404,7 @@ namespace Viewer
             {
                 if ((*m_parent)[i].get() == this)
                 {
-                    return i;
+                    return (int)i;
                 }
             }
         }
@@ -443,7 +443,7 @@ namespace Viewer
             index--;
             if (index < 0)
             {
-                index = m_parent->Size()-1;
+                index = (int)m_parent->Size()-1;
             }
             m_menu.Select((*m_parent)[index].get());
         }

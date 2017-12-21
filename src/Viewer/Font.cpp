@@ -46,7 +46,7 @@ public:
         // todo: create a 'data' class?
         m_data = Data::GetFont(fontName);
         //if (FT_New_Face(m_ft, fontfile.c_str(), 0, &m_face) != 0) 
-        if (FT_New_Memory_Face(m_ft, m_data.data(), m_data.size(), 0, &m_face) != 0)
+        if (FT_New_Memory_Face(m_ft, m_data.data(), (FT_Long)m_data.size(), (FT_Long)0, &m_face) != 0)
         {
 // todo: exception?
 //            fprintf(stderr, "Could not open font\n");

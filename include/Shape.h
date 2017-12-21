@@ -68,6 +68,10 @@ namespace Geometry
         void Scale(const double factor);
         void Translate(const Vector3d& translation);
 
+        // geometry operations
+        void Add(ShapePtr& other);       // A joined with B
+        void Subtract(ShapePtr& other);  // A minus overlap with B 
+
         // Store/Retrieve shape to db.
         void Store(SQLite::DB& db) const;
         void Retrieve(SQLite::DB& db);

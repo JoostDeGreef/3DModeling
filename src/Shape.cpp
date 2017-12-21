@@ -555,3 +555,42 @@ void Shape::Retrieve(SQLite::DB& db)
     // check the result
     ForEachFace([](const FaceRaw& face) {face->CheckPointering(); });
 }
+
+void Shape::Add(ShapePtr & other)
+{
+    std::vector<HullPtr> hulls0(GetHulls().begin(), GetHulls().end());
+    std::vector<HullPtr> hulls1(other->GetHulls().begin(), other->GetHulls().end());
+    std::vector<HullPtr> hulls2;
+
+    std::function<void(std::vector<HullPtr>&, std::vector<HullPtr>&, std::vector<HullPtr>&)> AddAB = [&](std::vector<HullPtr>& A, std::vector<HullPtr>& B, std::vector<HullPtr>& AB)
+    {
+
+    };
+
+    for (auto i0 = std::rbegin(hulls0); i0 != std::rend(hulls0); ++i0)
+    {
+        for (auto i1 = std::rbegin(hulls1); i1 != std::rend(hulls1); ++i1)
+        {
+            std::vector<HullPtr> res = (*i0)->Add(*i1);
+            if (!res.empty())
+            {
+                for (auto& hp : res)
+                {
+                    for (; i0 != std::rend(hulls0); ++i0)
+                    {
+
+                    }
+                    hulls2.emplace_back(hp);
+                }
+                hulls0.erase(std::next(i0).base());
+                hulls1.erase(std::next(i1).base());
+                break;
+            }
+        }
+    }
+}
+
+void Shape::Subtract(ShapePtr & other)
+{
+}
+

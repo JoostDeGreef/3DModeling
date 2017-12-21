@@ -116,6 +116,10 @@ namespace Geometry
         // Make sure the hull exist solely out of triangles
         void Triangulate();
 
+        // geometry operations
+        std::vector<HullPtr> Add(HullPtr& other);       // A joined with B, returns new hull or empty vector if there is no overlap.
+        std::vector<HullPtr> Subtract(HullPtr& other);  // A minus overlap with B, returns all resulting pieces (A and B if there is no overlap).
+
         // Make locking on this hull easy
         // examples:
         //    auto lock = hull.GetLock();

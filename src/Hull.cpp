@@ -254,3 +254,14 @@ void Hull::Translate(const Vector3d& translation)
         (*vertex) += translation;
     });
 }
+
+std::vector<HullPtr> Hull::Add(HullPtr & other)
+{
+    return std::vector<HullPtr>();
+}
+
+std::vector<HullPtr> Hull::Subtract(HullPtr & other)
+{
+    return std::vector<HullPtr>();
+}
+

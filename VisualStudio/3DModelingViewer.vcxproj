@@ -232,6 +232,9 @@
     <ClInclude Include="..\src\Viewer\Filesystem.h" />
     <ClInclude Include="..\src\Viewer\GLWrappers.h" />
     <ClInclude Include="..\src\Viewer\Menu.h" />
+    <ClInclude Include="..\src\Viewer\Menu\FontMenuItem.h" />
+    <ClInclude Include="..\src\Viewer\Menu\FPSMenuItem.h" />
+    <ClInclude Include="..\src\Viewer\Menu\RenderModeMenuItem.h" />
     <ClInclude Include="..\src\Viewer\RenderInfo.h" />
     <ClInclude Include="..\src\Viewer\RenderObjects.h" />
     <ClInclude Include="..\src\Viewer\Settings.h" />

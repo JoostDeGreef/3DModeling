@@ -196,10 +196,10 @@ void Hull::Triangulate()
     }
 }
 
-void Hull::CalculateBoundingShape()
+void Hull::CalculateBoundingShape(const BoundingShape3d::Type type)
 {
     const auto& vertices = GetVertices();
-    m_boundingShape.Set(BoundingShape3d::Type::Ball, vertices.begin(), vertices.end());
+    m_boundingShape.Set(type, vertices.begin(), vertices.end());
 }
 
 std::unordered_set<VertexRaw> Hull::GetVertices() const
@@ -255,13 +255,27 @@ void Hull::Translate(const Vector3d& translation)
     });
 }
 
-std::vector<HullPtr> Hull::Add(HullPtr & other)
+// algorithm:
+// - create a sorted list of all vertices for both hulls
+HullPtr Hull::Add(HullPtr & other)
 {
-    return std::vector<HullPtr>();
+    if (m_boundingShape.Touches(other->GetBoundingShape()))
+    {
+
+        // TODO
+
+    }
+    return HullPtr();
 }
 
 std::vector<HullPtr> Hull::Subtract(HullPtr & other)
 {
+    if (m_boundingShape.Touches(other->GetBoundingShape()))
+    {
+
+        // TODO
+
+    }
     return std::vector<HullPtr>();
 }
 

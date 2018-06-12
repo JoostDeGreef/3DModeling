@@ -66,6 +66,9 @@ Cube::Cube()
     Join(GF, FG);
     Join(EF, FE);
 
+    // fill bounding shape
+    hull->CalculateBoundingShape(BoundingShape3d::Type::Box);
+
     // create face normals
     ForEachFace([](const FaceRaw& face) {face->CalcNormal(); });
 

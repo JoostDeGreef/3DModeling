@@ -32,6 +32,7 @@ namespace Viewer
         public:
             State()
                 : m_pixelSize(-1)
+                , m_viewingMode(ViewingMode::Perspective)
             {
                 SetFontName("Prida");
             }
@@ -72,6 +73,10 @@ namespace Viewer
                     shape->SetRenderMode(renderMode);
                 }
             }
+            void SetViewingMode(const Geometry::ViewingMode viewingMode)
+            {
+                m_viewingMode = viewingMode;
+            }
             void SetFontName(const std::string& fontName)
             {
                 m_font = std::make_shared<Font>(std::move(std::string(fontName)), Settings::GetInt("FontSize",40));
@@ -103,6 +108,9 @@ namespace Viewer
             bool m_mouseDragging;
             Vector2d m_mousePos;
             Vector2d m_mouseDownPos;
+
+            // rendering
+            Geometry::ViewingMode m_viewingMode;
 
             // drawable objects
             std::vector<Geometry::ShapePtr> m_shapes;
@@ -432,9 +440,21 @@ namespace Viewer
             // todo: adjust far clipping plane?
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
-            glOrtho(-m_ratio / m_zoom, m_ratio / m_zoom, -1. / m_zoom, 1. / m_zoom, -2, 2);
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
+
+            if (m_viewingMode == ViewingMode::Orthogonal)
+            {
+                glOrtho(-m_ratio / m_zoom, m_ratio / m_zoom, -1. / m_zoom, 1. / m_zoom, -2, 2);
+                glMatrixMode(GL_MODELVIEW);
+                glLoadIdentity();
+            }
+            else
+            {
+                double scale = 0.9 / m_zoom;
+                glFrustum(-m_ratio * scale, m_ratio * scale, -1. * scale, 1. * scale, 3, 7);
+                glMatrixMode(GL_MODELVIEW);
+                glLoadIdentity();
+                gluLookAt(0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+            }
 
             glMultMatrix(CalculateRotation());
 
@@ -635,6 +655,11 @@ namespace Viewer
     void UserInterface::SetRenderMode(const Geometry::RenderMode renderMode)
     {
         return m_state->SetRenderMode(renderMode);
+    }
+
+    void UserInterface::SetViewingMode(const Geometry::ViewingMode viewingMode)
+    {
+        return m_state->SetViewingMode(viewingMode);
     }
 
     void UserInterface::SetFontName(const std::string& fontName)

@@ -90,7 +90,7 @@ namespace Geometry
         // get/set/calculate the bounding shape
         const BoundingShape3d& GetBoundingShape() const { return m_boundingShape; }
         void SetBoundingShape(const BoundingShape3d& boundingShape) { m_boundingShape = boundingShape; /*Invalidate();*/ }
-        void CalculateBoundingShape();
+        void CalculateBoundingShape(const BoundingShape3d::Type type = BoundingShape3d::Type::Ball);
 
         // direct access to contained faces/edges
         const container_type& GetFaces() const { return m_faces; }
@@ -117,7 +117,7 @@ namespace Geometry
         void Triangulate();
 
         // geometry operations
-        std::vector<HullPtr> Add(HullPtr& other);       // A joined with B, returns new hull or empty vector if there is no overlap.
+        HullPtr Add(HullPtr& other);       // A joined with B, returns new hull or null if there is no overlap.
         std::vector<HullPtr> Subtract(HullPtr& other);  // A minus overlap with B, returns all resulting pieces (A and B if there is no overlap).
 
         // Make locking on this hull easy

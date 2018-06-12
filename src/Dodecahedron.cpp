@@ -128,6 +128,10 @@ Dodecahedron::Dodecahedron(const int initialFaceCount)
     // check geometric integrity
     ForEachFace([](const FaceRaw& face) {face->CheckPointering(); });
 
+    // fill bounding shape
+    hull->CalculateBoundingShape();
+
+    // subdivide faces (bounding shape stays the same)
     Refine(initialFaceCount);
 }
 

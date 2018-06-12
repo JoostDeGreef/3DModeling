@@ -36,6 +36,24 @@ namespace Geometry
         }
 
         const container_type& GetHulls() const { return m_hulls; }
+        template<typename ITER>
+        void SetHulls(ITER& iterBegin, ITER& iterEnd)
+        {
+            m_hulls.clear();
+            for (auto iter = iterBegin; iter != iterEnd; ++iter)
+            {
+                m_hulls.emplace(*iter);
+            }
+        }
+        template<typename ITER>
+        void SetHulls(ITER& iter0Begin, ITER& iter0End, ITER& iter1Begin, ITER& iter1End)
+        {
+            SetHulls(iter0Begin, iter0End);
+            for (auto iter = iter1Begin; iter != iter1End; ++iter)
+            {
+                m_hulls.emplace(*iter);
+            }
+        }
 
         // perform function on each object
         void ForEachHull(std::function<void(const HullRaw& hull)> func) const;

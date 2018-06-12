@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\Viewer\Data.cpp" />
+    <ClCompile Include="..\src\Viewer\Filesystem.cpp" />
+    <ClCompile Include="..\src\Viewer\GLWrappers.cpp" />
+    <ClCompile Include="..\src\Viewer\RenderInfo.cpp" />
+    <ClCompile Include="..\src\Viewer\RenderObjects.cpp" />
+    <ClCompile Include="..\src\Viewer\Settings.cpp" />
+    <ClCompile Include="..\src\Viewer\Shaders.cpp" />
+    <ClCompile Include="..\src\Viewer\Font.cpp" />
+    <ClCompile Include="..\src\Viewer\UserInterface.cpp" />
+    <ClCompile Include="..\src\Viewer\ViewerMain.cpp" />
+    <ClCompile Include="..\src\Viewer\Menu.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Viewer\Data.h" />
+    <ClInclude Include="..\src\Viewer\Filesystem.h" />
+    <ClInclude Include="..\src\Viewer\GLWrappers.h" />
+    <ClInclude Include="..\src\Viewer\RenderInfo.h" />
+    <ClInclude Include="..\src\Viewer\RenderObjects.h" />
+    <ClInclude Include="..\src\Viewer\Settings.h" />
+    <ClInclude Include="..\src\Viewer\Shaders.h" />
+    <ClInclude Include="..\src\Viewer\Font.h" />
+    <ClInclude Include="..\src\Viewer\UserInterface.h" />
+    <ClInclude Include="..\src\Viewer\Menu.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Viewer\Menu\FPSMenuItem.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Viewer\Menu\RenderModeMenuItem.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Viewer\Menu\FontMenuItem.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Menu">
+      <UniqueIdentifier>{c71663dc-7b60-4dac-bb13-1b279a2875c7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

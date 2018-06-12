@@ -26,6 +26,8 @@ namespace Viewer
         static Geometry::RenderMode GetRenderMode() { return (Geometry::RenderMode)Geometry::Numerics::Clamp(GetInt("RenderMode", 0), 0, 2); }
         static void SetRenderMode(const Geometry::RenderMode renderMode) { Settings::SetInt("RenderMode", (int)renderMode); }
 
+        static Geometry::ViewingMode GetViewingMode() { return (Geometry::ViewingMode)Geometry::Numerics::Clamp(GetInt("ViewingMode", 0), 0, 1); }
+        static void SetViewingMode(const Geometry::ViewingMode viewingMode) { Settings::SetInt("ViewingMode", (int)viewingMode); }
     };
 }; // Viewer
 

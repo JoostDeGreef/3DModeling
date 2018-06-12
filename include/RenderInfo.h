@@ -9,6 +9,12 @@ namespace Geometry
         Transparent
     };
 
+    enum class ViewingMode
+    {
+        Orthogonal,
+        Perspective
+    };
+
     //class RenderInfo
     //{
     //public:

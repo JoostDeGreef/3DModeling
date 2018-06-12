@@ -23,6 +23,7 @@ namespace Viewer
         void ClearShapes();
 
         void SetRenderMode(const Geometry::RenderMode renderMode);
+        void SetViewingMode(const Geometry::ViewingMode viewingMode);
         void SetFontName(const std::string& fontName);
 
         Menu& GetMenu();

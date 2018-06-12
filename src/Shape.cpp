@@ -558,39 +558,43 @@ void Shape::Retrieve(SQLite::DB& db)
 
 void Shape::Add(ShapePtr & other)
 {
-    std::vector<HullPtr> hulls0(GetHulls().begin(), GetHulls().end());
-    std::vector<HullPtr> hulls1(other->GetHulls().begin(), other->GetHulls().end());
-    std::vector<HullPtr> hulls2;
+    std::vector<HullPtr> A(GetHulls().begin(), GetHulls().end());
+    std::vector<HullPtr> B(other->GetHulls().begin(), other->GetHulls().end());
 
-    std::function<void(std::vector<HullPtr>&, std::vector<HullPtr>&, std::vector<HullPtr>&)> AddAB = [&](std::vector<HullPtr>& A, std::vector<HullPtr>& B, std::vector<HullPtr>& AB)
+    for (auto i0 = std::rbegin(A); i0 != std::rend(A); ++i0)
     {
-
-    };
-
-    for (auto i0 = std::rbegin(hulls0); i0 != std::rend(hulls0); ++i0)
-    {
-        for (auto i1 = std::rbegin(hulls1); i1 != std::rend(hulls1); ++i1)
+        for (auto i1 = std::rbegin(B); i1 != std::rend(B); ++i1)
         {
-            std::vector<HullPtr> res = (*i0)->Add(*i1);
-            if (!res.empty())
+            HullPtr res = (*i0)->Add(*i1);
+            if (res)
             {
-                for (auto& hp : res)
-                {
-                    for (; i0 != std::rend(hulls0); ++i0)
-                    {
-
-                    }
-                    hulls2.emplace_back(hp);
-                }
-                hulls0.erase(std::next(i0).base());
-                hulls1.erase(std::next(i1).base());
-                break;
+                *i0 = res;
+                B.erase(std::next(i1).base());
             }
         }
     }
+
+    if (B.size() < other->GetHulls().size())
+    {
+        for (auto i0 = std::rbegin(A); i0 != std::rend(A); ++i0)
+        {
+            for (auto i1 = std::next(i0); i1 != std::rend(A); ++i1)
+            {
+                HullPtr res = (*i0)->Add(*i1);
+                if (res)
+                {
+                    *i0 = res;
+                    A.erase(std::next(i1).base());
+                }
+            }
+        }
+    }
+
+    SetHulls(A.begin(), A.end(), B.begin(), B.end());
 }
 
 void Shape::Subtract(ShapePtr & other)
 {
+    // TODO
 }
 

@@ -256,13 +256,140 @@ void Hull::Translate(const Vector3d& translation)
 }
 
 // algorithm:
-// - create a sorted list of all vertices for both hulls
+// - create a Z-sorted list of all vertices for both hulls
+class HullConnector
+{
+    struct FaceInfo
+    {
+        FaceInfo(const FacePtr& faceptr, unsigned int id)
+            : face(faceptr)
+            , id(id)
+        {}
+        FaceRaw face;
+        unsigned int id; // 1,2
+    };
+    typedef std::vector<FaceInfo> Faces;
+    typedef std::vector<FaceInfo*> FacePtrs;
+    struct VertexInfo
+    {
+        VertexInfo(const VertexRaw& vertex, const FacePtrs& faces, unsigned int id)
+            : vertex(vertex)
+            , faces(faces)
+            , id(id)
+        {}
+        VertexInfo(const VertexRaw& vertex, const FacePtrs& faces)
+            : VertexInfo(vertex, faces, faces.front()->id)
+        {}
+        VertexInfo(const VertexRaw& vertex, unsigned int id = 3)
+            : VertexInfo(vertex, {}, id)
+        {}
+        VertexRaw vertex;
+        FacePtrs faces;
+        unsigned int id; // 1,2  3=new
+    };
+    typedef std::vector<VertexInfo> Vertices;
+
+public:
+    HullConnector(Hull& a, Hull& b)
+        : m_A(a)
+        , m_B(b)
+        , m_faces()
+        , m_vertices()
+        , m_res()
+    {}
+
+    // if any face in A is intersected by a face in B,
+    // add the faces from B to A and create intersection edges.
+    bool Connect()
+    {
+        if (m_A.BoundingShapesTouch(m_B))
+        {
+            m_faces.reserve(m_A.GetFaces().size() + m_B.GetFaces().size());
+            GetFaceInfo(m_faces, m_A, 1);
+            GetFaceInfo(m_faces, m_B, 2);
+            m_vertices = GetVerticesFromFaces(m_faces);
+            SortVerticesZXYId(m_vertices);
+
+            // todo
+        }
+        return false;
+    }
+
+protected:
+    static void GetFaceInfo(Faces& faces, Hull& hull, const unsigned int id)
+    {
+        auto& hull_faces = hull.GetFaces();
+        for (auto& hf : hull_faces)
+        {
+            faces.emplace_back(hf,id);
+        }
+    }
+
+    // returns all the vertices, unsorted
+    static Vertices GetVerticesFromFaces(Faces& faces)
+    {
+        std::unordered_multimap<VertexRaw, FaceInfo*> vertexFaceMap;
+        for (auto& face : faces)
+        {
+            face.face->ForEachVertex([&vertexFaceMap,&face](const VertexRaw& vertex)
+            {
+                vertexFaceMap.emplace(vertex,&face);
+            });
+        }
+        Vertices vertices;
+        vertices.reserve(vertexFaceMap.bucket_count());
+        FacePtrs faceInfoPtrs;
+        VertexRaw vertex = nullptr;
+        auto StoreInfo = [&vertices,&faceInfoPtrs](VertexRaw& vertex)
+        {
+            if (vertex)
+            {
+                vertices.emplace_back(vertex, faceInfoPtrs);
+            }
+            faceInfoPtrs.clear();
+        };
+        for (auto& vfm : vertexFaceMap)
+        {
+            if (vfm.first != vertex)
+            {
+                StoreInfo(vertex);
+                vertex = vfm.first;
+            }
+            faceInfoPtrs.emplace_back(vfm.second);
+        }
+        StoreInfo(vertex);
+        return vertices;
+    }
+
+    // sort the vertices by Z,X,Y,Id ascending
+    static void SortVerticesZXYId(Vertices & vertices)
+    {
+        std::sort(vertices.begin(), vertices.end(), [](const VertexInfo & a, const VertexInfo & b) 
+        {
+            auto& va = *a.vertex;
+            auto& vb = *b.vertex;
+            if (va[2] < vb[2]) return true;
+            if (va[2] > vb[2]) return false;
+            if (va[0] < vb[0]) return true;
+            if (va[0] > vb[0]) return false;
+            if (va[1] < vb[1]) return true;
+            if (va[1] > vb[1]) return false;
+            return a.id < b.id;
+        });
+    }
+private:
+    Hull & m_A;
+    Hull & m_B;
+    Faces m_faces;
+    Vertices m_vertices;
+    std::vector<HullPtr> m_res;
+};
+
 HullPtr Hull::Add(HullPtr & other)
 {
-    if (m_boundingShape.Touches(other->GetBoundingShape()))
+    HullConnector hc(*this, *other);
+    if (hc.Connect())
     {
-
-        // TODO
 
     }
     return HullPtr();
@@ -270,10 +397,9 @@ HullPtr Hull::Add(HullPtr & other)
 
 std::vector<HullPtr> Hull::Subtract(HullPtr & other)
 {
-    if (m_boundingShape.Touches(other->GetBoundingShape()))
+    HullConnector hc(*this, *other);
+    if (hc.Connect())
     {
-
-        // TODO
 
     }
     return std::vector<HullPtr>();

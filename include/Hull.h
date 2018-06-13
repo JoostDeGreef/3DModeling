@@ -87,10 +87,11 @@ namespace Geometry
         const RenderMode GetRenderMode() const { return m_renderMode; }
         void SetRenderMode(const RenderMode renderMode) { m_renderMode = renderMode; Invalidate(); }
 
-        // get/set/calculate the bounding shape
+        // get/set/calculate/use the bounding shape
         const BoundingShape3d& GetBoundingShape() const { return m_boundingShape; }
         void SetBoundingShape(const BoundingShape3d& boundingShape) { m_boundingShape = boundingShape; /*Invalidate();*/ }
         void CalculateBoundingShape(const BoundingShape3d::Type type = BoundingShape3d::Type::Ball);
+        bool BoundingShapesTouch(const this_type &other) const { return m_boundingShape.Touches(other.GetBoundingShape()); }
 
         // direct access to contained faces/edges
         const container_type& GetFaces() const { return m_faces; }

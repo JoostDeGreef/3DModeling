@@ -556,6 +556,24 @@ void Shape::Retrieve(SQLite::DB& db)
     ForEachFace([](const FaceRaw& face) {face->CheckPointering(); });
 }
 
+double Shape::CalculateVolume() const
+{
+    double res = 0;
+    ForEachHull([&res](const HullRaw hull) 
+    {
+        double hullVolume = hull->CalculateVolume();
+        if (hull->GetOrientation() == Hull::Orientation::Outward)
+        {
+            res += hullVolume;
+        }
+        else
+        {
+            res -= hullVolume;
+        }
+    });
+    return res;
+}
+
 void Shape::Add(ShapePtr & other)
 {
     std::vector<HullPtr> A(GetHulls().begin(), GetHulls().end());

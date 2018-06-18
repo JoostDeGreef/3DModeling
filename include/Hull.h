@@ -93,6 +93,9 @@ namespace Geometry
         void CalculateBoundingShape(const BoundingShape3d::Type type = BoundingShape3d::Type::Ball);
         bool BoundingShapesTouch(const this_type &other) const { return m_boundingShape.Touches(other.GetBoundingShape()); }
 
+        // calculate the volume of the hull
+        double CalculateVolume() const;
+
         // direct access to contained faces/edges
         const container_type& GetFaces() const { return m_faces; }
         std::unordered_set<VertexRaw> GetVertices() const;

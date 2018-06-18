@@ -255,6 +255,12 @@ void Hull::Translate(const Vector3d& translation)
     });
 }
 
+double Hull::CalculateVolume() const
+{
+    // todo
+    return 0;
+}
+
 // algorithm:
 // - create a Z-sorted list of all vertices for both hulls
 class HullConnector
@@ -269,7 +275,7 @@ class HullConnector
         unsigned int id; // 1,2
     };
     typedef std::vector<FaceInfo> Faces;
-    typedef std::vector<FaceInfo*> FacePtrs;
+    typedef std::unordered_set<FaceInfo*> FacePtrs;
     struct VertexInfo
     {
         VertexInfo(const VertexRaw& vertex, const FacePtrs& faces, unsigned int id)
@@ -278,7 +284,7 @@ class HullConnector
             , id(id)
         {}
         VertexInfo(const VertexRaw& vertex, const FacePtrs& faces)
-            : VertexInfo(vertex, faces, faces.front()->id)
+            : VertexInfo(vertex, faces, (*(faces.begin()))->id)
         {}
         VertexInfo(const VertexRaw& vertex, unsigned int id = 3)
             : VertexInfo(vertex, {}, id)
@@ -302,20 +308,49 @@ public:
     // add the faces from B to A and create intersection edges.
     bool Connect()
     {
+        bool intersection = false;
         if (m_A.BoundingShapesTouch(m_B))
         {
+            // create sorted list of vertices
             m_faces.reserve(m_A.GetFaces().size() + m_B.GetFaces().size());
             GetFaceInfo(m_faces, m_A, 1);
             GetFaceInfo(m_faces, m_B, 2);
             m_vertices = GetVerticesFromFaces(m_faces);
             SortVerticesZXYId(m_vertices);
-
-            // todo
+            // iterate over the vertices
+            FacePtrs faces;
+            while (!m_vertices.empty())
+            {
+                VertexInfo vertexinfo = m_vertices.back();
+                m_vertices.pop_back();
+                for (auto& face : vertexinfo.faces)
+                {
+                    if (faces.find(face) == faces.end())
+                    {
+                        intersection = SplitByFaceIfNeeded(faces,face) || intersection;
+                    }
+                }
+            }
         }
-        return false;
+        return intersection;
     }
 
 protected:
+    bool SplitByFaceIfNeeded(FacePtrs& faces, FaceInfo* face)
+    {
+        bool res = false;
+        for (auto& f : faces)
+        {
+            const auto& n0 = f->face->GetNormal();
+            const auto& n1 = face->face->GetNormal();
+            assert(n0 && n1);
+
+            // todo
+
+        }
+        return res;
+    }
+
     static void GetFaceInfo(Faces& faces, Hull& hull, const unsigned int id)
     {
         auto& hull_faces = hull.GetFaces();
@@ -355,7 +390,7 @@ protected:
                 StoreInfo(vertex);
                 vertex = vfm.first;
             }
-            faceInfoPtrs.emplace_back(vfm.second);
+            faceInfoPtrs.emplace(vfm.second);
         }
         StoreInfo(vertex);
         return vertices;

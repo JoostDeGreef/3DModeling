@@ -77,3 +77,28 @@ TEST_F(ShapeTest, StoreRetrieve)
     ASSERT_EQ(count0, count1);
     ASSERT_EQ(shape0->GetBoundingShape(),shape1->GetBoundingShape());
 }
+
+TEST_F(ShapeTest, Volume)
+{
+    auto s = Construct<Cube>();
+    double vol = s->CalculateVolume();
+    EXPECT_DOUBLE_EQ(8.0, vol);
+    s->Scale(1 / sqrt(3));
+    vol = s->CalculateVolume();
+    EXPECT_DOUBLE_EQ(1.0, vol);
+}
+
+TEST_F(ShapeTest, Add)
+{
+    auto s = Construct<Cube>();
+    s->Scale(1 / sqrt(3));
+    s->SetColor(Construct<Color>(1.0f, 1.0f, 1.0f, 1.0f));
+    Geometry::ShapePtr t = Construct<Cube>();
+    t->Scale(1 / sqrt(3));
+    t->Translate({ 0.3,0.3,0.3 });
+    t->SetColor(Construct<Color>(1.0f, 0.0f, 0.0f, 1.0f));
+    s->Add(t);
+
+    // todo
+
+}

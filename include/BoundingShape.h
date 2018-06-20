@@ -299,6 +299,24 @@ namespace Geometry
             return m_optimal;
         }
 
+        template<typename VECTOR_TYPE = vector_type>
+        typename std::enable_if<3 == VECTOR_TYPE::dimension, double>::type
+        CalculateVolume() const
+        {
+            switch (m_type)
+            {
+            default:
+                return -1;
+            case Type::Box:
+                {
+                    auto v = (box.m_max - box.m_min);
+                    return v[0] * v[1] * v[2];
+                }
+            case Type::Ball:
+                return 4 * Numerics::Constants::Pi * pow(ball.m_radius,3) / 3;
+            }
+        }
+
     private:
         struct Box
         {

@@ -82,11 +82,11 @@ namespace Geometry
         void SetColor(const ColorPtr& color) { ForEachHull([&](const HullRaw& hull) {hull->SetColor(color); }); }
         void SetRenderMode(const RenderMode renderMode) { ForEachHull([&](const HullRaw& hull) {hull->SetRenderMode(renderMode); }); }
 
-        // scale/translate all hulls in this shape in parallel
+        // scale/translate all hull coordinates in this shape in parallel
         void Scale(const double factor);
         void Translate(const Vector3d& translation);
 
-        // calculate the volume of the shape
+        // calculate an approximate volume of the shape
         double CalculateVolume() const;
 
         // geometry operations

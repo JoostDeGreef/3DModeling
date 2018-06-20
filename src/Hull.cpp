@@ -257,8 +257,41 @@ void Hull::Translate(const Vector3d& translation)
 
 double Hull::CalculateVolume() const
 {
-    // todo
-    return 0;
+    auto SignedVolumeOfTriangle = [](const Vertex& v1, const Vertex& v2, const Vertex& v3) 
+    {
+        auto v321 = v3[0]*v2[1]*v1[2];
+        auto v231 = v2[0]*v3[1]*v1[2];
+        auto v312 = v3[0]*v1[1]*v2[2];
+        auto v132 = v1[0]*v3[1]*v2[2];
+        auto v213 = v2[0]*v1[1]*v3[2];
+        auto v123 = v1[0]*v2[1]*v3[2];
+        return (1.0f / 6.0f)*(-v321 + v231 + v312 - v132 - v213 + v123);
+    };
+    auto SignedVolumeOfFace = [&SignedVolumeOfTriangle](const Face& face)
+    {
+        double volume = 0.0;
+        assert(face.GetEdgeCount() > 2);
+        EdgeRaw edgePtr = face.GetStartEdge();
+        const auto& v1 = edgePtr->GetStartVertex();
+        edgePtr = edgePtr->GetNext();
+        auto v2 = edgePtr->GetStartVertex();
+        edgePtr = edgePtr->GetNext();
+        auto v3 = edgePtr->GetStartVertex();
+        while (v3 != v1)
+        {
+            volume += SignedVolumeOfTriangle(*v1, *v2, *v3);
+            v2 = v3;
+            edgePtr = edgePtr->GetNext();
+            v3 = edgePtr->GetStartVertex();
+        }
+        return volume;
+    };
+    double volume = 0.0;
+    ForEachFace([&volume,&SignedVolumeOfFace](const FaceRaw& facePtr)
+    {
+        volume += SignedVolumeOfFace(*facePtr);
+    });
+    return fabs(volume);
 }
 
 // algorithm:

@@ -44,6 +44,15 @@ TEST_F(BoundingShapeTest, Convert)
     EXPECT_FALSE(ball3.IsOptimal());
 }
 
+TEST_F(BoundingShapeTest, Volume)
+{
+    BoundingShape3d box3(Vector3d(0, 0, 0), Vector3d(2, 2, 2));
+    BoundingShape3d ball3 = box3;
+    ball3.Convert(BoundingShape3d::Type::Ball);
+    EXPECT_DOUBLE_EQ(8, box3.CalculateVolume());
+    EXPECT_NEAR(4 * Numerics::Constants::Pi*pow(sqrt(3), 3) / 3, ball3.CalculateVolume(), 0.01);
+}
+
 TEST_F(BoundingShapeTest, BallTouchesBox)
 {
     //  0 | 1 | 2

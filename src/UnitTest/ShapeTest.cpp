@@ -82,10 +82,14 @@ TEST_F(ShapeTest, Volume)
 {
     auto s = Construct<Cube>();
     double vol = s->CalculateVolume();
-    EXPECT_DOUBLE_EQ(8.0, vol);
-    s->Scale(1 / sqrt(3));
+    EXPECT_NEAR(8.0, vol, 0.01);
+    s->Scale(0.5);
     vol = s->CalculateVolume();
-    EXPECT_DOUBLE_EQ(1.0, vol);
+    EXPECT_NEAR(1.0, vol, 0.01);
+    s->Translate({ 1.3,1.3,1.3 });
+    s->Scale(3);
+    vol = s->CalculateVolume();
+    EXPECT_NEAR(27.0, vol, 0.01);
 }
 
 TEST_F(ShapeTest, Add)
@@ -94,8 +98,8 @@ TEST_F(ShapeTest, Add)
     s->Scale(1 / sqrt(3));
     s->SetColor(Construct<Color>(1.0f, 1.0f, 1.0f, 1.0f));
     Geometry::ShapePtr t = Construct<Cube>();
-    t->Scale(1 / sqrt(3));
-    t->Translate({ 0.3,0.3,0.3 });
+    t->Scale(0.5);
+    t->Translate({ 1.3,1.3,1.3 });
     t->SetColor(Construct<Color>(1.0f, 0.0f, 0.0f, 1.0f));
     s->Add(t);
 

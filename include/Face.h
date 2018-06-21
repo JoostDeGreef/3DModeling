@@ -65,6 +65,35 @@ namespace Geometry
         // Make sure the face only consist out of triangles; only uses existing vertices
         void Triangulate();
 
+        class FaceIntersection
+        {
+            friend Face;
+        public:
+            struct IntersectionPoint
+            {
+                EdgePtr m_edgeA;
+                EdgePtr m_edgeB;
+                VertexPtr m_vertex;
+            };
+
+            FaceIntersection(FacePtr& A, FacePtr& B)
+                : m_A(A)
+                , m_B(B)
+            {}
+
+            operator bool() const { return !m_points.empty(); }
+
+            void Calculate();
+        protected:
+            FacePtr m_A;
+            FacePtr m_B;
+
+            std::vector<IntersectionPoint> m_points;
+        };
+
+        // Find intersection between faces
+        FaceIntersection FindIntersection(FacePtr& other);
+
 #ifdef _DEBUG
         void CheckPointering() const;
 #else  // _DEBUG

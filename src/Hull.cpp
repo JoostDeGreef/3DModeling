@@ -304,7 +304,7 @@ class HullConnector
             : face(faceptr)
             , id(id)
         {}
-        FaceRaw face;
+        FacePtr face;
         unsigned int id; // 1,2
     };
     typedef std::vector<FaceInfo> Faces;
@@ -374,6 +374,9 @@ protected:
         bool res = false;
         for (auto& f : faces)
         {
+            auto intersection = f->face->FindIntersection(face->face);
+
+
             const auto& n0 = f->face->GetNormal();
             const auto& n1 = face->face->GetNormal();
             assert(n0 && n1);

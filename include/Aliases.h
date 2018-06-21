@@ -26,6 +26,8 @@ namespace Geometry
     template<typename POINT> class TLine;
     using Line2d = TLine<Vector2d>;
     using Line3d = TLine<Vector3d>;
+    using Line3dPtr = std::shared_ptr<Line3d>;
+    using Line3dRaw = raw_ptr<Line3d>;
 
     template<typename VALUE_TYPE> class TQuaternion;
     using Quat = TQuaternion<double>;

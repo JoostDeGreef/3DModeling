@@ -133,6 +133,17 @@ namespace Geometry
             return res;
         }
 
+        template<typename VECTOR_TYPE = this_type>
+        typename std::enable_if<3 == VECTOR_TYPE::dimension, VECTOR_TYPE>::type
+        Cross(const this_type& other) const
+        {
+            return this_type(
+                  m_data[1] * other[2] - m_data[2] * other[1],
+                  m_data[2] * other[0] - m_data[0] * other[2],
+                  m_data[0] * other[1] - m_data[1] * other[0]
+                );
+        }
+
         value_type Length() const
         {
             return sqrt(LengthSquared());
@@ -232,7 +243,7 @@ namespace Geometry
     };
 
     template<typename VALUE_TYPE>
-    inline TVector3<VALUE_TYPE> CrossProduct(const TVector3<VALUE_TYPE> &a, const TVector3<VALUE_TYPE> &b) 
+    inline TVector3<VALUE_TYPE> CrossProduct(const TVector3<VALUE_TYPE> &a, const TVector3<VALUE_TYPE> &b)
     {
         return  TVector3<VALUE_TYPE>(
             a[1] * b[2] - a[2] * b[1],

@@ -38,6 +38,9 @@
     <ClCompile Include="..\src\UnitTest\SQLiteTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\UnitTest\VectorTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\UnitTest\CommonTestFunctionality.h">

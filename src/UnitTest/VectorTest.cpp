@@ -1,11 +1,4 @@
-#include "gtest.h"
-using namespace testing;
-
-#include "Common.h"
-using namespace Common;
-
-#include "Geometry.h"
-using namespace Geometry;
+#include "CommonTestFunctionality.h"
 
 class VectorTest : public Test 
 {
@@ -58,6 +51,13 @@ TEST_F(VectorTest, InnerProduct)
     Vector3d v0(2,3,4);
     Vector3d v1(3,4,5);
     EXPECT_EQ(38,v0.InnerProduct(v1));
+}
+
+TEST_F(VectorTest, Cross)
+{
+    Vector3d v0(1, 2, 1);
+    Vector3d v1(2, 3,-2);
+    EXPECT_EQ(Vector3d(-7,4,-1), v0.Cross(v1));
 }
 
 TEST_F(VectorTest, Add) 

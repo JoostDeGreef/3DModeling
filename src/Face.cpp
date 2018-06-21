@@ -244,3 +244,45 @@ void Face::CheckPointering() const
     assert(normalCount == 0 || normalCount == count);
 }
 #endif // _DEBUG
+
+Face::FaceIntersection Face::FindIntersection(FacePtr& other)
+{
+    FaceIntersection intersection(shared_from_this(),other);
+    intersection.Calculate();
+    return intersection;
+}
+
+void Geometry::Face::FaceIntersection::Calculate()
+{
+    m_A->CheckPointering();
+    m_B->CheckPointering();
+
+    // get the face normals
+    auto& normalA = m_A->GetNormal();
+    auto& normalB = m_B->GetNormal();
+    assert(normalA && normalB);
+
+    // the direction of the line is orthogonal to both plane normals
+    auto normalL = normalA->Cross(*normalB);
+
+    // if the planes a parallel, return;
+    if (normalL.LengthSquared() < 0.0001)
+    {
+        return;
+    }
+
+    // normalize the normal
+    normalL.Normalize();
+
+    // distance from the planes to the origin
+    auto distanceA = - normalA->InnerProduct(*m_A->GetStartEdge()->GetStartVertex());
+    auto distanceB = - normalB->InnerProduct(*m_B->GetStartEdge()->GetStartVertex());
+
+    // find a point on the line
+    auto pointL = (*normalA * distanceB - *normalB * distanceA).Cross(normalL) / normalL.InnerProduct(normalL);
+
+    // todo: intersect this line with the countours of both faces.
+}
+
+
+

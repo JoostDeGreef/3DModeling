@@ -12,7 +12,7 @@ protected:
     }
 };
 
-TEST_F(ContourTest, SingleLoop)
+TEST_F(ContourTest, DISABLED_SingleLoop)
 {
     Contour contour;
     auto loops = contour.GetClockwiseLoops();
@@ -28,7 +28,7 @@ TEST_F(ContourTest, SingleLoop)
     EXPECT_EQ(4, loops.front().size());
 }
 
-TEST_F(ContourTest, ChangeOrientation)
+TEST_F(ContourTest, DISABLED_ChangeOrientation)
 {
     Contour contour({ Vector2d(0,0), Vector2d(0,1), Vector2d(1,1), Vector2d(1,0) });
     auto loops = contour.GetClockwiseLoops();
@@ -48,7 +48,7 @@ TEST_F(ContourTest, ChangeOrientation)
     EXPECT_EQ(Vector2d(0, 0), loops[0][3]);
 }
 
-TEST_F(ContourTest, MultipleLoops)
+TEST_F(ContourTest, DISABLED_MultipleLoops)
 {
     Contour contour;
     auto loops = contour.GetClockwiseLoops();

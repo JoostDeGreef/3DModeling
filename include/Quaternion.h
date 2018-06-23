@@ -34,9 +34,6 @@ namespace Geometry
         }
         TQuaternion(const vector_type &axis0, const vector_type &axis1)
         {
-            //vector_type rotAxis = CrossProduct(axis0, axis1);
-            //value_type angle = sqrt(axis0.LengthSquared() * axis1.LengthSquared()) + axis0.InnerProduct(axis1);
-            //Set(angle, rotAxis[0], rotAxis[1], rotAxis[2]);
             vector_type rotAxis = CrossProduct(axis0, axis1);
             value_type angle = rotAxis.Length();
             rotAxis.Normalize();
@@ -134,28 +131,25 @@ namespace Geometry
 
         void Invert()
         {
-            m_data[1] = -m_data[1];
-            m_data[2] = -m_data[2];
-            m_data[3] = -m_data[3];
+            value_type scale = 1.0 / MagnitudeSqr();
+            m_data[0] *=  scale;
+            m_data[1] *= -scale;
+            m_data[2] *= -scale;
+            m_data[3] *= -scale;
         }
         this_type Inverted() const
         {
-            return this_type(m_data[0], -m_data[1], -m_data[2], -m_data[3]);
+            value_type scale = 1.0 / MagnitudeSqr();
+            return this_type(m_data[0] * scale, -m_data[1] * scale, -m_data[2] * scale, -m_data[3] * scale);
         }
 
         void Normalize()
         {
-            value_type magnitude = 1.0/Magnitude();
-            m_data[0] *= magnitude;
-            m_data[1] *= magnitude;
-            m_data[2] *= magnitude;
-            m_data[3] *= magnitude;
+            *this /= Magnitude();
         }
         this_type Normalized() const
         {
-            this_type res(*this);
-            res.Normalize();
-            return res;
+            return *this / Magnitude();
         }
 
         this_type operator * (const value_type& value) const
@@ -258,9 +252,17 @@ namespace Geometry
 
         vector_type Transform(const vector_type& v) const
         {
-            vector_type r0,r1,r2;
-            GetRotationMatrix3rows(r0.GetData(), r1.GetData(), r2.GetData());
-            return vector_type(r0.InnerProduct(v), r1.InnerProduct(v), r2.InnerProduct(v));
+            //vector_type r0,r1,r2;
+            //GetRotationMatrix3rows(r0.GetData(), r1.GetData(), r2.GetData());
+            //return vector_type(r0.InnerProduct(v), r1.InnerProduct(v), r2.InnerProduct(v));
+            auto res = *this * this_type(0, v[0], v[1], v[2]) * Inverted();
+            return vector_type(res.GetX(), res.GetY(), res.GetZ());
+        }
+
+        vector_type InverseTransform(const vector_type& v) const
+        {
+            auto res = Inverted() * this_type(0, v[0], v[1], v[2]) * *this;
+            return vector_type(res.GetX(), res.GetY(), res.GetZ());
         }
     };
 

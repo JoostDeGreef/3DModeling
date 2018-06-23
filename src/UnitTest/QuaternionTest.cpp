@@ -73,6 +73,8 @@ TEST_F(QuaternionTest, Transform)
         Vector3d v(0, 1, 0);
         v = q.Transform(v);
         EXPECT_EQ(Vector3d(0, 1, 0), v);
+        v = q.InverseTransform(v);
+        EXPECT_EQ(Vector3d(0, 1, 0), v);
     }
     {
         Vector3d axis(1, 0, 0);
@@ -81,6 +83,8 @@ TEST_F(QuaternionTest, Transform)
         Vector3d v(0, 1, 0);
         v = q.Transform(v);
         EXPECT_EQ(Vector3d(0, -1, 0), v);
+        v = q.InverseTransform(v);
+        EXPECT_EQ(Vector3d(0, 1, 0), v);
     }
     {
         Vector3d axis(1, 1, 0);
@@ -89,6 +93,8 @@ TEST_F(QuaternionTest, Transform)
         Vector3d v(1, 0, 0);
         v = q.Transform(v);
         EXPECT_EQ(Vector3d(0, 1, 0), v);
+        v = q.InverseTransform(v);
+        EXPECT_EQ(Vector3d(1, 0, 0), v);
     }
 }
 

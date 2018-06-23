@@ -12,55 +12,38 @@ protected:
     }
 };
 
-TEST_F(ContourTest, DISABLED_SingleLoop)
+TEST_F(ContourTest, SingleLoop)
 {
     Contour contour;
-    auto loops = contour.GetClockwiseLoops();
-    EXPECT_EQ(0, loops.size());
+    auto points = contour.GetPoints();
+    EXPECT_EQ(0, points.size());
     Contour contour2({Vector2d(0,0), Vector2d(0,1), Vector2d(1,1)});
     contour = contour2;
-    loops = contour.GetClockwiseLoops();
-    ASSERT_EQ(1, loops.size());
-    EXPECT_EQ(3, loops.front().size());
+    points = contour.GetPoints();
+    EXPECT_EQ(3, points.size());
     contour.Add(Vector2d(1, 0));
-    loops = contour.GetClockwiseLoops();
-    ASSERT_EQ(1, loops.size());
-    EXPECT_EQ(4, loops.front().size());
+    points = contour.GetPoints();
+    EXPECT_EQ(4, points.size());
 }
 
-TEST_F(ContourTest, DISABLED_ChangeOrientation)
+TEST_F(ContourTest, ChangeOrientation)
 {
     Contour contour({ Vector2d(0,0), Vector2d(0,1), Vector2d(1,1), Vector2d(1,0) });
-    auto loops = contour.GetClockwiseLoops();
-    ASSERT_EQ(1, loops.size());
-    EXPECT_EQ(4, loops.front().size());
-    EXPECT_EQ(Vector2d(0, 0), loops[0][0]);
-    EXPECT_EQ(Vector2d(0, 1), loops[0][1]);
-    EXPECT_EQ(Vector2d(1, 1), loops[0][2]);
-    EXPECT_EQ(Vector2d(1, 0), loops[0][3]);
+    contour.ForceClockwise();
+    auto points = contour.GetPoints();
+    ASSERT_EQ(4, points.size());
+    EXPECT_EQ(Vector2d(0, 0), points[0]);
+    EXPECT_EQ(Vector2d(0, 1), points[1]);
+    EXPECT_EQ(Vector2d(1, 1), points[2]);
+    EXPECT_EQ(Vector2d(1, 0), points[3]);
     contour = Contour({ Vector2d(0,0), Vector2d(1,0), Vector2d(1,1), Vector2d(0,1) });
-    loops = contour.GetClockwiseLoops();
-    ASSERT_EQ(1, loops.size());
-    EXPECT_EQ(4, loops.front().size());
-    EXPECT_EQ(Vector2d(0, 1), loops[0][0]);
-    EXPECT_EQ(Vector2d(1, 1), loops[0][1]);
-    EXPECT_EQ(Vector2d(1, 0), loops[0][2]);
-    EXPECT_EQ(Vector2d(0, 0), loops[0][3]);
+    contour.ForceClockwise();
+    points = contour.GetPoints();
+    ASSERT_EQ(4, points.size());
+    EXPECT_EQ(Vector2d(0, 1), points[0]);
+    EXPECT_EQ(Vector2d(1, 1), points[1]);
+    EXPECT_EQ(Vector2d(1, 0), points[2]);
+    EXPECT_EQ(Vector2d(0, 0), points[3]);
 }
 
-TEST_F(ContourTest, DISABLED_MultipleLoops)
-{
-    Contour contour;
-    auto loops = contour.GetClockwiseLoops();
-    EXPECT_EQ(0, loops.size());
-    contour = Contour({ Vector2d(0,0), Vector2d(1,0), Vector2d(1,1) });
-    loops = contour.GetClockwiseLoops();
-    ASSERT_EQ(1, loops.size());
-    EXPECT_EQ(3, loops.front().size());
-    contour.Add({ Vector2d(-1, 1), Vector2d(-1, 2), Vector2d(0, 2) });
-    loops = contour.GetClockwiseLoops();
-    ASSERT_EQ(2, loops.size());
-    EXPECT_EQ(4, loops.front().size());
-    EXPECT_EQ(4, loops.back().size());
-}
 

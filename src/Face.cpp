@@ -245,14 +245,70 @@ void Face::CheckPointering() const
 }
 #endif // _DEBUG
 
+Face::ContourInPlane Face::ConvertToContourInPlane(const Vertex & axis, const Vertex & point) const
+{
+    return ContourInPlane(*this, axis, point);
+}
+
+// map the plane on one of the primary planes, depending on axis
+Face::ContourInPlane::ContourInPlane(const Face & face, const Vertex & axis, const Vertex & point)
+{
+    using namespace std::placeholders;
+    // subtract point, rotate, drop element
+    auto Apply = [&](const VertexRaw& vertex)
+    {
+        // todo
+        return *vertex;
+    };
+    // drop one element from the coordinate
+    auto DropX = [&Apply](const VertexRaw & v)
+    {
+        auto p = Apply(v);
+        return Vector2d(p[1], p[2]);
+    };
+    auto DropY = [&Apply](const VertexRaw & v)
+    {
+        auto p = Apply(v);
+        return Vector2d(p[0], p[2]);
+    };
+    auto DropZ = [&Apply](const VertexRaw & v)
+    {
+        auto p = Apply(v);
+        return Vector2d(p[0], p[1]);
+    };
+    // arrange the work
+    if (axis[0] >= axis[1])
+    {
+        if (axis[0] >= axis[2])
+        {
+            face.ForEachVertex(DropX);
+        }
+        else
+        {
+            face.ForEachVertex(DropZ);
+        }
+    }
+    else
+    {
+        if (axis[1] >= axis[2])
+        {
+            face.ForEachVertex(DropY);
+        }
+        else
+        {
+            face.ForEachVertex(DropZ);
+        }
+    }
+}
+
 Face::FaceIntersection Face::FindIntersection(FacePtr& other)
 {
-    FaceIntersection intersection(shared_from_this(),other);
+    FaceIntersection intersection(shared_from_this(), other);
     intersection.Calculate();
     return intersection;
 }
 
-void Geometry::Face::FaceIntersection::Calculate()
+void Face::FaceIntersection::Calculate()
 {
     m_A->CheckPointering();
     m_B->CheckPointering();
@@ -275,14 +331,14 @@ void Geometry::Face::FaceIntersection::Calculate()
     normalL.Normalize();
 
     // distance from the planes to the origin
-    auto distanceA = - normalA->InnerProduct(*m_A->GetStartEdge()->GetStartVertex());
-    auto distanceB = - normalB->InnerProduct(*m_B->GetStartEdge()->GetStartVertex());
+    auto distanceA = -normalA->InnerProduct(*m_A->GetStartEdge()->GetStartVertex());
+    auto distanceB = -normalB->InnerProduct(*m_B->GetStartEdge()->GetStartVertex());
 
     // find a point on the line
     auto pointL = (*normalA * distanceB - *normalB * distanceA).Cross(normalL) / normalL.InnerProduct(normalL);
 
-    // todo: intersect this line with the countours of both faces.
-}
+    // intersect this line with the countours of both faces.
 
+}
 
 

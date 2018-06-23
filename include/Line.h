@@ -4,6 +4,7 @@
 
 namespace Geometry
 {
+    // line segment
 	template<typename POINT>
 	class TLine 
 	{

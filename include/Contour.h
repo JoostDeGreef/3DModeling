@@ -2,11 +2,11 @@
 
 namespace Geometry
 {
-    /* contour: line shape in the x,y plane
+    /* contour: simple line shape in the x,y plane
     *
     * note:
     *   - the last and the first point are connected
-    *   - for now, selfintersections are not detected and/or corrected.
+    *   - selfintersections are not detected and/or corrected.
     *
     */
     class Contour 
@@ -19,9 +19,9 @@ namespace Geometry
         void Add(const Vector2d& point);
         void Add(const std::vector<Vector2d>& points);
 
-        /* Turn the single line shape into several clockwise loops
-        */
-        std::vector<std::vector<Vector2d>> GetClockwiseLoops();
+        const std::vector<Vector2d>& GetPoints() const { return m_points; }
+
+        void ForceClockwise();
     private:
         std::vector<Vector2d> m_points;
     };

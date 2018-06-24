@@ -245,60 +245,62 @@ void Face::CheckPointering() const
 }
 #endif // _DEBUG
 
-Face::ContourInPlane Face::ConvertToContourInPlane(const Vertex & axis, const Vertex & point) const
+std::vector<Face::ContourLineIntersection> Face::GetContourLineIntersections(const Vertex& dir, const Vertex & point) const
 {
-    return ContourInPlane(*this, axis, point);
-}
-
-// map the plane on one of the primary planes, depending on axis
-Face::ContourInPlane::ContourInPlane(const Face & face, const Vertex & axis, const Vertex & point)
-{
+    std::vector<std::tuple<EdgeRaw, Vector2d>> vertices;
     using namespace std::placeholders;
     // subtract point, rotate, drop element
-    auto Apply = [&](const VertexRaw& vertex)
+    auto Apply = [&point](const VertexRaw& vertex)
     {
-        // todo
-        return *vertex;
+        // no rotation for now, the error seems small anyway.
+        return *vertex - point;
     };
     // drop one element from the coordinate
-    auto DropX = [&Apply](const VertexRaw & v)
+    auto DropCoord = [&Apply,&vertices](const EdgeRaw & e, const unsigned int coord0, const unsigned int coord1)
     {
-        auto p = Apply(v);
-        return Vector2d(p[1], p[2]);
-    };
-    auto DropY = [&Apply](const VertexRaw & v)
-    {
-        auto p = Apply(v);
-        return Vector2d(p[0], p[2]);
-    };
-    auto DropZ = [&Apply](const VertexRaw & v)
-    {
-        auto p = Apply(v);
-        return Vector2d(p[0], p[1]);
+        auto p = Apply(e->GetEndVertex());
+        vertices.emplace_back(e, Vector2d(p[coord0], p[coord1]));
     };
     // arrange the work
-    if (axis[0] >= axis[1])
+    unsigned int coord0;
+    unsigned int coord1;
+    if (dir[0] >= dir[1])
     {
-        if (axis[0] >= axis[2])
+        if (dir[0] >= dir[2])
         {
-            face.ForEachVertex(DropX);
+            coord0 = 1;
+            coord1 = 2;
         }
         else
         {
-            face.ForEachVertex(DropZ);
+            coord0 = 0;
+            coord1 = 1;
         }
     }
     else
     {
-        if (axis[1] >= axis[2])
-        {
-            face.ForEachVertex(DropY);
-        }
-        else
-        {
-            face.ForEachVertex(DropZ);
-        }
+        coord0 = 0;
+        coord1 = (dir[1] >= dir[2]) ? 2 : 1;
     }
+    ForEachEdge([&DropCoord,&coord0,&coord1](const EdgeRaw & e) { DropCoord(e, coord0, coord1); });
+    const auto dir2d = Vector2d(dir[coord0], dir[coord1]);
+    // find intersections
+    Line2d line0({ 0,0 }, dir2d);
+    Vector2d p0 = get<1>(vertices.back());
+    for(const auto& edgeVector2d: vertices)
+    {
+        Vector2d p1 = get<1>(edgeVector2d);
+        Line2d line1(p0, p1);
+        auto intersection = line0.CalculateIntersection(line1);
+
+
+        // Todo
+
+
+        p0 = p1;
+    }
+    // Todo
+    return std::vector<Face::ContourLineIntersection>();
 }
 
 Face::FaceIntersection Face::FindIntersection(FacePtr& other)
@@ -338,7 +340,10 @@ void Face::FaceIntersection::Calculate()
     auto pointL = (*normalA * distanceB - *normalB * distanceA).Cross(normalL) / normalL.InnerProduct(normalL);
 
     // intersect this line with the countours of both faces.
+    auto intersectionsA = m_A->GetContourLineIntersections(normalL, pointL);
+    auto intersectionsB = m_B->GetContourLineIntersections(normalL, pointL);
 
+    // todo: see if the intersection intervals overlap.
 }
 
 

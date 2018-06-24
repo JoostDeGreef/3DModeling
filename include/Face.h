@@ -65,22 +65,13 @@ namespace Geometry
         // Make sure the face only consist out of triangles; only uses existing vertices
         void Triangulate();
 
-        // Convert face to contour in plane
-        class ContourInPlane
+        // Obtain the intersetions pointf for a line in the face plane with the contour of the face.
+        class ContourLineIntersection
         {
-            friend Face;
         public:
-            ContourInPlane(const Face& face,const Vertex & axis, const Vertex & point);
 
-            const Contour& GetContour() const { return m_contour; }
-            const Quat& GetRotation() const { return m_rotation; }
-            const Vertex& GetPoint() const { return m_point; }
-        protected:
-            Contour m_contour;
-            Quat m_rotation;
-            Vertex m_point;
         };
-        ContourInPlane ConvertToContourInPlane(const Vertex& axis = Vertex(1,0,0), const Vertex & point = Vertex(0,0,0)) const;
+        std::vector<ContourLineIntersection> GetContourLineIntersections(const Vertex& dir, const Vertex & point) const;
 
         // Find intersection between faces
         class FaceIntersection

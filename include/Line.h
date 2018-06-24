@@ -30,53 +30,32 @@ namespace Geometry
         public:
             enum Type
             {
-                Parallel     = 0x0000, // 0
+                Parallel = 0x00,
                 
-                BeforeBefore = 0x0101, // 257
-                BeforeStart  = 0x0102, // 258
-                BeforeOn     = 0x0104, // 260
-                BeforeEnd    = 0x0108, // 264
-                BeforeAfter  = 0x0110, // 272
-
-                StartBefore  = 0x0201, // 513
-                StartStart   = 0x0202, // 514
-                StartOn      = 0x0204, // 516
-                StartEnd     = 0x0208, // 520
-                StartAfter   = 0x0210, // 528
-
-                OnBefore     = 0x0401, // 1025
-                OnStart      = 0x0402, // 1026
-                OnOn         = 0x0404, // 1028
-                OnEnd        = 0x0408, // 1032
-                OnAfter      = 0x0410, // 1040
-
-                EndBefore    = 0x0801, // 2049
-                EndStart     = 0x0802, // 2050
-                EndOn        = 0x0804, // 2052
-                EndEnd       = 0x0808, // 2056
-                EndAfter     = 0x0810, // 2064
-
-                AfterBefore  = 0x1001, // 4097
-                AfterStart   = 0x1002, // 4098
-                AfterOn      = 0x1004, // 4100
-                AfterEnd     = 0x1008, // 4104
-                AfterAfter   = 0x1010  // 4112
+                Before   = 0x01,
+                Start    = 0x02,
+                On       = 0x04,
+                End      = 0x08,
+                After    = 0x10,
             };
 
-            Intersection(const Type& type, const point_type& intersection)
-                : m_type(std::move(type))
+            Intersection(const Type type[2], const point_type& intersection, const double s[2])
+                : m_type{ type[0], type[1] }
                 , m_intersection(std::move(intersection))
+                , m_s{ s[0], s[1] }
             {}
 
-            const Type& GetType() const { return m_type; }
+            const Type& GetType(const unsigned int index) const { return m_type[index]; }
             const point_type& GetIntersection() const { return m_intersection; }
-            bool IsParallel() { return Parallel == m_type; } // lins are parallel
-            bool LinesIntersect() { return Parallel != m_type; } // lines are not parallel
-            bool LinesSharePoint() { return (m_type & 0x0A00) && (m_type & 0x000A); } // end-end, start-start, end-start, start-end
-            bool SegmentsIntersect() { return (m_type & 0x0E00) && (m_type & 0x000E); } // lines intersect within segments
+            bool IsParallel() const { return Parallel == m_type[0]; } // lines are parallel
+            bool LinesIntersect() const { return Parallel != m_type[0]; } // lines are not parallel
+            bool LinesSharePoint() const { return (m_type[0] & 0x0A) && (m_type[1] & 0x0A); } // end-end, start-start, end-start, start-end
+            bool SegmentsIntersect() const { return (m_type[0] & 0x0E) && (m_type[1] & 0x0E); } // lines intersect within segments
+            const double& s(const unsigned int index) const { return m_s[index]; }
         private:
-            Type m_type;
+            Type m_type[2];
             point_type m_intersection;
+            double m_s[2];
         };
 
         Intersection CalculateIntersection(const TLine<POINT> &other, const value_type eps = 0.00001) const;
@@ -105,12 +84,15 @@ namespace Geometry
                 if (s <= 1 + eps) { return 8; }
                 return 16;
             };
-            int type = Interval(t, eps*slope0.Length()) * 256 + Interval(s, eps*slope1.Length());
-            return Intersection(static_cast<Intersection::Type>(type), intersection);
+            const Intersection::Type types[2] = { static_cast<Intersection::Type>(Interval(t, eps*slope0.Length())), static_cast<Intersection::Type>(Interval(s, eps*slope1.Length())) };
+            const value_type st[2] = { t,s };
+            return Intersection(types, intersection, st);
         }
         else
         {
-            return Intersection(Intersection::Parallel,point_type());
+            const Intersection::Type types[2] = { Intersection::Parallel,Intersection::Parallel };
+            const value_type st[2] = { 0,0 };
+            return Intersection(types, point_type(), st);
         }
     }
 

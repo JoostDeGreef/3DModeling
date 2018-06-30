@@ -258,15 +258,17 @@ std::vector<Face::ContourLineIntersection> Face::GetContourLineIntersections(con
     // drop one element from the coordinate
     auto DropCoord = [&Apply,&vertices](const EdgeRaw & e, const unsigned int coord0, const unsigned int coord1)
     {
-        auto p = Apply(e->GetEndVertex());
+        auto p = Apply(e->GetStartVertex());
         vertices.emplace_back(e, Vector2d(p[coord0], p[coord1]));
     };
     // arrange the work
     unsigned int coord0;
     unsigned int coord1;
-    if (dir[0] >= dir[1])
+    auto norm = *GetNormal();
+    norm.InnerProduct(norm); // absolute values for compare
+    if (norm[0] >= norm[1])
     {
-        if (dir[0] >= dir[2])
+        if (norm[0] >= norm[2])
         {
             coord0 = 1;
             coord1 = 2;
@@ -280,27 +282,55 @@ std::vector<Face::ContourLineIntersection> Face::GetContourLineIntersections(con
     else
     {
         coord0 = 0;
-        coord1 = (dir[1] >= dir[2]) ? 2 : 1;
+        coord1 = (norm[1] >= norm[2]) ? 2 : 1;
     }
     ForEachEdge([&DropCoord,&coord0,&coord1](const EdgeRaw & e) { DropCoord(e, coord0, coord1); });
     const auto dir2d = Vector2d(dir[coord0], dir[coord1]);
     // find intersections
+    std::vector<Face::ContourLineIntersection> res;
     Line2d line0({ 0,0 }, dir2d);
-    Vector2d p0 = get<1>(vertices.back());
-    for(const auto& edgeVector2d: vertices)
+    for(unsigned int i=0;i<vertices.size();++i)
     {
-        Vector2d p1 = get<1>(edgeVector2d);
+        unsigned int j = i + 1;
+        if (j >= vertices.size())
+        {
+            j = 0;
+        }
+        Vector2d p0 = get<1>(vertices[i]);
+        Vector2d p1 = get<1>(vertices[j]);
         Line2d line1(p0, p1);
         auto intersection = line0.CalculateIntersection(line1);
-
-
-        // Todo
-
-
-        p0 = p1;
+        switch (intersection.GetType(1))
+        {
+        case Line2d::Intersection::Start:
+            res.emplace_back(get<0>(vertices[i]));
+            break;
+        case Line2d::Intersection::End:
+            res.emplace_back(get<0>(vertices[j]));
+            break;
+        case Line2d::Intersection::On:
+            res.emplace_back(get<0>(vertices[i]),intersection.s(1));
+            break;
+        default:
+            break;
+        }
     }
-    // Todo
-    return std::vector<Face::ContourLineIntersection>();
+    // remove connected start and end intersections, duplicated intersections
+    if (res.size() >= 2)
+    {
+        for (int i = (int)res.size() - 2; i >= 0; --i)
+        {
+            if (res[i] == res[i+1])
+            {
+                res.erase(res.begin() + i + 1);
+            }
+        }
+    }
+    if (res.size() >= 2 && res.front() == res.back())
+    {
+        res.erase(res.begin() + res.size() - 1);
+    }
+    return res;
 }
 
 Face::FaceIntersection Face::FindIntersection(FacePtr& other)
@@ -339,11 +369,26 @@ void Face::FaceIntersection::Calculate()
     // find a point on the line
     auto pointL = (*normalA * distanceB - *normalB * distanceA).Cross(normalL) / normalL.InnerProduct(normalL);
 
-    // intersect this line with the countours of both faces.
+    // intersect this line with the countour of A.
     auto intersectionsA = m_A->GetContourLineIntersections(normalL, pointL);
+    switch(intersectionsA.size())
+    {
+    case 0: // no intersection
+        return;
+    case 1: // single point intersection
+        // TODO
+        m_points.emplace_back();
+        return;
+    default: // full line intersection
+        break;
+    }
+
+// TODO: adjust normalL and pointL to make it the start and end on A
+
+    // intersect this line with the countour of B.
     auto intersectionsB = m_B->GetContourLineIntersections(normalL, pointL);
 
-    // todo: see if the intersection intervals overlap.
+// TODO: see if the intersection intervals overlap.
 }
 
 

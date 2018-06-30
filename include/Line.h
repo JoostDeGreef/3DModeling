@@ -30,13 +30,17 @@ namespace Geometry
         public:
             enum Type
             {
-                Parallel = 0x00,
+                Unknown     = 0x00,
                 
-                Before   = 0x01,
-                Start    = 0x02,
-                On       = 0x04,
-                End      = 0x08,
-                After    = 0x10,
+                Before      = 0x01,
+                Start       = 0x02,
+                On          = 0x04,
+                End         = 0x08,
+                After       = 0x10,
+
+                Parallel    = 0x20,
+                Colinear    = 0x40,
+                Overlapping = 0x80,
             };
 
             Intersection(const Type type[2], const point_type& intersection, const double s[2])
@@ -47,6 +51,7 @@ namespace Geometry
 
             const Type& GetType(const unsigned int index) const { return m_type[index]; }
             const point_type& GetIntersection() const { return m_intersection; }
+// TODO: these are not correct
             bool IsParallel() const { return Parallel == m_type[0]; } // lines are parallel
             bool LinesIntersect() const { return Parallel != m_type[0]; } // lines are not parallel
             bool LinesSharePoint() const { return (m_type[0] & 0x0A) && (m_type[1] & 0x0A); } // end-end, start-start, end-start, start-end
@@ -90,8 +95,9 @@ namespace Geometry
         }
         else
         {
+// TODO: handle colinear and overlapping
             const Intersection::Type types[2] = { Intersection::Parallel,Intersection::Parallel };
-            const value_type st[2] = { 0,0 };
+            const value_type st[2] = { -1,-1 };
             return Intersection(types, point_type(), st);
         }
     }

@@ -63,3 +63,20 @@ TEST_F(FaceTest, SplitTriangle)
     face->Split();
     EXPECT_EQ(13, FaceCount(shape));
 }
+
+TEST_F(FaceTest, GetContourLineIntersections)
+{
+    ShapePtr shape = Construct<Cube>();
+    FacePtr face = *(*shape->GetHulls().begin())->GetFaces().begin();
+    face->CheckPointering();
+    EXPECT_EQ(6, FaceCount(shape));
+    EdgeRaw edge = face->GetStartEdge();
+    auto point = *edge->GetStartVertex();
+    edge = edge->GetNext()->GetNext();
+    auto dir = (*edge->GetStartVertex() - point).Normalized();
+    auto res = face->GetContourLineIntersections(dir,point);
+    EXPECT_EQ(2, res.size());
+    point = *face->GetStartEdge()->GetNext()->GetStartVertex();
+    res = face->GetContourLineIntersections(dir, point);
+    EXPECT_EQ(1, res.size());
+}

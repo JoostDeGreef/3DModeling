@@ -69,7 +69,37 @@ namespace Geometry
         class ContourLineIntersection
         {
         public:
+            enum class Type
+            {
+                EdgeIntersection,  // intersection of edge at s
+                VertexIntersection // intersection at start vertex
+            };
+        private:
+            ContourLineIntersection(Type type, EdgeRaw edge, double s)
+                : m_type(type)
+                , m_edge(edge)
+                , m_s(s)
+            {}
+        public:
+            ContourLineIntersection(EdgeRaw edge, double s)
+                : ContourLineIntersection(Type::EdgeIntersection, edge, s)
+            {}
+            ContourLineIntersection(EdgeRaw edge)
+                : ContourLineIntersection(Type::VertexIntersection, edge, 0)
+            {}
 
+            bool operator == (const ContourLineIntersection& other) const
+            {
+                return
+                    m_edge == other.m_edge &&
+                    m_type == other.m_type &&
+                    (m_type == Type::VertexIntersection || Numerics::Equal(m_s, other.m_s));
+            }
+
+        private:
+            Type m_type;
+            EdgeRaw m_edge;
+            double m_s;
         };
         std::vector<ContourLineIntersection> GetContourLineIntersections(const Vertex& dir, const Vertex & point) const;
 

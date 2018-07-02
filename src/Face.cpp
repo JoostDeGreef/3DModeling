@@ -330,6 +330,25 @@ std::vector<Face::ContourLineIntersection> Face::GetContourLineIntersections(con
     {
         res.erase(res.begin() + res.size() - 1);
     }
+    // if there are 2 vertex intersections, and they belong to the same edge, join them.
+    if (res.size() == 2
+        && res.front().GetType() == ContourLineIntersection::Type::VertexIntersection
+        && res.back().GetType() == ContourLineIntersection::Type::VertexIntersection)
+    {
+        auto SetEdgeIsIntersection = [&res](const EdgeRaw edge)
+        {
+            res.clear();
+            res.emplace_back(ContourLineIntersection::Type::EdgeIsIntersection, edge, 0.0);            
+        };
+        if (res.front().GetEdge()->GetNext() == res.back().GetEdge())
+        {
+            SetEdgeIsIntersection(res.front().GetEdge());
+        }
+        else if (res.front().GetEdge() == res.back().GetEdge()->GetNext())
+        {
+            SetEdgeIsIntersection(res.back().GetEdge());
+        }
+    }
     return res;
 }
 

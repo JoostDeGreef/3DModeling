@@ -71,16 +71,15 @@ namespace Geometry
         public:
             enum class Type
             {
-                EdgeIntersection,  // intersection of edge at s
-                VertexIntersection // intersection at start vertex
+                EdgeIntersection,   // intersection of edge at s
+                VertexIntersection, // intersection at start vertex
+                EdgeIsIntersection  // face intersected by existing edge
             };
-        private:
             ContourLineIntersection(Type type, EdgeRaw edge, double s)
                 : m_type(type)
                 , m_edge(edge)
                 , m_s(s)
             {}
-        public:
             ContourLineIntersection(EdgeRaw edge, double s)
                 : ContourLineIntersection(Type::EdgeIntersection, edge, s)
             {}
@@ -96,6 +95,13 @@ namespace Geometry
                     (m_type == Type::VertexIntersection || Numerics::Equal(m_s, other.m_s));
             }
 
+            Type GetType() const { return m_type; }
+            EdgeRaw GetEdge() const { return m_edge; }
+            double GetS() const { return m_s; }
+
+            void SetType(const Type type) { m_type = type; }
+            void SetEdge(const EdgeRaw edge) { m_edge = edge; }
+            void SetS(const double s) { m_s = s; }
         private:
             Type m_type;
             EdgeRaw m_edge;
